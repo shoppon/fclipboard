@@ -1,0 +1,16 @@
+cpip: "rpm2cpio .rpm | cpio -div"
+fio_bw: |-
+  fio -filename= -direct=1 -iodepth 64 -thread -rw=write -ioengine=libaio -bs=512k -size=10G -numjobs=1 -runtime=60 -group_reporting -name=write
+fio_iops: |-
+  fio -filename= -direct=1 -iodepth 128 -thread -rw=randwrite -ioengine=libaio -bs=4k -size=10G -numjobs=1 -runtime=60 -group_reporting -name=rand_write
+hard_reboot: "echo 1 > /proc/sys/kernel/sysrq && echo b > /proc/sysrq-trigger"
+iptable_insert: "iptables -I INPUT -p tcp --dport 22 -j ACCEPT"
+kill: "ps -ef|grep -v grep|grep ${A}|awk \"{print \\$2}\"|xargs kill -9"
+ld_library_path: "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/"
+long_mount: |-
+  for point in $(findmnt -lk -o TARGET) ; do bytes=$(systemd-escape --path --suffix=mount $point | wc -c); if [[ $bytes -ge 256 ]]; then echo "$bytes $point";fi ; done
+mount_nas: "mount -t cifs //192.168.5.200/nas /mnt/nas"
+ovs_remove_port: "ovs-vsctl remove port $A tag $B"
+ovs_set_port: "ovs-vsctl set port $A tag=$B"
+proxy: "export https_proxy=http://$A:7890 http_proxy=http://$A:7890"
+youtube_dl: 'youtube-dl -f best  --no-check-certificate "$A"'
