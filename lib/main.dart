@@ -20,7 +20,7 @@ class _MainAppState extends State<MainApp> {
 
   final _focusNode = FocusNode();
 
-  final _matcher = Matcher();
+  final _matcher = Matcher(10);
 
   @override
   void initState() {
@@ -45,8 +45,33 @@ class _MainAppState extends State<MainApp> {
   void _handleKeyEvent(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       if (event.isControlPressed) {
-        if (event.logicalKey == LogicalKeyboardKey.digit0) {
+        // FIXME(xp): stupid!!!
+        if (event.logicalKey == LogicalKeyboardKey.digit1) {
           _selectItem(0);
+        }
+        if (event.logicalKey == LogicalKeyboardKey.digit2) {
+          _selectItem(1);
+        }
+        if (event.logicalKey == LogicalKeyboardKey.digit3) {
+          _selectItem(2);
+        }
+        if (event.logicalKey == LogicalKeyboardKey.digit4) {
+          _selectItem(3);
+        }
+        if (event.logicalKey == LogicalKeyboardKey.digit5) {
+          _selectItem(4);
+        }
+        if (event.logicalKey == LogicalKeyboardKey.digit6) {
+          _selectItem(5);
+        }
+        if (event.logicalKey == LogicalKeyboardKey.digit7) {
+          _selectItem(6);
+        }
+        if (event.logicalKey == LogicalKeyboardKey.digit8) {
+          _selectItem(7);
+        }
+        if (event.logicalKey == LogicalKeyboardKey.digit9) {
+          _selectItem(8);
         }
       }
     }
@@ -54,7 +79,11 @@ class _MainAppState extends State<MainApp> {
 
   void _filterClipboard(String searchText) {
     setState(() {
-      clipboards.add(ClipboardItem(title: searchText, subtitle: searchText));
+      final matches = _matcher.match(searchText);
+      clipboards.clear();
+      matches.forEach((key, value) {
+        clipboards.add(ClipboardItem(title: key, subtitle: value));
+      });
       _selectedIndex = 0;
     });
   }
@@ -103,7 +132,7 @@ class _MainAppState extends State<MainApp> {
                         leading: const FlutterLogo(),
                         title: Text(clipboards[index].title),
                         subtitle: Text(clipboards[index].subtitle),
-                        trailing: Text("Ctrl+$index"),
+                        trailing: Text("Ctrl+${index + 1}"),
                         selected: _selectedIndex == index,
                         onTap: () {
                           _selectItem(index);

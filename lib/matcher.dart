@@ -1,11 +1,14 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:yaml/yaml.dart';
 import 'package:fuzzy/fuzzy.dart';
 
 class Matcher {
   Map<String, String> all = {};
 
-  Matcher() {
+  int maxMatches = 10;
+
+  Matcher(this.maxMatches) {
     init();
   }
 
@@ -21,10 +24,15 @@ class Matcher {
     }
   }
 
-  match(String leading) {
-    final fuse = Fuzzy(['a', 'b', 'c'],
+  Map<String, String> match(String leading) {
+    final fuse = Fuzzy(all.keys.toList(),
         options: FuzzyOptions(distance: 80, maxPatternLength: 10));
-    final result = fuse.search(leading);
-    return result;
+    var result = fuse.search(leading);
+    result = result.sublist(0, min(maxMatches, result.length));
+    Map<String, String> matches = {};
+    for (var r in result) {
+      matches[r.item] = all[r.item].toString();
+    }
+    return matches;
   }
 }
