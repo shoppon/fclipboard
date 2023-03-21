@@ -1,0 +1,14 @@
+exec_mariadb: |-
+  kubectl exec -it -n openstack $(kubectl -n openstack get po -owide -l "application=mariadb,component=server" --no-headers -o jsonpath="{.items[$A].metadata.name}" ) -c mariadb -- mysql --defaults-file=/etc/mysql/admin_user.cnf -e "use ${B};${C}"
+get_connector: |-
+  kubectl exec -it -n openstack $(kubectl -n openstack get po -owide -l "application=nova,component=compute" --no-headers -o jsonpath="{.items[0].metadata.name}" --field-selector spec.nodeName=$(hostname|cut -d. -f1) ) -c nova-compute --  python3 -c "import json;from nova.virt.libvirt.driver import LibvirtDriver;d = LibvirtDriver(None);print(json.dumps(d.get_volume_connector(None)))"
+initialize_connection: |-
+  curl -X POST ${u}/v3/${p}/volumes/${v}/action --header "Accept: */*" --header "Host: cinder" --header "X-Auth-Token: ${t}" --header "Content-Type: application/json" --data "{"os-initialize_connection": {"connector": ${c}}}"
+query_bdm: "select * from block_device_mapping where instance_uuid=\"${A}\"\\G;"
+query_bdm_by_node_lun: |-
+  select * from block_device_mapping where connection_info like "%node-44%"target_lun": 1,%" ORDER BY created_at desc limit 5\G;
+single_path: "select count(*) from block_device_mapping where device_name like '%/dev/sd%';"
+terminate_connection: |-
+  curl -X POST ${u}/v3/${p}/volumes/${v}/action --header "Accept: */*" --header "Host: cinder" --header "X-Auth-Token: ${t}" --header "Content-Type: application/json" --data "{"os-terminate_connection": {"connector": ${c}}}"
+time_cinder_volume: |-
+  time kubectl exec -it -n openstack $(kubectl -n openstack get po -owide -l "application=cinder,component=volume" --no-headers -o jsonpath="{.items[0].metadata.name}" ) -c cinder-volume -- python3 -c "from cinder.cmd import volume;from oslo_config import cfg;from cinder import context;from cinder import objects;CONF = cfg.CONF;CONF(['--config-file=/etc/cinder/cinder.conf'], project='cinder'); objects.register_all();ctx = context.get_admin_context();print(len(objects.VolumeList.get_all(ctx, None, 1000)));"

@@ -1,0 +1,22 @@
+delete: "iscsiadm -m node -T ${t} -p ${p} -o delete"
+delete_all: |-
+  lsscsi -i|grep IBM|awk '{print $6}'|xargs -i echo {}| cut -d/ -f3|xargs -i bash -c "echo 1>/sys/block/{}/device/delete"
+delete_device: "dev=;echo 1 > /sys/block/$dev/device/delete"
+discover: "iscsiadm -m discoverydb -t sendtargets --portal ${p} --discover"
+fc_device: "ls -l /dev/disk/by-path/*pci-*-fc-*-lun-*"
+fc_port_speed: "cat /sys/class/fc_host/host*/speed"
+fc_port_state: "cat /sys/class/fc_host/host*/port_state"
+get_hctl: "dev=;ls /sys/block/$dev/device/scsi_device/"
+get_scsi_id: "dev=;/lib/udev/scsi_id -gud /dev/$dev"
+get_session: "iscsiadm -m session"
+get_wwid: "dev=;cat /sys/block/$dev/device/wwid"
+host_state: "cat /sys/class/scsi_host/host3/state"
+iscsi_device: |-
+  bs="/sys/class/scsi_host/host*/device/session*/target*/*:*:*:*/block/*";for b in $bs; do echo $b;done
+login: "iscsiadm -m node -T ${t} --login"
+logout: "iscsiadm -m node -T ${t} -p ${p} --logout"
+new: "iscsiadm -m node -T ${t} -p ${p} --interface default --op new"
+scan: |-
+  for host in `cd /sys/class/scsi_host/;echo *`;do echo "- - -" >/sys/class/scsi_host/${host}/scan;done
+session_state: "cat /sys/class/scsi_host/host*/device/session*/target*/*:*:*:*/state"
+unbind_fc_port: "echo \"\" >  /sys/bus/pci/drivers/qla2xxx/unbind"

@@ -1,0 +1,8 @@
+copy_cm: |-
+  kubectl -nceph get cm ceph-etc -o yaml | sed 's/namespace: ceph/namespace: thor/' | kubectl create -f -
+decode_secret: |-
+  ns=;sc=;kubectl -n ${ns} get secret ${sc} -o go-template='{{range $k,$v := .data}}{{printf "%s: " $k}}{{if not $v}}{{$v}}{{else}}{{$v | base64decode}}{{end}}{{"\n"}}{{end}}'
+pod_id: "-o custom-columns=PodName:.metadata.name,PodUID:.metadata.uid"
+prefix: "-s https://$s:6443 --insecure-skip-tls-verify=true  --token $t"
+trigger_cronjob: "kubectl -n ${A} create job --from=cronjob/${B} ${C}"
+unrunning_pod: "kubectl get po -owide -A|grep -iv running|grep -iv complete"

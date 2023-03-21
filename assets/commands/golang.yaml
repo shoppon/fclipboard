@@ -1,0 +1,2 @@
+mockgen: |-
+  mockgen -source internal/mock/xx.go -destination internal/mock/xx_mock.go -package mock
