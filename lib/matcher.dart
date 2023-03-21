@@ -1,7 +1,8 @@
-import 'dart:io';
+import 'dart:convert';
 import 'dart:math';
 import 'package:yaml/yaml.dart';
 import 'package:fuzzy/fuzzy.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class Matcher {
   Map<String, String> all = {};
@@ -13,14 +14,16 @@ class Matcher {
   }
 
   void init() async {
-    final directory = Directory('conf');
-    final files = await directory.list().toList();
-    for (var file in files) {
-      if (file is File && file.path.endsWith('.yaml')) {
-        final content = await file.readAsString();
-        final yaml = loadYaml(content);
-        all.addAll(Map<String, String>.from(yaml));
-      }
+    final manifiestContent = await rootBundle.loadString('AssetManifest.json');
+    final manifestMap = json.decode(manifiestContent);
+    final commandsPath = manifestMap.keys
+        .where((String key) => key.contains('commands/'))
+        .where((String key) => key.endsWith('.yaml'))
+        .toList();
+    for (var file in commandsPath) {
+      String content = await rootBundle.loadString(file);
+      final yaml = loadYaml(content);
+      all.addAll(Map<String, String>.from(yaml));
     }
   }
 
