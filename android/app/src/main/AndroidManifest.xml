@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.fclipbaord">
+    package="com.shoppon.fclipbaord">
     <application
         android:label="fclipbaord"
         android:name="${applicationName}"

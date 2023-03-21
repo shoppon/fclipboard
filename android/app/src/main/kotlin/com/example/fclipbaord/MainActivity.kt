@@ -1,4 +1,4 @@
-package com.example.fclipbaord
+package com.shoppon.fclipbaord
 
 import io.flutter.embedding.android.FlutterActivity
 
