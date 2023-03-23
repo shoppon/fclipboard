@@ -26,6 +26,7 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   List<Entry> entries = [];
   int _selectedIndex = 0;
+  List<String> _params = [];
 
   final _focusNode = FocusNode();
 
@@ -85,7 +86,13 @@ class _MainAppState extends State<MainApp> {
 
   void _filterClipboard(String searchText) {
     setState(() {
-      final matches = _matcher.match(searchText);
+      final searchTexts = searchText.split(' ');
+      if (searchTexts.length > 1) {
+        _params = searchTexts.sublist(1);
+      } else {
+        _params = [];
+      }
+      final matches = _matcher.match(searchTexts[0]);
       entries.clear();
       for (final match in matches) {
         entries.add(match);
@@ -98,7 +105,16 @@ class _MainAppState extends State<MainApp> {
     setState(() {
       if (entries.length > index) {
         _selectedIndex = index;
-        Clipboard.setData(ClipboardData(text: entries[index].subtitle));
+        var subtitle = entries[index].subtitle;
+        final params = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+        for (var i = 0; i < params.length; i++) {
+          if (subtitle.contains('\$${params[i]}')) {
+            if (i < _params.length) {
+              subtitle = '${params[i]}="${_params[i]}";$subtitle';
+            }
+          }
+        }
+        Clipboard.setData(ClipboardData(text: subtitle));
       }
     });
   }
