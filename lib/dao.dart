@@ -7,7 +7,7 @@ import 'model.dart';
 class DBHelper {
   Future<Database> get database async {
     return openDatabase(
-      join(await getDatabasesPath(), 'fclipboard.db'),
+      join(await databaseFactory.getDatabasesPath(), 'fclipboard.db'),
       onCreate: (db, version) {
         db.execute(
           "CREATE TABLE category(id INTEGER PRIMARY KEY, name TEXT, icon TEXT, conf TEXT)",
@@ -15,30 +15,25 @@ class DBHelper {
         db.execute(
           "CREATE TABLE entry(id INTEGER PRIMARY KEY, title TEXT, subtitle TEXT, category TEXT)",
         );
-        db.execute(
-          "INSERT INTO category(name, icon, conf) VALUES('default', 'assets/icons/clipboard.png', '')",
-        );
-        db.execute(
-          "INSERT INTO category(name, icon, conf) VALUES('ceph', 'assets/images/ceph.png', 'assets/commands/ceph.yaml')",
-        );
-        db.execute(
-          "INSERT INTO category(name, icon, conf) VALUES('git', 'assets/images/git.png', 'assets/commands/git.yaml')",
-        );
-        db.execute(
-          "INSERT INTO category(name, icon, conf) VALUES('golang', 'assets/images/golang.png', 'assets/commands/golang.yaml')",
-        );
-        db.execute(
-          "INSERT INTO category(name, icon, conf) VALUES('k8s', 'assets/images/kubernetes.png', 'assets/commands/k8s.yaml')",
-        );
-        db.execute(
-          "INSERT INTO category(name, icon, conf) VALUES('linux', 'assets/images/linux.png', 'assets/commands/linux.yaml')",
-        );
-        db.execute(
-          "INSERT INTO category(name, icon, conf) VALUES('mysql', 'assets/images/mysql.png', 'assets/commands/mysql.yaml')",
-        );
-        db.execute(
-          "INSERT INTO category(name, icon, conf) VALUES('openstack', 'assets/images/openstack.png', 'assets/commands/openstack.yaml')",
-        );
+        final categories = [
+          'ceph',
+          'es',
+          'git',
+          'golang',
+          'iscsi',
+          'k8s',
+          'kubernetes',
+          'linux',
+          'mysql',
+          'openstack',
+          'symbol',
+          'vscode'
+        ];
+        for (var c in categories) {
+          db.execute(
+            "INSERT INTO category(name, icon, conf) VALUES('$c', 'assets/images/$c.png', 'assets/commands/$c.yaml')",
+          );
+        }
       },
       version: 1,
     );

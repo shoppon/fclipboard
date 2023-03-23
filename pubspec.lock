@@ -21,10 +21,10 @@ packages:
     dependency: transitive
     description:
       name: async
-      sha256: "947bfcf187f74dbc5e146c9eb9c0f10c9f8b30743e341481c1e2ed3ecc18c20c"
+      sha256: bfe67ef28df125b7dddcea62755991f807aa39a2492a23e1550161692950bbe0
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.0"
+    version: "2.10.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -336,6 +336,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.3"
+  sqflite_common_ffi:
+    dependency: "direct main"
+    description:
+      name: sqflite_common_ffi
+      sha256: "79c719db08d3b779919da8679c4f1c2f5d8792b5ceb35a0eb872525ce2724cf8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.2"
+  sqlite3:
+    dependency: transitive
+    description:
+      name: sqlite3
+      sha256: "822d321a008e194d7929357e5b58d2e4a04ab670d137182f9759152aa33180ff"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.10.1"
   stack_trace:
     dependency: transitive
     description:
