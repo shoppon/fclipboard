@@ -45,3 +45,4 @@ app.*.map.json
 
 # custom
 password.yaml
+windows/Output
