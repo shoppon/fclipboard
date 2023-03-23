@@ -1,11 +1,12 @@
-import 'dart:convert';
 import 'dart:math';
+import 'package:fclipbaord/dao.dart';
+import 'package:fclipbaord/model.dart';
 import 'package:yaml/yaml.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class Matcher {
-  Map<String, String> all = {};
+  List<Entry> all = [];
 
   int maxMatches = 10;
 
@@ -14,27 +15,28 @@ class Matcher {
   }
 
   void init() async {
-    final manifiestContent = await rootBundle.loadString('AssetManifest.json');
-    final manifestMap = json.decode(manifiestContent);
-    final commandsPath = manifestMap.keys
-        .where((String key) => key.contains('commands/'))
-        .where((String key) => key.endsWith('.yaml'))
-        .toList();
-    for (var file in commandsPath) {
-      String content = await rootBundle.loadString(file);
+    final helper = DBHelper();
+    final categoiries = await helper.categories();
+    for (var category in categoiries) {
+      final content = await rootBundle.loadString(category.conf);
       final yaml = loadYaml(content);
-      all.addAll(Map<String, String>.from(yaml));
+      all.addAll(Map<String, String>.from(yaml).entries.map((e) => Entry(
+          title: '${category.name}_${e.key}',
+          subtitle: e.value,
+          category: category.name,
+          icon: category.icon)));
     }
   }
 
-  Map<String, String> match(String leading) {
-    final fuse = Fuzzy(all.keys.toList(),
-        options: FuzzyOptions(distance: 80, maxPatternLength: 10));
+  List<Entry> match(String leading) {
+    final keys = all.map((e) => e.title).toList();
+    final fuse =
+        Fuzzy(keys, options: FuzzyOptions(distance: 80, maxPatternLength: 10));
     var result = fuse.search(leading);
     result = result.sublist(0, min(maxMatches, result.length));
-    Map<String, String> matches = {};
+    List<Entry> matches = [];
     for (var r in result) {
-      matches[r.item] = all[r.item].toString();
+      matches.add(all.firstWhere((e) => e.title == r.item));
     }
     return matches;
   }

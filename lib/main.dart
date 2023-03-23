@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MainApp());
 }
 
@@ -15,7 +16,7 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  List<ClipboardItem> clipboards = [];
+  List<Entry> entries = [];
   int _selectedIndex = 0;
 
   final _focusNode = FocusNode();
@@ -25,9 +26,6 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     super.initState();
-    _matcher.all.forEach((key, value) {
-      clipboards.add(ClipboardItem(title: key, subtitle: value));
-    });
 
     RawKeyboard.instance.addListener(_handleKeyEvent);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -80,19 +78,19 @@ class _MainAppState extends State<MainApp> {
   void _filterClipboard(String searchText) {
     setState(() {
       final matches = _matcher.match(searchText);
-      clipboards.clear();
-      matches.forEach((key, value) {
-        clipboards.add(ClipboardItem(title: key, subtitle: value));
-      });
+      entries.clear();
+      for (final match in matches) {
+        entries.add(match);
+      }
       _selectedIndex = 0;
     });
   }
 
   void _selectItem(int index) {
     setState(() {
-      if (clipboards.length > index) {
+      if (entries.length > index) {
         _selectedIndex = index;
-        Clipboard.setData(ClipboardData(text: clipboards[index].subtitle));
+        Clipboard.setData(ClipboardData(text: entries[index].subtitle));
       }
     });
   }
@@ -122,20 +120,22 @@ class _MainAppState extends State<MainApp> {
           ),
           Expanded(
               child: ListView.builder(
-                  itemCount: clipboards.length,
-                  itemBuilder: (context, index) {
+                  itemCount: entries.length,
+                  itemBuilder: (context, i) {
                     return Container(
-                      color: _selectedIndex == index
+                      color: _selectedIndex == i
                           ? const Color.fromARGB(255, 199, 226, 248)
                           : null,
                       child: ListTile(
-                        leading: const FlutterLogo(),
-                        title: Text(clipboards[index].title),
-                        subtitle: Text(clipboards[index].subtitle),
-                        trailing: Text("Ctrl+${index + 1}"),
-                        selected: _selectedIndex == index,
+                        leading: CircleAvatar(
+                          backgroundImage: AssetImage(entries[i].icon),
+                        ),
+                        title: Text(entries[i].title),
+                        subtitle: Text(entries[i].subtitle),
+                        trailing: Text("Ctrl+${i + 1}"),
+                        selected: _selectedIndex == i,
                         onTap: () {
-                          _selectItem(index);
+                          _selectItem(i);
                         },
                       ),
                     );
