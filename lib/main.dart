@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fclipbaord/matcher.dart';
-import 'package:fclipbaord/model.dart';
+import 'package:fclipboard/matcher.dart';
+import 'package:fclipboard/model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';

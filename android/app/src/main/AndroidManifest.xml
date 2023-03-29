@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.shoppon.fclipbaord">
+    package="com.shoppon.fclipboard">
     <application
-        android:label="fclipbaord"
+        android:label="fclipboard"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

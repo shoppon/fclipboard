@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.shoppon" "\0"
-            VALUE "FileDescription", "fclipbaord" "\0"
+            VALUE "FileDescription", "fclipboard" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "fclipbaord" "\0"
+            VALUE "InternalName", "fclipboard" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2023 com.shoppon. All rights reserved." "\0"
-            VALUE "OriginalFilename", "fclipbaord.exe" "\0"
-            VALUE "ProductName", "fclipbaord" "\0"
+            VALUE "OriginalFilename", "fclipboard.exe" "\0"
+            VALUE "ProductName", "fclipboard" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

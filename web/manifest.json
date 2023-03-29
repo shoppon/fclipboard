@@ -1,6 +1,6 @@
 {
-    "name": "fclipbaord",
-    "short_name": "fclipbaord",
+    "name": "fclipboard",
+    "short_name": "fclipboard",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#hexcode",

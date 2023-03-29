@@ -1,6 +1,6 @@
 import 'dart:math';
-import 'package:fclipbaord/dao.dart';
-import 'package:fclipbaord/model.dart';
+import 'package:fclipboard/dao.dart';
+import 'package:fclipboard/model.dart';
 import 'package:yaml/yaml.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:flutter/services.dart' show rootBundle;
