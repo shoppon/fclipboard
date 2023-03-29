@@ -2,10 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "fclipboard"
-#define MyAppVersion "1.2.9"
+#define MyAppVersion "1.3.0"
 #define MyAppPublisher "shoppon"
 #define MyAppURL "shoppon"
-#define MyAppExeName "fclipbaord.exe"
+#define MyAppExeName "fclipboard.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -36,8 +36,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "D:\code\fclipbaord\build\windows\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\code\fclipbaord\build\windows\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "D:\code\fclipbaord\build\windows\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\code\fclipbaord\build\windows\runner\Release\sqlite3.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\code\fclipbaord\build\windows\runner\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
