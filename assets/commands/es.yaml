@@ -15,6 +15,8 @@ admin_openrc: |
   # When neutron client returns non-ascii character and stdout is piped or
   # redirected, it would raise an encoding error.
   export PYTHONIOENCODING=UTF-8
+alcubierre_volumemapping: |-
+  disk=`kubectl exec -it -n alcubierre $(kubectl -n alcubierre get po -owide -l "application=alcubierre,component=manul" --no-headers -o jsonpath="{.items[0].metadata.name}" ) -c manul -- bash -c "kvctl list volume --format object|grep $A"|grep -Po "alcub_[\w-]+"`;kubectl exec -it -n alcubierre $(kubectl -n alcubierre get po -owide -l "application=alcubierre,component=manul" --no-headers -o jsonpath="{.items[0].metadata.name}" ) -c manul -- bash -c "kvctl list volumemapping --format object|grep $disk"
 alcubierre_disk: |-
   kubectl exec -it -n alcubierre $(kubectl -n alcubierre get po -owide -l "application=alcubierre,component=manul" --no-headers -o jsonpath="{.items[0].metadata.name}" ) -c manul -- bash -c "kvctl list volume --format object|grep $A"
 alcubierre_disk_id: |-
