@@ -19,4 +19,5 @@ new: "iscsiadm -m node -T ${t} -p ${p} --interface default --op new"
 scan: |-
   for host in `cd /sys/class/scsi_host/;echo *`;do echo "- - -" >/sys/class/scsi_host/${host}/scan;done
 session_state: "cat /sys/class/scsi_host/host*/device/session*/target*/*:*:*:*/state"
-unbind_fc_port: "echo \"\" >  /sys/bus/pci/drivers/qla2xxx/unbind"
+targetname: "cat /sys/devices/platform/host$A/session*/iscsi_session/session*/targetname"
+unbind_fc_port: 'echo "" >  /sys/bus/pci/drivers/qla2xxx/unbind'
