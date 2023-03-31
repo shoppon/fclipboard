@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fclipboard/listing.dart';
 import 'package:fclipboard/matcher.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/adding.dart';
@@ -161,6 +162,15 @@ class _MainAppState extends State<MainApp> {
                 onPressed: () {},
               ),
               actions: <Widget>[
+                IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ListingPage()),
+                      );
+                    },
+                    icon: const Icon(Icons.list)),
                 IconButton(
                     onPressed: () {
                       // goto settings page

@@ -81,9 +81,13 @@ class DBHelper {
     });
   }
 
-  Future<List<Entry>> entries() async {
+  Future<List<Entry>> entries(String? category) async {
     final Database db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('entry');
+    var query = db.query('entry');
+    if (category != null) {
+      query = db.query('entry', where: 'category = ?', whereArgs: [category]);
+    }
+    final List<Map<String, dynamic>> maps = await query;
     return List.generate(maps.length, (i) {
       return Entry(
         title: maps[i]['title'],
@@ -91,6 +95,15 @@ class DBHelper {
         category: maps[i]['category'],
       );
     });
+  }
+
+  Future<void> deleteEntry(String title) async {
+    final Database db = await database;
+    await db.delete(
+      'entry',
+      where: "title = ?",
+      whereArgs: [title],
+    );
   }
 
   void deleteAll() async {
