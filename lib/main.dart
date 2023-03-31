@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fclipboard/matcher.dart';
 import 'package:fclipboard/model.dart';
+import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
@@ -11,13 +12,15 @@ import 'package:window_manager/window_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
+  if (isDesktop()) {
+    await windowManager.ensureInitialized();
+    await hotKeyManager.unregisterAll();
+    await registerHotkey();
+  }
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
   }
   databaseFactory = databaseFactoryFfi;
-  await hotKeyManager.unregisterAll();
-  await registerHotkey();
   runApp(const MainApp());
 }
 

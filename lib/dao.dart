@@ -1,13 +1,25 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'model.dart';
+
+Future<String> getDatabasePath() async {
+  if (Platform.isIOS) {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = join(directory.path, 'fclipboard.db');
+    return path;
+  } else {
+    return join(await databaseFactory.getDatabasesPath(), 'fclipboard.db');
+  }
+}
 
 class DBHelper {
   Future<Database> get database async {
     return openDatabase(
-      join(await databaseFactory.getDatabasesPath(), 'fclipboard.db'),
+      await getDatabasePath(),
       onCreate: (db, version) {
         db.execute(
           "CREATE TABLE category(id INTEGER PRIMARY KEY, name TEXT, icon TEXT, conf TEXT)",
