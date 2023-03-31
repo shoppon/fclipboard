@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fclipboard/matcher.dart';
 import 'package:fclipboard/model.dart';
+import 'package:fclipboard/adding.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -148,50 +149,74 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-          body: Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              // controller: _searchController,
-              focusNode: _focusNode,
-              onChanged: (value) {
-                _filterClipboard(value);
-              },
-              decoration: InputDecoration(
-                hintText: "Search",
-                // prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Builder(builder: (context) {
+        return Scaffold(
+            appBar: AppBar(
+              title: const Text('fclipboard'),
+              leading: IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () {},
               ),
+              actions: <Widget>[
+                IconButton(
+                    onPressed: () {
+                      // goto settings page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AddingPage()),
+                      );
+                    },
+                    icon: const Icon(Icons.add)),
+              ],
             ),
-          ),
-          Expanded(
-              child: ListView.builder(
-                  itemCount: entries.length,
-                  itemBuilder: (context, i) {
-                    return Container(
-                      color: _selectedIndex == i
-                          ? const Color.fromARGB(255, 199, 226, 248)
-                          : null,
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: AssetImage(entries[i].icon),
-                        ),
-                        title: Text(entries[i].title),
-                        subtitle: Text(entries[i].subtitle),
-                        trailing: Text("Ctrl+${i + 1}"),
-                        selected: _selectedIndex == i,
-                        onTap: () {
-                          _selectItem(i);
-                        },
+            body: Column(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    // controller: _searchController,
+                    focusNode: _focusNode,
+                    onChanged: (value) {
+                      _filterClipboard(value);
+                    },
+                    decoration: InputDecoration(
+                      hintText: "Search",
+                      // prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                    );
-                  }))
-        ],
-      )),
+                    ),
+                  ),
+                ),
+                Expanded(
+                    child: ListView.builder(
+                        itemCount: entries.length,
+                        itemBuilder: (context, i) {
+                          return Container(
+                            color: _selectedIndex == i
+                                ? const Color.fromARGB(255, 199, 226, 248)
+                                : null,
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: AssetImage(entries[i].icon),
+                              ),
+                              title: Text(entries[i].title),
+                              subtitle: Text(entries[i].subtitle),
+                              trailing: Text("Ctrl+${i + 1}"),
+                              selected: _selectedIndex == i,
+                              onTap: () {
+                                _selectItem(i);
+                              },
+                            ),
+                          );
+                        }))
+              ],
+            ));
+      }),
     );
   }
 }
