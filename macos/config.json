@@ -1,0 +1,13 @@
+{
+  "title": "fclipboard",
+  "icon": "/Users/shoppon/code/fclipboard/assets/icons/fclipboard.png",
+  "contents": [
+    { "x": 448, "y": 344, "type": "link", "path": "/Applications" },
+    {
+      "x": 192,
+      "y": 344,
+      "type": "file",
+      "path": "/Users/shoppon/code/fclipboard/build/macos/Build/Products/Release/fclipboard.app"
+    }
+  ]
+}
