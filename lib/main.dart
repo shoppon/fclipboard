@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:fclipboard/adding_category.dart';
 import 'package:fclipboard/adding_entry.dart';
@@ -80,7 +81,9 @@ class _MainAppState extends State<MainApp> {
     final entries = await _dbHelper.entries(null);
     _matcher.reset(entries);
     setState(() {
-      this.entries = entries;
+      // get most used 10 entries
+      entries.sort((a, b) => b.counter.compareTo(a.counter));
+      this.entries = entries.sublist(0, min(10, entries.length));
     });
   }
 
@@ -120,7 +123,8 @@ class _MainAppState extends State<MainApp> {
     });
   }
 
-  void _selectItem(int index) {
+  void _selectItem(int index) async {
+    await _dbHelper.incEntryCounter(entries[index].title);
     setState(() {
       if (entries.length > index) {
         _selectedIndex = index;

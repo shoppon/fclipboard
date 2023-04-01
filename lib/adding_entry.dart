@@ -107,6 +107,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                     final entry = Entry(
                         title: _title,
                         subtitle: _content,
+                        counter: 0,
                         categoryId: _category.id);
                     _dbHelper.insertEntry(entry);
                     // toasts success

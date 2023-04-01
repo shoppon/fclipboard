@@ -33,6 +33,7 @@ class DBHelper {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             subtitle TEXT NOT NULL,
+            counter INTEGER NOT NULL,
             category_id NOT NULL,
             FOREIGN KEY (category_id) REFERENCES category(id)
           )
@@ -77,7 +78,7 @@ class DBHelper {
   Future<List<Entry>> entries(String? category) async {
     final Database db = await database;
     var results = await db.rawQuery('''
-      SELECT entry.title, entry.subtitle, entry.category_id, category.name, category.icon
+      SELECT entry.title, entry.subtitle, entry.counter, entry.category_id, category.name, category.icon
       FROM entry
       INNER JOIN category ON entry.category_id = category.id
     ''');
@@ -86,6 +87,7 @@ class DBHelper {
       entries.add(Entry(
         title: r['title'].toString(),
         subtitle: r['subtitle'].toString(),
+        counter: r['counter'] as int,
         categoryId: r['category_id'] as int,
         icon: r['icon'].toString(),
       ));
@@ -109,6 +111,15 @@ class DBHelper {
       where: "name = ?",
       whereArgs: [category],
     );
+  }
+
+  Future<void> incEntryCounter(String title) async {
+    final Database db = await database;
+    await db.rawUpdate('''
+      UPDATE entry
+      SET counter = counter + 1
+      WHERE title = ?
+    ''', [title]);
   }
 
   Future<void> deleteAll() async {

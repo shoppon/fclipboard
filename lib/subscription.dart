@@ -45,6 +45,7 @@ class Subscriber {
       await dbHelper.insertEntry(Entry(
         title: "${c.name}_${e['title']}",
         subtitle: e['subtitle'],
+        counter: 0,
         categoryId: c.id,
       ));
     }

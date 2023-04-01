@@ -22,6 +22,7 @@ class Entry {
     required this.title,
     required this.subtitle,
     required this.categoryId,
+    required this.counter,
     this.icon = '',
   });
 
@@ -29,11 +30,13 @@ class Entry {
   final String title;
   final String subtitle;
   final String icon;
+  final int counter;
 
   Map<String, dynamic> toMap() {
     return {
       'title': title,
       'subtitle': subtitle,
+      'counter': counter,
       'category_id': categoryId,
     };
   }
