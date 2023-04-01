@@ -77,11 +77,21 @@ class DBHelper {
 
   Future<List<Entry>> entries(String? category) async {
     final Database db = await database;
-    var results = await db.rawQuery('''
+    List<Map<String, Object?>> results;
+    if (category == null || category == 'all') {
+      results = await db.rawQuery('''
       SELECT entry.title, entry.subtitle, entry.counter, entry.category_id, category.name, category.icon
       FROM entry
       INNER JOIN category ON entry.category_id = category.id
     ''');
+    } else {
+      results = await db.rawQuery('''
+      SELECT entry.title, entry.subtitle, entry.counter, entry.category_id, category.name, category.icon
+      FROM entry
+      INNER JOIN category ON entry.category_id = category.id
+      WHERE category.name = ?
+    ''', [category]);
+    }
     List<Entry> entries = [];
     for (var r in results) {
       entries.add(Entry(
