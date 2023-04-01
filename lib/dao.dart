@@ -76,7 +76,6 @@ class DBHelper {
       return Category(
         name: maps[i]['name'],
         icon: maps[i]['icon'],
-        conf: maps[i]['conf'],
       );
     });
   }

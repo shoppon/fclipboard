@@ -3,14 +3,14 @@ import 'package:fclipboard/model.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class AddingPage extends StatefulWidget {
-  const AddingPage({Key? key}) : super(key: key);
+class EntryAddingPage extends StatefulWidget {
+  const EntryAddingPage({Key? key}) : super(key: key);
 
   @override
-  State<AddingPage> createState() => _AddingPageState();
+  State<EntryAddingPage> createState() => _EntryAddingPageState();
 }
 
-class _AddingPageState extends State<AddingPage> {
+class _EntryAddingPageState extends State<EntryAddingPage> {
   final _formKey = GlobalKey<FormState>();
 
   String _title = '';
@@ -121,10 +121,15 @@ class _AddingPageState extends State<AddingPage> {
                     });
                   }),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Content'),
+                keyboardType: TextInputType.multiline,
+                decoration: const InputDecoration(
+                  labelText: 'Content',
+                ),
                 onChanged: (value) {
                   _content = value;
                 },
+                minLines: 5,
+                maxLines: 5,
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(

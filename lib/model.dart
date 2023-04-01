@@ -2,18 +2,15 @@ class Category {
   Category({
     required this.name,
     required this.icon,
-    required this.conf,
   });
 
   final String name;
   final String icon;
-  final String conf;
 
   Map<String, dynamic> toMap() {
     return {
       'name': name,
       'icon': icon,
-      'conf': conf,
     };
   }
 }

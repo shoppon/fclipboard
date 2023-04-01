@@ -1,9 +1,7 @@
 import 'dart:math';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart';
-import 'package:yaml/yaml.dart';
 import 'package:fuzzy/fuzzy.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
 class Matcher {
   List<Entry> all = [];
@@ -17,15 +15,7 @@ class Matcher {
   void init() async {
     final helper = DBHelper();
     final categoiries = await helper.categories();
-    for (var category in categoiries) {
-      final content = await rootBundle.loadString(category.conf);
-      final yaml = loadYaml(content);
-      all.addAll(Map<String, String>.from(yaml).entries.map((e) => Entry(
-          title: '${category.name}_${e.key}',
-          subtitle: e.value,
-          category: category.name,
-          icon: category.icon)));
-    }
+    for (var _ in categoiries) {}
   }
 
   List<Entry> match(String leading) {

@@ -1,9 +1,10 @@
 import 'dart:io';
 
+import 'package:fclipboard/adding_category.dart';
+import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/listing.dart';
 import 'package:fclipboard/matcher.dart';
 import 'package:fclipboard/model.dart';
-import 'package:fclipboard/adding.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -171,16 +172,38 @@ class _MainAppState extends State<MainApp> {
                       );
                     },
                     icon: const Icon(Icons.list)),
-                IconButton(
-                    onPressed: () {
-                      // goto settings page
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const AddingPage()),
-                      );
-                    },
-                    icon: const Icon(Icons.add)),
+                PopupMenuButton(
+                  icon: const Icon(Icons.add),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const CategoryAddingPage()),
+                          );
+                        },
+                        child: const Text('Add Categories'),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const EntryAddingPage()),
+                          );
+                        },
+                        child: const Text('Add Entries'),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
             body: Column(
