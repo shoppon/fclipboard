@@ -11,9 +11,9 @@ class ListingPage extends StatefulWidget {
 
 class _ListingPageState extends State<ListingPage> {
   List<Entry> entries = [];
-  final List<String> _categories = [];
+  final List<String> _categories = ['all'];
 
-  String _category = '';
+  String _category = 'all';
 
   final DBHelper _dbHelper = DBHelper();
 
@@ -30,11 +30,21 @@ class _ListingPageState extends State<ListingPage> {
     });
   }
 
+  void loadEntries() async {
+    final filter = _category == 'all' ? null : _category;
+    final entries = await _dbHelper.entries(filter);
+
+    setState(() {
+      this.entries = entries;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
 
     loadCategories();
+    loadEntries();
   }
 
   List<DropdownMenuItem<String>> buildDropdownMenuItems() {
@@ -91,23 +101,30 @@ class _ListingPageState extends State<ListingPage> {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            SizedBox(
-                height: 60,
-                child: DropdownButton<String>(
-                  value: _category,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _category = newValue!;
-
-                      _dbHelper.entries(_category).then((value) {
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: <Widget>[
+                  const Text('Category:'),
+                  const SizedBox(
+                    width: 16.0,
+                  ),
+                  Expanded(
+                    child: DropdownButton<String>(
+                      value: _category,
+                      onChanged: (String? newValue) {
                         setState(() {
-                          entries = value;
+                          _category = newValue!;
+                          loadEntries();
                         });
-                      });
-                    });
-                  },
-                  items: buildDropdownMenuItems(),
-                )),
+                      },
+                      isExpanded: true,
+                      items: buildDropdownMenuItems(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
                 child: ListView.builder(
                     itemCount: entries.length,
