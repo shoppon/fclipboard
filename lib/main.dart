@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fclipboard/adding_category.dart';
 import 'package:fclipboard/adding_entry.dart';
+import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/listing.dart';
 import 'package:fclipboard/matcher.dart';
 import 'package:fclipboard/model.dart';
@@ -60,14 +61,25 @@ class _MainAppState extends State<MainApp> {
   final _focusNode = FocusNode();
 
   final _matcher = Matcher(10);
+  final _dbHelper = DBHelper();
 
   @override
   void initState() {
     super.initState();
 
+    loadEntries();
+
     RawKeyboard.instance.addListener(_handleKeyEvent);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
+    });
+  }
+
+  void loadEntries() async {
+    final entries = await _dbHelper.entries(null);
+    _matcher.reset(entries);
+    setState(() {
+      this.entries = entries;
     });
   }
 
@@ -169,7 +181,7 @@ class _MainAppState extends State<MainApp> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => const ListingPage()),
-                      );
+                      ).then((value) => loadEntries());
                     },
                     icon: const Icon(Icons.list)),
                 PopupMenuButton(
@@ -197,7 +209,7 @@ class _MainAppState extends State<MainApp> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const EntryAddingPage()),
-                          );
+                          ).then((value) => loadEntries());
                         },
                         child: const Text('Add Entries'),
                       ),
@@ -211,14 +223,12 @@ class _MainAppState extends State<MainApp> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
-                    // controller: _searchController,
                     focusNode: _focusNode,
                     onChanged: (value) {
                       _filterClipboard(value);
                     },
                     decoration: InputDecoration(
                       hintText: "Search",
-                      // prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -234,8 +244,11 @@ class _MainAppState extends State<MainApp> {
                                 ? const Color.fromARGB(255, 199, 226, 248)
                                 : null,
                             child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundImage: AssetImage(entries[i].icon),
+                              leading: InkWell(
+                                child: Text(
+                                  entries[i].icon,
+                                  style: const TextStyle(fontSize: 32.0),
+                                ),
                               ),
                               title: Text(entries[i].title),
                               subtitle: Text(entries[i].subtitle),

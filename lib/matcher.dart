@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fuzzy/fuzzy.dart';
 
@@ -8,14 +7,10 @@ class Matcher {
 
   int maxMatches = 10;
 
-  Matcher(this.maxMatches) {
-    init();
-  }
+  Matcher(this.maxMatches);
 
-  void init() async {
-    final helper = DBHelper();
-    final categoiries = await helper.categories();
-    for (var _ in categoiries) {}
+  void reset(List<Entry> news) {
+    all = List.from(news);
   }
 
   List<Entry> match(String leading) {

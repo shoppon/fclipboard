@@ -21,31 +21,22 @@ class DBHelper {
     return openDatabase(
       await getDatabasePath(),
       onCreate: (db, version) {
-        db.execute(
-          "CREATE TABLE category(id INTEGER PRIMARY KEY, name TEXT, icon TEXT, conf TEXT)",
-        );
-        db.execute(
-          "CREATE TABLE entry(id INTEGER PRIMARY KEY, title TEXT, subtitle TEXT, category TEXT)",
-        );
-        final categories = [
-          'ceph',
-          'es',
-          'git',
-          'golang',
-          'iscsi',
-          'k8s',
-          'kubernetes',
-          'linux',
-          'mysql',
-          'openstack',
-          'symbol',
-          'vscode'
-        ];
-        for (var c in categories) {
-          db.execute(
-            "INSERT INTO category(name, icon, conf) VALUES('$c', 'assets/images/$c.png', 'assets/commands/$c.yaml')",
-          );
-        }
+        db.execute('''
+          CREATE TABLE category(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            icon TEXT NOT NULL
+          )
+        ''');
+        db.execute('''
+          CREATE TABLE entry(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            subtitle TEXT NOT NULL,
+            category_id NOT NULL,
+            FOREIGN KEY (category_id) REFERENCES category(id)
+          )
+        ''');
       },
       version: 1,
     );
@@ -82,18 +73,21 @@ class DBHelper {
 
   Future<List<Entry>> entries(String? category) async {
     final Database db = await database;
-    var query = db.query('entry');
-    if (category != null) {
-      query = db.query('entry', where: 'category = ?', whereArgs: [category]);
+    var results = await db.rawQuery('''
+      SELECT entry.title, entry.subtitle, entry.category_id, category.name, category.icon
+      FROM entry
+      INNER JOIN category ON entry.category_id = category.id
+    ''');
+    List<Entry> entries = [];
+    for (var r in results) {
+      entries.add(Entry(
+        title: r['title'].toString(),
+        subtitle: r['subtitle'].toString(),
+        categoryId: r['category_id'] as int,
+        icon: r['icon'].toString(),
+      ));
     }
-    final List<Map<String, dynamic>> maps = await query;
-    return List.generate(maps.length, (i) {
-      return Entry(
-        title: maps[i]['title'],
-        subtitle: maps[i]['subtitle'],
-        category: maps[i]['category'],
-      );
-    });
+    return entries;
   }
 
   Future<void> deleteEntry(String title) async {
@@ -105,9 +99,19 @@ class DBHelper {
     );
   }
 
-  void deleteAll() async {
+  Future<void> deleteCategory(String category) async {
+    final Database db = await database;
+    await db.delete(
+      'category',
+      where: "name = ?",
+      whereArgs: [category],
+    );
+  }
+
+  Future<void> deleteAll() async {
     final Database db = await database;
     await db.delete('category');
     await db.delete('entry');
+    await deleteDatabase(await getDatabasePath());
   }
 }

@@ -62,8 +62,11 @@ class _ListingPageState extends State<ListingPage> {
     showDialog(
         context: context,
         builder: (BuildContext context) {
+          var title = index == -1
+              ? 'Delete category $_category'
+              : 'Delete ${entries[index].title}';
           return AlertDialog(
-            title: Text('Delete ${entries[index].title}'),
+            title: Text(title),
             content: const Text('Are you sure?'),
             actions: <Widget>[
               TextButton(
@@ -73,11 +76,26 @@ class _ListingPageState extends State<ListingPage> {
                   child: const Text('No')),
               TextButton(
                   onPressed: () {
-                    _dbHelper.deleteEntry(entries[index].title).then((value) {
-                      setState(() {
-                        entries.removeAt(index);
+                    if (index == -1) {
+                      if (entries.isNotEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Category not empty')));
+                      } else {
+                        _dbHelper.deleteCategory(_category).then((value) {
+                          setState(() {
+                            _categories.remove(_category);
+                            _category = _categories[0];
+                          });
+                        });
+                      }
+                    } else {
+                      _dbHelper.deleteEntry(entries[index].title).then((value) {
+                        setState(() {
+                          entries.removeAt(index);
+                        });
                       });
-                    });
+                    }
                     Navigator.of(context).pop();
                   },
                   child: const Text('Yes')),
@@ -106,8 +124,11 @@ class _ListingPageState extends State<ListingPage> {
               child: Row(
                 children: <Widget>[
                   const Text('Category:'),
-                  const SizedBox(
-                    width: 16.0,
+                  IconButton(
+                    onPressed: () {
+                      deleteListItem(-1);
+                    },
+                    icon: const Icon(Icons.delete),
                   ),
                   Expanded(
                     child: DropdownButton<String>(

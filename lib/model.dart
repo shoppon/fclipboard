@@ -2,10 +2,12 @@ class Category {
   Category({
     required this.name,
     required this.icon,
+    this.id = 0,
   });
 
   final String name;
   final String icon;
+  final int id;
 
   Map<String, dynamic> toMap() {
     return {
@@ -19,11 +21,11 @@ class Entry {
   Entry({
     required this.title,
     required this.subtitle,
-    this.category = 'default',
-    this.icon = 'assets/icons/clipboard.png',
+    required this.categoryId,
+    this.icon = '',
   });
 
-  final String category;
+  final int categoryId;
   final String title;
   final String subtitle;
   final String icon;
@@ -32,7 +34,7 @@ class Entry {
     return {
       'title': title,
       'subtitle': subtitle,
-      'category': category,
+      'category_id': categoryId,
     };
   }
 }

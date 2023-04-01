@@ -15,9 +15,9 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
 
   String _title = '';
   String _content = '';
-  String _category = '';
+  Category _category = Category(name: 'all', icon: '😆');
 
-  final List<String> _categories = [];
+  final List<Category> _categories = [];
 
   final DBHelper _dbHelper = DBHelper();
 
@@ -28,7 +28,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
     for (var c in _categories) {
       items.add(DropdownMenuItem(
         value: c,
-        child: Text(c),
+        child: Text(c.name),
       ));
     }
     return items;
@@ -48,7 +48,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
 
     setState(() {
       for (var c in categories) {
-        _categories.add(c.name);
+        _categories.add(c);
       }
     });
   }
@@ -117,7 +117,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                   items: buildDropdownMenuItems(),
                   onChanged: (value) {
                     setState(() {
-                      _category = value.toString();
+                      _category = value;
                     });
                   }),
               TextFormField(
@@ -135,7 +135,9 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
               ElevatedButton(
                   onPressed: () {
                     final entry = Entry(
-                        title: _title, subtitle: _content, category: _category);
+                        title: _title,
+                        subtitle: _content,
+                        categoryId: _category.id);
                     _dbHelper.insertEntry(entry);
                     // toasts success
                     showToast("Added successfully");
