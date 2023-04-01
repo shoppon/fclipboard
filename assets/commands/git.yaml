@@ -1,2 +1,0 @@
-force_remove: |
-  git filter-branch --force --index-filter "git rm --cached --ignore-unmatch $A" --prune-empty --tag-name-filter cat -- --all
