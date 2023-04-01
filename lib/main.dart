@@ -94,33 +94,10 @@ class _MainAppState extends State<MainApp> {
   void _handleKeyEvent(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       if (event.isControlPressed) {
-        // FIXME(xp): stupid!!!
-        if (event.logicalKey == LogicalKeyboardKey.digit1) {
-          _selectItem(0);
-        }
-        if (event.logicalKey == LogicalKeyboardKey.digit2) {
-          _selectItem(1);
-        }
-        if (event.logicalKey == LogicalKeyboardKey.digit3) {
-          _selectItem(2);
-        }
-        if (event.logicalKey == LogicalKeyboardKey.digit4) {
-          _selectItem(3);
-        }
-        if (event.logicalKey == LogicalKeyboardKey.digit5) {
-          _selectItem(4);
-        }
-        if (event.logicalKey == LogicalKeyboardKey.digit6) {
-          _selectItem(5);
-        }
-        if (event.logicalKey == LogicalKeyboardKey.digit7) {
-          _selectItem(6);
-        }
-        if (event.logicalKey == LogicalKeyboardKey.digit8) {
-          _selectItem(7);
-        }
-        if (event.logicalKey == LogicalKeyboardKey.digit9) {
-          _selectItem(8);
+        final logicalKey = event.character;
+        int number = logicalKey!.codeUnitAt(0) - 49;
+        if (number >= 0 && number <= 9) {
+          _selectItem(number);
         }
       }
     }
@@ -171,10 +148,6 @@ class _MainAppState extends State<MainApp> {
         return Scaffold(
             appBar: AppBar(
               title: const Text('fclipboard'),
-              leading: IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () {},
-              ),
               actions: <Widget>[
                 IconButton(
                     onPressed: () {
@@ -231,6 +204,51 @@ class _MainAppState extends State<MainApp> {
                   ],
                 ),
               ],
+            ),
+            drawer: Drawer(
+              child: ListView(
+                children: <Widget>[
+                  const UserAccountsDrawerHeader(
+                      accountName: Text('Shoppon'),
+                      accountEmail: Text('shopppon@gmail.com'),
+                      currentAccountPicture: CircleAvatar(
+                        child: Icon(Icons.person),
+                      )),
+                  ListTile(
+                    leading: const Icon(Icons.clear),
+                    title: const Text('Clear all data'),
+                    onTap: () async {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Clear all data'),
+                              content: const Text('Are you sure?'),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text('Cancel'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: const Text('OK'),
+                                  onPressed: () async {
+                                    await _dbHelper.deleteAll();
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop();
+                                      showToast(
+                                          context, 'Clear successfully', false);
+                                    }
+                                  },
+                                )
+                              ],
+                            );
+                          }).then((value) => loadEntries());
+                    },
+                  ),
+                ],
+              ),
             ),
             body: Column(
               children: <Widget>[

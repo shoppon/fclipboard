@@ -42,22 +42,24 @@ class DBHelper {
     );
   }
 
-  Future<void> insertCategory(Category category) async {
+  Future<int> insertCategory(Category category) async {
     final Database db = await database;
-    await db.insert(
+    final id = await db.insert(
       'category',
       category.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    return id;
   }
 
-  Future<void> insertEntry(Entry entry) async {
+  Future<int> insertEntry(Entry entry) async {
     final Database db = await database;
-    await db.insert(
+    final int id = await db.insert(
       'entry',
       entry.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    return id;
   }
 
   Future<List<Category>> categories() async {
@@ -67,6 +69,7 @@ class DBHelper {
       return Category(
         name: maps[i]['name'],
         icon: maps[i]['icon'],
+        id: maps[i]['id'],
       );
     });
   }
@@ -112,6 +115,5 @@ class DBHelper {
     final Database db = await database;
     await db.delete('category');
     await db.delete('entry');
-    await deleteDatabase(await getDatabasePath());
   }
 }

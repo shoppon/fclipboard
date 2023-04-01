@@ -23,7 +23,7 @@ class Subscriber {
       throw Exception('Failed to subscribe to $url');
     }
 
-    final decodedResponse = json.decode(response.body);
+    final decodedResponse = json.decode(utf8.decode(response.bodyBytes));
     final content =
         await rootBundle.loadString('assets/schemas/subscription.json');
     final schema = JsonSchema.createSchema(json.decode(content));
@@ -43,7 +43,7 @@ class Subscriber {
     for (var e in decodedResponse['entries']) {
       final c = categories.firstWhere((c) => c.name == e['category']);
       await dbHelper.insertEntry(Entry(
-        title: "${c.name}_$e['title']",
+        title: "${c.name}_${e['title']}",
         subtitle: e['subtitle'],
         categoryId: c.id,
       ));
