@@ -1,7 +1,7 @@
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart';
+import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class EntryAddingPage extends StatefulWidget {
   const EntryAddingPage({Key? key}) : super(key: key);
@@ -21,8 +21,6 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
 
   final DBHelper _dbHelper = DBHelper();
 
-  final FToast _fToast = FToast();
-
   List<DropdownMenuItem> buildDropdownMenuItems() {
     List<DropdownMenuItem> items = [];
     for (var c in _categories) {
@@ -38,8 +36,6 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
   void initState() {
     super.initState();
 
-    _fToast.init(context);
-
     loadCategories();
   }
 
@@ -51,32 +47,6 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
         _categories.add(c);
       }
     });
-  }
-
-  void showToast(String content) {
-    Widget toast = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25.0),
-        color: Colors.greenAccent,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.check),
-          const SizedBox(
-            width: 12.0,
-          ),
-          Text(content),
-        ],
-      ),
-    );
-
-    _fToast.showToast(
-      child: toast,
-      gravity: ToastGravity.BOTTOM,
-      toastDuration: const Duration(seconds: 2),
-    );
   }
 
   @override
@@ -140,7 +110,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                         categoryId: _category.id);
                     _dbHelper.insertEntry(entry);
                     // toasts success
-                    showToast("Added successfully");
+                    showToast(context, "Added successfully", false);
                     Navigator.pop(context);
                   },
                   child: const Text('Save')),

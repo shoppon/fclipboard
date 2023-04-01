@@ -6,6 +6,7 @@ import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/listing.dart';
 import 'package:fclipboard/matcher.dart';
 import 'package:fclipboard/model.dart';
+import 'package:fclipboard/subscription.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -212,6 +213,19 @@ class _MainAppState extends State<MainApp> {
                           ).then((value) => loadEntries());
                         },
                         child: const Text('Add Entries'),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const SubscriptionPage()),
+                          ).then((value) => loadEntries());
+                        },
+                        child: const Text('Subscribe'),
                       ),
                     ),
                   ],
