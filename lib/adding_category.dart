@@ -21,8 +21,6 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
 
   final FToast _fToast = FToast();
 
-  bool _showEmojiPicker = false;
-
   @override
   void initState() {
     super.initState();
@@ -99,9 +97,26 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
                             child: Text(_icon,
                                 style: const TextStyle(fontSize: 32.0)),
                             onTap: () {
-                              setState(() {
-                                _showEmojiPicker = true;
-                              });
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return EmojiPicker(
+                                      onEmojiSelected: (category, emoji) {
+                                        setState(() {
+                                          _icon = emoji.emoji;
+                                        });
+                                        Navigator.pop(context);
+                                      },
+                                      onBackspacePressed: () => {
+                                        Navigator.pop(context),
+                                      },
+                                      config: const Config(
+                                        columns: 8,
+                                        emojiSizeMax: 32,
+                                        buttonMode: ButtonMode.MATERIAL,
+                                      ),
+                                    );
+                                  });
                             },
                           )),
                     ],
@@ -121,29 +136,6 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
               ),
             ),
           ),
-          Offstage(
-              offstage: !_showEmojiPicker,
-              child: SizedBox(
-                height: 300,
-                child: EmojiPicker(
-                  onEmojiSelected: (category, emoji) {
-                    _icon = emoji.emoji;
-                    setState(() {
-                      _showEmojiPicker = false;
-                    });
-                  },
-                  onBackspacePressed: () => {
-                    setState(() {
-                      _showEmojiPicker = false;
-                    })
-                  },
-                  config: const Config(
-                    columns: 7,
-                    emojiSizeMax: 32,
-                    buttonMode: ButtonMode.MATERIAL,
-                  ),
-                ),
-              ))
         ]));
   }
 }

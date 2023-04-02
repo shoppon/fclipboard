@@ -103,6 +103,19 @@ class _MainAppState extends State<MainApp> {
           _selectItem(number);
         }
       }
+      if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+        _selectItem(_selectedIndex);
+      }
+      if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+        setState(() {
+          _selectedIndex = (_selectedIndex + 1) % entries.length;
+        });
+      }
+      if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+        setState(() {
+          _selectedIndex = (_selectedIndex - 1) % entries.length;
+        });
+      }
     }
   }
 
@@ -140,6 +153,14 @@ class _MainAppState extends State<MainApp> {
         Clipboard.setData(ClipboardData(text: subtitle));
       }
     });
+  }
+
+  String _getTrailingText(int index) {
+    if (isDesktop()) {
+      return 'Ctrl+${index + 1}';
+    } else {
+      return '';
+    }
   }
 
   @override
@@ -288,7 +309,7 @@ class _MainAppState extends State<MainApp> {
                               ),
                               title: Text(entries[i].title),
                               subtitle: Text(entries[i].subtitle),
-                              trailing: Text("Ctrl+${i + 1}"),
+                              trailing: Text(_getTrailingText(i)),
                               selected: _selectedIndex == i,
                               onTap: () {
                                 _selectItem(i);

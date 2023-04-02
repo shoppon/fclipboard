@@ -1,5 +1,6 @@
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart';
+import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 
 class ListingPage extends StatefulWidget {
@@ -76,6 +77,7 @@ class _ListingPageState extends State<ListingPage> {
                   child: const Text('No')),
               TextButton(
                   onPressed: () {
+                    // delete category
                     if (index == -1) {
                       if (entries.isNotEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -87,13 +89,16 @@ class _ListingPageState extends State<ListingPage> {
                             _categories.remove(_category);
                             _category = _categories[0];
                           });
+                          showToast(context, 'Delete successfully', false);
                         });
                       }
                     } else {
+                      // delete entry
                       _dbHelper.deleteEntry(entries[index].title).then((value) {
                         setState(() {
                           entries.removeAt(index);
                         });
+                        showToast(context, 'Delete successfully', false);
                       });
                     }
                     Navigator.of(context).pop();
