@@ -1,4 +1,5 @@
 import 'package:fclipboard/dao.dart';
+import 'package:fclipboard/flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +54,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Adding'),
+        title: Text(AppLocalizations.of(context).addEntry),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -69,10 +70,11 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Title'),
+                decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).title),
                 validator: (value) {
                   if (value == null) {
-                    return 'Please enter some text';
+                    return AppLocalizations.of(context).titleCannotBeEmpty;
                   }
                   return null;
                 },
@@ -81,8 +83,8 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                 },
               ),
               DropdownButtonFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).category,
                   ),
                   items: buildDropdownMenuItems(),
                   onChanged: (value) {
@@ -92,8 +94,8 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                   }),
               TextFormField(
                 keyboardType: TextInputType.multiline,
-                decoration: const InputDecoration(
-                  labelText: 'Content',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context).content,
                 ),
                 onChanged: (value) {
                   _content = value;
@@ -111,10 +113,11 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                         categoryId: _category.id);
                     _dbHelper.insertEntry(entry);
                     // toasts success
-                    showToast(context, "Added successfully", false);
+                    showToast(context,
+                        AppLocalizations.of(context).addSuccessfully, false);
                     Navigator.pop(context);
                   },
-                  child: const Text('Save')),
+                  child: Text(AppLocalizations.of(context).save)),
             ],
           ),
         ),

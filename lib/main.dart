@@ -11,10 +11,12 @@ import 'package:fclipboard/subscription.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:window_manager/window_manager.dart';
+import 'flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -169,10 +171,20 @@ class _MainAppState extends State<MainApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('zh', 'CN'),
+      ],
       home: Builder(builder: (context) {
         return Scaffold(
             appBar: AppBar(
-              title: const Text('fclipboard'),
+              title: Text(AppLocalizations.of(context).appTitle),
               actions: <Widget>[
                 IconButton(
                     onPressed: () {
@@ -197,7 +209,7 @@ class _MainAppState extends State<MainApp> {
                                     const CategoryAddingPage()),
                           );
                         },
-                        child: const Text('Add Categories'),
+                        child: Text(AppLocalizations.of(context).addCategory),
                       ),
                     ),
                     PopupMenuItem(
@@ -210,7 +222,7 @@ class _MainAppState extends State<MainApp> {
                                 builder: (context) => const EntryAddingPage()),
                           ).then((value) => loadEntries());
                         },
-                        child: const Text('Add Entries'),
+                        child: Text(AppLocalizations.of(context).addEntry),
                       ),
                     ),
                     PopupMenuItem(
@@ -223,7 +235,8 @@ class _MainAppState extends State<MainApp> {
                                 builder: (context) => const SubscriptionPage()),
                           ).then((value) => loadEntries());
                         },
-                        child: const Text('Subscribe'),
+                        child:
+                            Text(AppLocalizations.of(context).addSubscription),
                       ),
                     ),
                   ],
@@ -241,29 +254,35 @@ class _MainAppState extends State<MainApp> {
                       )),
                   ListTile(
                     leading: const Icon(Icons.clear),
-                    title: const Text('Clear all data'),
+                    title: Text(AppLocalizations.of(context).clearAll),
                     onTap: () async {
                       showDialog(
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: const Text('Clear all data'),
-                              content: const Text('Are you sure?'),
+                              title:
+                                  Text(AppLocalizations.of(context).clearAll),
+                              content: Text(
+                                  AppLocalizations.of(context).confirmDelete),
                               actions: <Widget>[
                                 TextButton(
-                                  child: const Text('Cancel'),
+                                  child:
+                                      Text(AppLocalizations.of(context).cancel),
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
                                 ),
                                 TextButton(
-                                  child: const Text('OK'),
+                                  child: Text(AppLocalizations.of(context).ok),
                                   onPressed: () async {
                                     await _dbHelper.deleteAll();
                                     if (context.mounted) {
                                       Navigator.of(context).pop();
                                       showToast(
-                                          context, 'Clear successfully', false);
+                                          context,
+                                          AppLocalizations.of(context)
+                                              .deleteAllSuccess,
+                                          false);
                                     }
                                   },
                                 )
@@ -285,7 +304,7 @@ class _MainAppState extends State<MainApp> {
                       _filterClipboard(value);
                     },
                     decoration: InputDecoration(
-                      hintText: "Search",
+                      hintText: AppLocalizations.of(context).searchHint,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),

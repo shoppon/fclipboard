@@ -1,5 +1,6 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fclipboard/dao.dart';
+import 'package:fclipboard/flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fclipboard/model.dart' as model;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -58,7 +59,7 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Adding'),
+          title: Text(AppLocalizations.of(context).addCategory),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
@@ -78,8 +79,8 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
                     alignment: Alignment.centerRight,
                     children: [
                       TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Name',
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context).name,
                         ),
                         validator: (value) {
                           if (value == null) {
@@ -128,10 +129,10 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
                             model.Category(name: _name, icon: _icon);
                         _dbHelper.insertCategory(category);
                         // toasts success
-                        showToast("Added successfully");
+                        showToast(AppLocalizations.of(context).addSuccessfully);
                         Navigator.pop(context);
                       },
-                      child: const Text('Save')),
+                      child: Text(AppLocalizations.of(context).save)),
                 ],
               ),
             ),

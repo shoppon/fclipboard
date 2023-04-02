@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:fclipboard/flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -76,7 +77,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Subscription'),
+        title: Text(AppLocalizations.of(context).subscribe),
       ),
       body: Padding(
         padding: const EdgeInsets.all(18.0),
@@ -105,15 +106,19 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 if (success) {
                   if (context.mounted) {
                     Navigator.pop(context);
-                    showToast(context, 'Subscribed successfully', false);
+                    showToast(
+                        context,
+                        AppLocalizations.of(context).subscribeSuccessfully,
+                        false);
                   }
                 } else {
                   if (context.mounted) {
-                    showToast(context, 'Failed to subscribe', true);
+                    showToast(context,
+                        AppLocalizations.of(context).subscribeFailed, true);
                   }
                 }
               },
-              child: const Text('Subscribe'),
+              child: Text(AppLocalizations.of(context).subscribe),
             )
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:fclipboard/dao.dart';
+import 'package:fclipboard/flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
@@ -68,42 +69,45 @@ class _ListingPageState extends State<ListingPage> {
               : 'Delete ${entries[index].title}';
           return AlertDialog(
             title: Text(title),
-            content: const Text('Are you sure?'),
+            content: Text(AppLocalizations.of(context).confirmDelete),
             actions: <Widget>[
               TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text('No')),
+                  child: Text(AppLocalizations.of(context).cancel)),
               TextButton(
-                  onPressed: () {
-                    // delete category
-                    if (index == -1) {
-                      if (entries.isNotEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Category not empty')));
-                      } else {
-                        _dbHelper.deleteCategory(_category).then((value) {
-                          setState(() {
-                            _categories.remove(_category);
-                            _category = _categories[0];
-                          });
-                          showToast(context, 'Delete successfully', false);
-                        });
-                      }
+                onPressed: () {
+                  // delete category
+                  if (index == -1) {
+                    if (entries.isNotEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(
+                              AppLocalizations.of(context).categoryNotEmpty)));
                     } else {
-                      // delete entry
-                      _dbHelper.deleteEntry(entries[index].title).then((value) {
+                      _dbHelper.deleteCategory(_category).then((value) {
                         setState(() {
-                          entries.removeAt(index);
+                          _categories.remove(_category);
+                          _category = _categories[0];
                         });
-                        showToast(context, 'Delete successfully', false);
+                        showToast(context,
+                            AppLocalizations.of(context).deleteSuccess, false);
                       });
                     }
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Yes')),
+                  } else {
+                    // delete entry
+                    _dbHelper.deleteEntry(entries[index].title).then((value) {
+                      setState(() {
+                        entries.removeAt(index);
+                      });
+                      showToast(context,
+                          AppLocalizations.of(context).deleteSuccess, false);
+                    });
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: Text(AppLocalizations.of(context).ok),
+              )
             ],
           );
         });
@@ -113,7 +117,7 @@ class _ListingPageState extends State<ListingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Listing'),
+          title: Text(AppLocalizations.of(context).listing),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
@@ -128,7 +132,7 @@ class _ListingPageState extends State<ListingPage> {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: <Widget>[
-                  const Text('Category:'),
+                  Text(AppLocalizations.of(context).category),
                   IconButton(
                     onPressed: () {
                       deleteListItem(-1);
