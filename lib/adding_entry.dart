@@ -99,7 +99,11 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                   },
                   value: _categories.isNotEmpty
                       ? _categories.firstWhere(
-                          (element) => element.id == widget.old?.categoryId)
+                          (element) => element.id == widget.old?.categoryId,
+                          orElse: () {
+                            return _categories[0];
+                          },
+                        )
                       : null,
                   onChanged: (value) {
                     setState(() {

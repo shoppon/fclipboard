@@ -99,9 +99,9 @@ class _MainAppState extends State<MainApp> {
 
   void _handleKeyEvent(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
-      if (event.isControlPressed) {
-        final logicalKey = event.character;
-        int number = logicalKey!.codeUnitAt(0) - 49;
+      if (event.isAltPressed) {
+        final logicalKey = event.logicalKey.keyLabel;
+        int number = logicalKey.codeUnitAt(0) - 49;
         if (number >= 0 && number <= 9) {
           _selectItem(number);
         }

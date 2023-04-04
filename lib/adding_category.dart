@@ -83,13 +83,11 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
                           labelText: AppLocalizations.of(context).name,
                         ),
                         validator: (value) {
-                          if (value == null) {
-                            return 'Please enter some text';
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(context).categoryCannotBeEmpty;
                           }
-                          return null;
-                        },
-                        onChanged: (value) {
                           _name = value;
+                          return null;
                         },
                       ),
                       Positioned(
@@ -125,6 +123,9 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
                   const SizedBox(height: 32.0),
                   ElevatedButton(
                       onPressed: () {
+                        if (!_formKey.currentState!.validate()) {
+                          return;
+                        }
                         final category =
                             model.Category(name: _name, icon: _icon);
                         _dbHelper.insertCategory(category);
