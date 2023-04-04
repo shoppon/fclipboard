@@ -387,6 +387,16 @@ class _MainAppState extends State<MainApp> {
                                                   .delete)),
                                     ],
                                   );
+                                  if (selectedValue == 0) {
+                                    if (context.mounted) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                EntryAddingPage(old: entries[i])),
+                                      ).then((value) => loadEntries());
+                                    }
+                                  }
                                   if (selectedValue == 1) {
                                     if (context.mounted) {
                                       _deleteListItem(context, i);

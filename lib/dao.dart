@@ -31,7 +31,7 @@ class DBHelper {
         db.execute('''
           CREATE TABLE entry(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
+            title TEXT NOT NULL UNIQUE,
             subtitle TEXT NOT NULL,
             counter INTEGER NOT NULL,
             category_id NOT NULL,
@@ -39,7 +39,15 @@ class DBHelper {
           )
         ''');
       },
-      version: 1,
+      onUpgrade: (db, oldVersion, newVersion) {
+        if (oldVersion == 1) {
+          // make title column UNIQUE
+          db.execute('''
+            CREATE UNIQUE INDEX idx_entry_title ON entry(title)
+          ''');
+        }
+      },
+      version: 2,
     );
   }
 
@@ -136,5 +144,7 @@ class DBHelper {
     final Database db = await database;
     await db.delete('category');
     await db.delete('entry');
+    // drop databases
+    await deleteDatabase(await getDatabasePath());
   }
 }

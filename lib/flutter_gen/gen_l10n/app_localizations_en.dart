@@ -26,6 +26,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get category => 'Category';
 
   @override
+  String get categoryCannotBeEmpty => 'Category cannot be empty';
+
+  @override
   String get categoryNotEmpty => 'Category is not empty';
 
   @override
@@ -36,6 +39,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get content => 'Content';
+
+  @override
+  String get contentCannotBeEmpty => 'Content cannot be empty';
 
   @override
   String get delete => 'Delete';

@@ -26,6 +26,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get category => '分类';
 
   @override
+  String get categoryCannotBeEmpty => '分类不能为空';
+
+  @override
   String get categoryNotEmpty => '分类不为空';
 
   @override
@@ -36,6 +39,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get content => '内容';
+
+  @override
+  String get contentCannotBeEmpty => '内容不能为空';
 
   @override
   String get delete => '删除';

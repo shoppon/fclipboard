@@ -135,6 +135,12 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get category;
 
+  /// No description provided for @categoryCannotBeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Category cannot be empty'**
+  String get categoryCannotBeEmpty;
+
   /// No description provided for @categoryNotEmpty.
   ///
   /// In en, this message translates to:
@@ -158,6 +164,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Content'**
   String get content;
+
+  /// No description provided for @contentCannotBeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Content cannot be empty'**
+  String get contentCannotBeEmpty;
 
   /// No description provided for @delete.
   ///
