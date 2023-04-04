@@ -177,6 +177,12 @@ abstract class AppLocalizations {
   /// **'Listing'**
   String get listing;
 
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get loading;
+
   /// No description provided for @name.
   ///
   /// In en, this message translates to:

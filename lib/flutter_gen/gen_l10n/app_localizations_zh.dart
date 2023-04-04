@@ -47,6 +47,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get listing => '列表';
 
   @override
+  String get loading => '加载中';
+
+  @override
   String get name => '名称';
 
   @override

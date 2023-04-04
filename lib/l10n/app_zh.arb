@@ -14,6 +14,7 @@
   "deleteAllSuccess": "已删除所有条目",
   "deleteSuccess": "删除成功",
   "listing": "列表",
+  "loading": "加载中",
   "name": "名称",
   "ok": "确定",
   "save": "保存",

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:json_schema2/json_schema2.dart';
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 import 'dao.dart';
 import 'model.dart';
@@ -101,6 +102,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () async {
+                ProgressDialog progressDialog =
+                    ProgressDialog(context: context);
+                progressDialog.show(msg: AppLocalizations.of(context).loading);
                 final subscriber = Subscriber(url: url);
                 final success = await subscriber.trySubscribe();
                 if (success) {
@@ -117,6 +121,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                         AppLocalizations.of(context).subscribeFailed, true);
                   }
                 }
+                progressDialog.close();
               },
               child: Text(AppLocalizations.of(context).subscribe),
             )
