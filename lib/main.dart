@@ -160,7 +160,7 @@ class _MainAppState extends State<MainApp> {
 
   String _getTrailingText(int index) {
     if (isDesktop()) {
-      return 'Ctrl+${index + 1}';
+      return 'alt+${index + 1}';
     } else {
       return '';
     }
