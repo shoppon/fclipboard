@@ -11,6 +11,7 @@
   "clearAll": "Clear All",
   "confirmDelete": "Are you sure?",
   "content": "Content",
+  "delete": "Delete",
   "deleteAllSuccess": "All entries deleted successfully",
   "deleteSuccess": "Delete successfully",
   "listing": "Listing",
@@ -23,5 +24,6 @@
   "subscribeFailed": "Subscribe failed",
   "subscribeSuccessfully": "Subscribe successfully",
   "title": "Title",
-  "titleCannotBeEmpty": "Title cannot be empty"
+  "titleCannotBeEmpty": "Title cannot be empty",
+  "update": "Update"
 }

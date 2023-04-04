@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:fclipboard/adding_category.dart';
 import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/dao.dart';
-import 'package:fclipboard/listing.dart';
 import 'package:fclipboard/matcher.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/subscription.dart';
@@ -66,6 +65,8 @@ class _MainAppState extends State<MainApp> {
 
   final _matcher = Matcher(10);
   final _dbHelper = DBHelper();
+
+  Offset _tapPosition = Offset.zero;
 
   @override
   void initState() {
@@ -165,6 +166,39 @@ class _MainAppState extends State<MainApp> {
     }
   }
 
+  void _deleteListItem(BuildContext context, int index) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          var title = 'Delete ${entries[index].title}';
+          return AlertDialog(
+            title: Text(title),
+            content: Text(AppLocalizations.of(context).confirmDelete),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(AppLocalizations.of(context).cancel)),
+              TextButton(
+                onPressed: () {
+                  // delete entry
+                  _dbHelper.deleteEntry(entries[index].title).then((value) {
+                    setState(() {
+                      entries.removeAt(index);
+                    });
+                    showToast(context,
+                        AppLocalizations.of(context).deleteSuccess, false);
+                  });
+                  Navigator.of(context).pop();
+                },
+                child: Text(AppLocalizations.of(context).ok),
+              )
+            ],
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -186,15 +220,6 @@ class _MainAppState extends State<MainApp> {
             appBar: AppBar(
               title: Text(AppLocalizations.of(context).appTitle),
               actions: <Widget>[
-                IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const ListingPage()),
-                      ).then((value) => loadEntries());
-                    },
-                    icon: const Icon(Icons.list)),
                 PopupMenuButton(
                   icon: const Icon(Icons.add),
                   itemBuilder: (context) => [
@@ -315,24 +340,60 @@ class _MainAppState extends State<MainApp> {
                     child: ListView.builder(
                         itemCount: entries.length,
                         itemBuilder: (context, i) {
-                          return Container(
-                            color: _selectedIndex == i
-                                ? const Color.fromARGB(255, 199, 226, 248)
-                                : null,
-                            child: ListTile(
-                              leading: InkWell(
-                                child: Text(
-                                  entries[i].icon,
-                                  style: const TextStyle(fontSize: 32.0),
+                          return GestureDetector(
+                            onTapDown: (details) {
+                              _tapPosition = details.globalPosition;
+                            },
+                            child: Container(
+                              color: _selectedIndex == i
+                                  ? const Color.fromARGB(255, 199, 226, 248)
+                                  : null,
+                              child: ListTile(
+                                leading: InkWell(
+                                  child: Text(
+                                    entries[i].icon,
+                                    style: const TextStyle(fontSize: 32.0),
+                                  ),
                                 ),
+                                title: Text(entries[i].title),
+                                subtitle: Text(entries[i].subtitle),
+                                trailing: Text(_getTrailingText(i)),
+                                selected: _selectedIndex == i,
+                                onTap: () {
+                                  _selectItem(i);
+                                },
+                                onLongPress: () async {
+                                  _selectItem(i);
+                                  final RelativeRect position =
+                                      RelativeRect.fromLTRB(
+                                    _tapPosition.dx,
+                                    _tapPosition.dy,
+                                    _tapPosition.dx + 40,
+                                    _tapPosition.dy + 40,
+                                  );
+                                  int? selectedValue = await showMenu(
+                                    context: context,
+                                    position: position,
+                                    items: <PopupMenuEntry<int>[
+                                      PopupMenuItem(
+                                          value: 0,
+                                          child: Text(
+                                              AppLocalizations.of(context)
+                                                  .update)),
+                                      PopupMenuItem(
+                                          value: 1,
+                                          child: Text(
+                                              AppLocalizations.of(context)
+                                                  .delete)),
+                                    ],
+                                  );
+                                  if (selectedValue == 1) {
+                                    if (context.mounted) {
+                                      _deleteListItem(context, i);
+                                    }
+                                  }
+                                },
                               ),
-                              title: Text(entries[i].title),
-                              subtitle: Text(entries[i].subtitle),
-                              trailing: Text(_getTrailingText(i)),
-                              selected: _selectedIndex == i,
-                              onTap: () {
-                                _selectItem(i);
-                              },
                             ),
                           );
                         }))

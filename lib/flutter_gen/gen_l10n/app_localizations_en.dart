@@ -38,6 +38,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get content => 'Content';
 
   @override
+  String get delete => 'Delete';
+
+  @override
   String get deleteAllSuccess => 'All entries deleted successfully';
 
   @override
@@ -75,4 +78,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get titleCannotBeEmpty => 'Title cannot be empty';
+
+  @override
+  String get update => 'Update';
 }

@@ -159,6 +159,12 @@ abstract class AppLocalizations {
   /// **'Content'**
   String get content;
 
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
   /// No description provided for @deleteAllSuccess.
   ///
   /// In en, this message translates to:
@@ -236,6 +242,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Title cannot be empty'**
   String get titleCannotBeEmpty;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

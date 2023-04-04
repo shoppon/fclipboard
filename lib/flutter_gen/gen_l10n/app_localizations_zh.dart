@@ -38,6 +38,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get content => '内容';
 
   @override
+  String get delete => '删除';
+
+  @override
   String get deleteAllSuccess => '已删除所有条目';
 
   @override
@@ -75,4 +78,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get titleCannotBeEmpty => '标题不能为空';
+
+  @override
+  String get update => '修改';
 }
