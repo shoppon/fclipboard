@@ -18,6 +18,7 @@ dependencies:
   path_provider: ^2.0.2
   sqflite: ^2.2.6
   sqflite_common_ffi: ^2.2.2
+  sqlite3_flutter_libs: ^0.5.13
   hotkey_manager: ^0.1.7
   window_manager: ^0.3.1
   fluttertoast: ^8.2.1

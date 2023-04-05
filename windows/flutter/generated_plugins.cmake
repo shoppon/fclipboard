@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
   hotkey_manager
   screen_retriever
+  sqlite3_flutter_libs
   window_manager
 )
 

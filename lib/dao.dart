@@ -7,8 +7,11 @@ import 'package:path_provider/path_provider.dart';
 import 'model.dart';
 
 Future<String> getDatabasePath() async {
-  if (Platform.isIOS) {
+  if (Platform.isIOS || Platform.isAndroid) {
     final directory = await getApplicationDocumentsDirectory();
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
     final path = join(directory.path, 'fclipboard.db');
     return path;
   } else {
