@@ -24,7 +24,7 @@ class DBHelper {
         db.execute('''
           CREATE TABLE category(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
+            name TEXT NOT NULL UNIQUE,
             icon TEXT NOT NULL
           )
         ''');
@@ -44,6 +44,9 @@ class DBHelper {
           // make title column UNIQUE
           db.execute('''
             CREATE UNIQUE INDEX idx_entry_title ON entry(title)
+          ''');
+          db.execute('''
+            CREATE UNIQUE INDEX idx_category_name ON category(name)
           ''');
         }
       },
