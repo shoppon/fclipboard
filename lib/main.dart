@@ -22,7 +22,6 @@ void main() async {
   if (isDesktop()) {
     await windowManager.ensureInitialized();
     await hotKeyManager.unregisterAll();
-    await registerHotkey();
   }
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
@@ -31,7 +30,7 @@ void main() async {
   runApp(const MainApp());
 }
 
-Future<void> registerHotkey() async {
+Future<void> registerHotkey(FocusNode focusNode) async {
   HotKey hotkey = HotKey(
     KeyCode.keyP,
     modifiers: [KeyModifier.alt],
@@ -42,6 +41,7 @@ Future<void> registerHotkey() async {
     keyDownHandler: (hotKey) async {
       await windowManager.show();
       await windowManager.focus();
+      focusNode.requestFocus();
     },
   );
 
@@ -78,6 +78,10 @@ class _MainAppState extends State<MainApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
+
+    if (isDesktop()) {
+      registerHotkey(_focusNode);
+    }
   }
 
   void loadEntries() async {
@@ -99,7 +103,7 @@ class _MainAppState extends State<MainApp> {
 
   void _handleKeyEvent(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
-      if (event.isAltPressed) {
+      if (event.isAltPressed && Platform.isWindows || event.isMetaPressed && Platform.isMacOS) {
         final logicalKey = event.logicalKey.keyLabel;
         int number = logicalKey.codeUnitAt(0) - 49;
         if (number >= 0 && number <= 9) {
@@ -159,8 +163,10 @@ class _MainAppState extends State<MainApp> {
   }
 
   String _getTrailingText(int index) {
-    if (isDesktop()) {
+    if (Platform.isWindows) {
       return 'alt+${index + 1}';
+    } else if (Platform.isMacOS) {
+      return 'cmd+${index + 1}';
     } else {
       return '';
     }
