@@ -62,6 +62,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get name => 'Name';
 
   @override
+  String get noParameters => 'No parameters';
+
+  @override
   String get ok => 'OK';
 
   @override

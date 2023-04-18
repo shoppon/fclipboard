@@ -19,6 +19,7 @@
   "listing": "Listing",
   "loading": "Loading",
   "name": "Name",
+  "noParameters": "No parameters",
   "ok": "OK",
   "save": "Save",
   "searchHint": "Search",

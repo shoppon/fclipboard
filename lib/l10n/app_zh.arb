@@ -19,6 +19,7 @@
   "listing": "列表",
   "loading": "加载中",
   "name": "名称",
+  "noParameters": "没有参数",
   "ok": "确定",
   "save": "保存",
   "searchHint": "搜索",

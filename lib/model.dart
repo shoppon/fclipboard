@@ -24,6 +24,7 @@ class Entry {
     required this.categoryId,
     required this.counter,
     this.icon = '',
+    this.parameters = const [],
   });
 
   final int categoryId;
@@ -31,6 +32,7 @@ class Entry {
   final String subtitle;
   final String icon;
   final int counter;
+  final List<Param> parameters;
 
   Map<String, dynamic> toMap() {
     return {
@@ -38,6 +40,28 @@ class Entry {
       'subtitle': subtitle,
       'counter': counter,
       'category_id': categoryId,
+    };
+  }
+}
+
+class Param {
+  int id;
+  String name;
+  String initial;
+  int entryId;
+
+  Param({
+    this.id = -1,
+    this.name = '',
+    this.initial = '',
+    this.entryId = 0,
+  });
+
+  Map<String, dynamic> toMap(int entryId) {
+    return {
+      'name': name,
+      'initial': initial,
+      'entry_id': entryId,
     };
   }
 }

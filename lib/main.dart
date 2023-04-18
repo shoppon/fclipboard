@@ -6,6 +6,7 @@ import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/matcher.dart';
 import 'package:fclipboard/model.dart';
+import 'package:fclipboard/search.dart';
 import 'package:fclipboard/subscription.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +68,8 @@ class _MainAppState extends State<MainApp> {
   final _dbHelper = DBHelper();
 
   Offset _tapPosition = Offset.zero;
+
+  List<Param> _parameters = [];
 
   @override
   void initState() {
@@ -158,6 +161,8 @@ class _MainAppState extends State<MainApp> {
           }
         }
         Clipboard.setData(ClipboardData(text: subtitle));
+
+        _parameters = entries[index].parameters;
       }
     });
   }
@@ -327,26 +332,18 @@ class _MainAppState extends State<MainApp> {
             ),
             body: Column(
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    focusNode: _focusNode,
-                    onChanged: (value) {
-                      _filterClipboard(value);
-                    },
-                    decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context).searchHint,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
+                SearchParamWidget(
+                  parameters: _parameters,
+                  onChanged: (value) {
+                    _filterClipboard(value);
+                  },
+                  focusNode: _focusNode,
                 ),
                 Expanded(
-                    child: ListView.builder(
-                        itemCount: entries.length,
-                        itemBuilder: (context, i) {
-                          return GestureDetector(
+                  child: ListView.builder(
+                      itemCount: entries.length,
+                      itemBuilder: (context, i) {
+                        return GestureDetector(
                             onTapDown: (details) {
                               _tapPosition = details.globalPosition;
                             },

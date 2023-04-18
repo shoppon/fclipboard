@@ -207,6 +207,12 @@ abstract class AppLocalizations {
   /// **'Name'**
   String get name;
 
+  /// No description provided for @noParameters.
+  ///
+  /// In en, this message translates to:
+  /// **'No parameters'**
+  String get noParameters;
+
   /// No description provided for @ok.
   ///
   /// In en, this message translates to:

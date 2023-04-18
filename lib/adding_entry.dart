@@ -21,6 +21,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
   String _title = '';
   String _content = '';
   Category _category = Category(name: 'all', icon: '😆');
+  List<Param> parameters = [];
 
   final List<Category> _categories = [];
 
@@ -128,16 +129,39 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                     widget.old == null ? '' : '${widget.old?.subtitle}',
               ),
               const SizedBox(height: 16.0),
+              ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: parameters.length,
+                  itemBuilder: (BuildContext context, index) {
+                    return ParameterInput(
+                        parameter: parameters[index],
+                        onDelete: () {
+                          setState(() {
+                            parameters.removeAt(index);
+                          });
+                        });
+                  }),
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      parameters.add(Param());
+                    });
+                  },
+                  child: const Text('add')),
+              const SizedBox(height: 16.0),
               ElevatedButton(
                   onPressed: () {
                     if (!_formKey.currentState!.validate()) {
                       return;
                     }
                     final entry = Entry(
-                        title: _title,
-                        subtitle: _content,
-                        counter: 0,
-                        categoryId: _category.id);
+                      title: _title,
+                      subtitle: _content,
+                      counter: 0,
+                      categoryId: _category.id,
+                      parameters: parameters,
+                    );
                     _dbHelper.insertEntry(entry);
                     // toasts success
                     showToast(context,
@@ -150,5 +174,65 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
         ),
       ),
     );
+  }
+}
+
+class ParameterInput extends StatefulWidget {
+  final Param parameter;
+  final VoidCallback onDelete;
+
+  const ParameterInput(
+      {super.key, required this.parameter, required this.onDelete});
+
+  @override
+  State<ParameterInput> createState() => _ParameterInputState();
+}
+
+class _ParameterInputState extends State<ParameterInput> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _initialController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+        child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: 'name'),
+                  onChanged: (value) {
+                    widget.parameter.name = value;
+                  },
+                ),
+                TextField(
+                  controller: _initialController,
+                  decoration: const InputDecoration(labelText: 'initial'),
+                  onChanged: (value) {
+                    widget.parameter.initial = value;
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                        onPressed: widget.onDelete, child: const Text('delete'))
+                  ],
+                )
+              ],
+            )));
   }
 }

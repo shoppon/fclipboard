@@ -62,6 +62,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get name => '名称';
 
   @override
+  String get noParameters => '没有参数';
+
+  @override
   String get ok => '确定';
 
   @override

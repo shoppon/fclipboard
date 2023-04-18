@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:collection/collection.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -17,6 +18,18 @@ Future<String> getDatabasePath() async {
   } else {
     return join(await databaseFactory.getDatabasesPath(), 'fclipboard.db');
   }
+}
+
+void createEntryTable(db) {
+  db.execute('''
+    CREATE TABLE param(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      initial TEXT,
+      entry_id NOT NULL,
+      FOREIGN KEY (entry_id) REFERENCES entry(id)
+    )
+  ''');
 }
 
 class DBHelper {
@@ -41,6 +54,7 @@ class DBHelper {
             FOREIGN KEY (category_id) REFERENCES category(id)
           )
         ''');
+        createEntryTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) {
         if (oldVersion == 1) {
@@ -52,8 +66,11 @@ class DBHelper {
             CREATE UNIQUE INDEX idx_category_name ON category(name)
           ''');
         }
+        if (oldVersion == 2) {
+          createEntryTable(db);
+        }
       },
-      version: 2,
+      version: 3,
     );
   }
 
@@ -74,6 +91,15 @@ class DBHelper {
       entry.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    if (entry.parameters.isNotEmpty) {
+      for (var p in entry.parameters) {
+        await db.insert(
+          'param',
+          p.toMap(id),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    }
     return id;
   }
 
@@ -94,9 +120,10 @@ class DBHelper {
     List<Map<String, Object?>> results;
     if (category == null || category == 'all') {
       results = await db.rawQuery('''
-      SELECT entry.title, entry.subtitle, entry.counter, entry.category_id, category.name, category.icon
+      SELECT entry.title, entry.subtitle, entry.counter, entry.category_id, category.name as c_name, category.icon, param.name as p_name, param.initial
       FROM entry
       INNER JOIN category ON entry.category_id = category.id
+      LEFT JOIN param ON entry.id = param.entry_id
     ''');
     } else {
       results = await db.rawQuery('''
@@ -108,13 +135,29 @@ class DBHelper {
     }
     List<Entry> entries = [];
     for (var r in results) {
-      entries.add(Entry(
-        title: r['title'].toString(),
-        subtitle: r['subtitle'].toString(),
-        counter: r['counter'] as int,
-        categoryId: r['category_id'] as int,
-        icon: r['icon'].toString(),
-      ));
+      // find existing entry
+      Entry? entry = entries.firstWhereOrNull((e) => e.title == r['title']);
+      if (entry != null) {
+        entry.parameters.add(Param(
+          name: r['p_name'].toString(),
+          initial: r['initial'].toString(),
+        ));
+      } else {
+        entries.add(Entry(
+          title: r['title'].toString(),
+          subtitle: r['subtitle'].toString(),
+          counter: r['counter'] as int,
+          categoryId: r['category_id'] as int,
+          icon: r['icon'].toString(),
+          parameters: [],
+        ));
+        if (r['p_name'] != null) {
+          entries.last.parameters.add(Param(
+            name: r['p_name'].toString(),
+            initial: r['initial'].toString(),
+          ));
+        }
+      }
     }
     return entries;
   }
