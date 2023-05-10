@@ -48,12 +48,14 @@ class Param {
   int id;
   String name;
   String initial;
+  String current;
   int entryId;
 
   Param({
     this.id = -1,
     this.name = '',
     this.initial = '',
+    this.current = '',
     this.entryId = 0,
   });
 

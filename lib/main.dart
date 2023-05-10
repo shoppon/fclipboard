@@ -62,7 +62,10 @@ class _MainAppState extends State<MainApp> {
   int _selectedIndex = 0;
   List<String> _params = [];
 
-  final _focusNode = FocusNode();
+  // focus node for the search field
+  final _searchFocusNode = FocusNode();
+  // focus node for the list
+  final _entryFocusNode = FocusNode();
 
   final _matcher = Matcher(10);
   final _dbHelper = DBHelper();
@@ -79,11 +82,11 @@ class _MainAppState extends State<MainApp> {
 
     RawKeyboard.instance.addListener(_handleKeyEvent);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
+      _searchFocusNode.requestFocus();
     });
 
     if (isDesktop()) {
-      registerHotkey(_focusNode);
+      registerHotkey(_searchFocusNode);
     }
   }
 
@@ -101,7 +104,7 @@ class _MainAppState extends State<MainApp> {
   void dispose() {
     super.dispose();
     RawKeyboard.instance.removeListener(_handleKeyEvent);
-    _focusNode.dispose();
+    _searchFocusNode.dispose();
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
@@ -113,7 +116,7 @@ class _MainAppState extends State<MainApp> {
           _selectItem(number);
         }
       }
-      if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+      if (event.isKeyPressed(LogicalKeyboardKey.enter) && _entryFocusNode.hasFocus) {
         _selectItem(_selectedIndex);
       }
       if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
@@ -337,10 +340,23 @@ class _MainAppState extends State<MainApp> {
                   onChanged: (value) {
                     _filterClipboard(value);
                   },
-                  focusNode: _focusNode,
+                  onEditingComplete: () {
+                    final entry = entries[_selectedIndex];
+                    var subtitle = entry.subtitle;
+                    final params = entry.parameters;
+                    for (var p in params) {
+                      if (p.current.isNotEmpty) {
+                        subtitle = subtitle.replaceAll(p.name, p.current);
+                      }
+                    }
+                    Clipboard.setData(ClipboardData(text: subtitle));
+                  },
+                  focusNode: _searchFocusNode,
                 ),
                 Expanded(
-                  child: ListView.builder(
+                  child: Focus(
+                    focusNode: _entryFocusNode,
+                    child: ListView.builder(
                       itemCount: entries.length,
                       itemBuilder: (context, i) {
                         return GestureDetector(
@@ -410,6 +426,7 @@ class _MainAppState extends State<MainApp> {
                             ),
                           );
                         }))
+                )
               ],
             ));
       }),

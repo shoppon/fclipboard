@@ -8,11 +8,13 @@ class SearchParamWidget extends StatefulWidget {
     required this.onChanged,
     required this.parameters,
     required this.focusNode,
+    required this.onEditingComplete,
   }) : super();
 
   final List<Param> parameters;
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
+  final VoidCallback? onEditingComplete;
 
   @override
   State<SearchParamWidget> createState() => _SearchParamWidgetState();
@@ -69,6 +71,10 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
                                   InputDecoration(labelText: entry.name),
                               controller:
                                   TextEditingController(text: entry.initial),
+                              onChanged: (value) {
+                                entry.current = value;
+                              },
+                              onEditingComplete: widget.onEditingComplete,
                             ),
                           ),
                         )

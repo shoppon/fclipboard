@@ -165,6 +165,11 @@ class DBHelper {
   Future<void> deleteEntry(String title) async {
     final Database db = await database;
     await db.delete(
+      'param',
+      where: "entry_id IN (SELECT id FROM entry WHERE title = ?)",
+      whereArgs: [title],
+    );
+    await db.delete(
       'entry',
       where: "title = ?",
       whereArgs: [title],
