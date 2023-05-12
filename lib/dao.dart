@@ -20,11 +20,12 @@ Future<String> getDatabasePath() async {
   }
 }
 
-void createEntryTable(db) {
+void createParamTable(db) {
   db.execute('''
     CREATE TABLE param(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
+      required BOOLEAN DEFAULT FALSE,
       initial TEXT,
       entry_id NOT NULL,
       FOREIGN KEY (entry_id) REFERENCES entry(id)
@@ -54,7 +55,7 @@ class DBHelper {
             FOREIGN KEY (category_id) REFERENCES category(id)
           )
         ''');
-        createEntryTable(db);
+        createParamTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) {
         if (oldVersion == 1) {
@@ -67,7 +68,7 @@ class DBHelper {
           ''');
         }
         if (oldVersion == 2) {
-          createEntryTable(db);
+          createParamTable(db);
         }
       },
       version: 3,
