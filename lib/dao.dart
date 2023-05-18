@@ -25,6 +25,7 @@ void createParamTable(db) {
     CREATE TABLE param(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
+      description TEXT,
       required BOOLEAN DEFAULT FALSE,
       initial TEXT,
       entry_id NOT NULL,

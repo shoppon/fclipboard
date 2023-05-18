@@ -6,12 +6,13 @@ class SearchParamWidget extends StatefulWidget {
   const SearchParamWidget({
     super.key,
     required this.onChanged,
-    required this.parameters,
+    required this.entry,
     required this.focusNode,
     required this.onEditingComplete,
   }) : super();
 
-  final List<Param> parameters;
+  final ValueNotifier<Entry> entry;
+
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
   final VoidCallback? onEditingComplete;
@@ -21,6 +22,18 @@ class SearchParamWidget extends StatefulWidget {
 }
 
 class _SearchParamWidgetState extends State<SearchParamWidget> {
+  Entry _entry = Entry.empty();
+
+  @override
+  void initState() {
+    super.initState();
+    widget.entry.addListener(() {
+      setState(() {
+        _entry = widget.entry.value;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -51,7 +64,7 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Visibility(
-                  visible: widget.parameters.isEmpty,
+                  visible: _entry.parameters.isEmpty,
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
@@ -60,7 +73,7 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
                     ),
                   ),
                 ),
-                ...widget.parameters.map((entry) => Expanded(
+                ..._entry.parameters.map((entry) => Expanded(
                         child: Row(
                       children: [
                         Expanded(

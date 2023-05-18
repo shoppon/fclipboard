@@ -4,13 +4,11 @@ import 'package:fclipboard/adding_category.dart';
 import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/entry_list.dart';
-import 'package:fclipboard/matcher.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/search.dart';
 import 'package:fclipboard/subscription.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -58,16 +56,13 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  List<Entry> entries = [];
-  int _selectedIndex = 0;
+  ValueNotifier<String> filterNotifier = ValueNotifier('');
+  ValueNotifier<Entry> entryNotifier = ValueNotifier(Entry.empty());
 
   // focus node for the search field
   final _searchFocusNode = FocusNode();
 
-  final _matcher = Matcher(10);
   final _dbHelper = DBHelper();
-
-  final List<Param> _parameters = [];
 
   @override
   void initState() {
@@ -86,18 +81,6 @@ class _MainAppState extends State<MainApp> {
   void dispose() {
     super.dispose();
     _searchFocusNode.dispose();
-  }
-
-  void _filterClipboard(String searchText) {
-    setState(() {
-      final searchTexts = searchText.split(' ');
-      final matches = _matcher.match(searchTexts[0]);
-      entries.clear();
-      for (final match in matches) {
-        entries.add(match);
-      }
-      _selectedIndex = 0;
-    });
   }
 
   @override
@@ -223,24 +206,28 @@ class _MainAppState extends State<MainApp> {
             body: Column(
               children: <Widget>[
                 SearchParamWidget(
-                  parameters: _parameters,
+                  entry: entryNotifier,
                   onChanged: (value) {
-                    _filterClipboard(value);
+                    filterNotifier.value = value;
                   },
                   onEditingComplete: () {
-                    final entry = entries[_selectedIndex];
-                    var subtitle = entry.subtitle;
-                    final params = entry.parameters;
-                    for (var p in params) {
-                      if (p.current.isNotEmpty) {
-                        subtitle = subtitle.replaceAll(p.name, p.current);
-                      }
-                    }
-                    Clipboard.setData(ClipboardData(text: subtitle));
+                    // final entry = entries[_selectedIndex];
+                    // var subtitle = entry.subtitle;
+                    // final params = entry.parameters;
+                    // for (var p in params) {
+                    //   if (p.current.isNotEmpty) {
+                    //     subtitle = subtitle.replaceAll(p.name, p.current);
+                    //   }
+                    // }
+                    // Clipboard.setData(ClipboardData(text: subtitle));
                   },
                   focusNode: _searchFocusNode,
                 ),
-                Expanded(child: EntryListView())
+                Expanded(
+                    child: EntryListView(
+                  filterNotifier: filterNotifier,
+                  entryNotifier: entryNotifier,
+                ))
               ],
             ));
       }),

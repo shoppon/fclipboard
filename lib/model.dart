@@ -42,6 +42,10 @@ class Entry {
       'category_id': categoryId,
     };
   }
+
+  static Entry empty() {
+    return Entry(categoryId: 0, title: '', subtitle: '', counter: 0);
+  }
 }
 
 class Param {
@@ -50,6 +54,8 @@ class Param {
   String initial;
   String current;
   int entryId;
+  bool required = false;
+  String description = '';
 
   Param({
     this.id = -1,
@@ -57,6 +63,8 @@ class Param {
     this.initial = '',
     this.current = '',
     this.entryId = 0,
+    this.required = false,
+    this.description = '',
   });
 
   Map<String, dynamic> toMap(int entryId) {
@@ -64,6 +72,8 @@ class Param {
       'name': name,
       'initial': initial,
       'entry_id': entryId,
+      'required': required ? 1 : 0,
+      'description': description,
     };
   }
 }

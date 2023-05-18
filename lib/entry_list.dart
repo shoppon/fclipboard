@@ -13,9 +13,13 @@ import 'package:flutter/services.dart';
 class EntryListView extends StatefulWidget {
   EntryListView({
     Key? key,
+    required this.filterNotifier,
+    required this.entryNotifier,
   }) : super(key: key);
 
   final _entryFocusNode = FocusNode();
+  final ValueNotifier<String> filterNotifier;
+  final ValueNotifier<Entry?> entryNotifier;
 
   @override
   State<EntryListView> createState() => _EntryListViewState();
@@ -23,7 +27,9 @@ class EntryListView extends StatefulWidget {
 
 class _EntryListViewState extends State<EntryListView> {
   List<Entry> entries = [];
-  int _selectedIndex = 0;
+
+  int _preSelectedIndex = -1;
+  int _curSelectedIndex = 0;
 
   final _dbHelper = DBHelper();
   final _matcher = Matcher(10);
@@ -35,12 +41,38 @@ class _EntryListViewState extends State<EntryListView> {
     super.initState();
     RawKeyboard.instance.addListener(_handleKeyEvent);
     loadEntries();
+    widget.filterNotifier.addListener(() {
+      _filterEntries(widget.filterNotifier.value);
+    });
   }
 
   @override
   void dispose() {
     RawKeyboard.instance.removeListener(_handleKeyEvent);
+    widget.filterNotifier.dispose();
     super.dispose();
+  }
+
+  void _filterEntries(String searchText) {
+    setState(() {
+      final searchTexts = searchText.split(' ');
+      final matches = _matcher.match(searchTexts[0]);
+      entries.clear();
+      for (final match in matches) {
+        entries.add(match);
+      }
+      _setSelectedIndex(0);
+    });
+  }
+
+  void _setSelectedIndex(int index) {
+    setState(() {
+      _preSelectedIndex = _curSelectedIndex;
+      _curSelectedIndex = index;
+      if (_preSelectedIndex != _curSelectedIndex) {
+        widget.entryNotifier.value = entries[_curSelectedIndex];
+      }
+    });
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
@@ -50,20 +82,20 @@ class _EntryListViewState extends State<EntryListView> {
         final logicalKey = event.logicalKey.keyLabel;
         int number = logicalKey.codeUnitAt(0) - 49;
         if (number >= 0 && number <= 9) {
-          _selectItem(number);
+          _setSelectedIndex(number);
         }
       }
       if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
-        _selectItem(_selectedIndex);
+        _setSelectedIndex(_curSelectedIndex);
       }
       if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
         setState(() {
-          _selectedIndex = (_selectedIndex + 1) % entries.length;
+          _setSelectedIndex((_curSelectedIndex + 1) % entries.length);
         });
       }
       if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
         setState(() {
-          _selectedIndex = (_selectedIndex - 1) % entries.length;
+          _setSelectedIndex((_curSelectedIndex - 1) % entries.length);
         });
       }
     }
@@ -93,7 +125,7 @@ class _EntryListViewState extends State<EntryListView> {
     await _dbHelper.incEntryCounter(entries[index].title);
     setState(() {
       if (entries.length > index) {
-        _selectedIndex = index;
+        _curSelectedIndex = index;
         var subtitle = entries[index].subtitle;
         final params = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
         for (var i = 0; i < params.length; i++) {
@@ -139,7 +171,7 @@ class _EntryListViewState extends State<EntryListView> {
   }
 
   _getColor(i) {
-    return _selectedIndex == i
+    return _curSelectedIndex == i
         ? const Color.fromARGB(255, 199, 226, 248)
         : null;
   }
@@ -198,7 +230,7 @@ class _EntryListViewState extends State<EntryListView> {
                     title: Text(entries[i].title),
                     subtitle: Text(entries[i].subtitle),
                     trailing: Text(_getTrailingText(i)),
-                    selected: _selectedIndex == i,
+                    selected: _curSelectedIndex == i,
                     onTap: () {
                       _selectItem(i);
                     },
