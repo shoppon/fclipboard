@@ -122,16 +122,17 @@ class DBHelper {
     List<Map<String, Object?>> results;
     if (category == null || category == 'all') {
       results = await db.rawQuery('''
-      SELECT entry.title, entry.subtitle, entry.counter, entry.category_id, category.name as c_name, category.icon, param.name as p_name, param.initial
+      SELECT entry.id, entry.title, entry.subtitle, entry.counter, entry.category_id, category.name as c_name, category.icon, param.id as p_id, param.name as p_name, param.initial
       FROM entry
       INNER JOIN category ON entry.category_id = category.id
       LEFT JOIN param ON entry.id = param.entry_id
     ''');
     } else {
       results = await db.rawQuery('''
-      SELECT entry.title, entry.subtitle, entry.counter, entry.category_id, category.name, category.icon
+      SELECT entry.id, entry.title, entry.subtitle, entry.counter, entry.category_id, category.name as c_name, category.icon, param.id as p_id, param.name as p_name, param.initial
       FROM entry
       INNER JOIN category ON entry.category_id = category.id
+      LEFT JOIN param ON entry.id = param.entry_id
       WHERE category.name = ?
     ''', [category]);
     }
@@ -141,11 +142,13 @@ class DBHelper {
       Entry? entry = entries.firstWhereOrNull((e) => e.title == r['title']);
       if (entry != null) {
         entry.parameters.add(Param(
+          id: r['p_id'] as int,
           name: r['p_name'].toString(),
           initial: r['initial'].toString(),
         ));
       } else {
         entries.add(Entry(
+          id: r['id'] as int,
           title: r['title'].toString(),
           subtitle: r['subtitle'].toString(),
           counter: r['counter'] as int,
@@ -155,6 +158,7 @@ class DBHelper {
         ));
         if (r['p_name'] != null) {
           entries.last.parameters.add(Param(
+            id: r['p_id'] as int,
             name: r['p_name'].toString(),
             initial: r['initial'].toString(),
           ));

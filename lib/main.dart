@@ -9,6 +9,7 @@ import 'package:fclipboard/search.dart';
 import 'package:fclipboard/subscription.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -128,7 +129,8 @@ class _MainAppState extends State<MainApp> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const EntryAddingPage()),
+                                builder: (context) =>
+                                    EntryAddingPage(entry: Entry.empty())),
                           ).then((value) => {});
                         },
                         child: Text(AppLocalizations.of(context).addEntry),
@@ -211,15 +213,15 @@ class _MainAppState extends State<MainApp> {
                     filterNotifier.value = value;
                   },
                   onEditingComplete: () {
-                    // final entry = entries[_selectedIndex];
-                    // var subtitle = entry.subtitle;
-                    // final params = entry.parameters;
-                    // for (var p in params) {
-                    //   if (p.current.isNotEmpty) {
-                    //     subtitle = subtitle.replaceAll(p.name, p.current);
-                    //   }
-                    // }
-                    // Clipboard.setData(ClipboardData(text: subtitle));
+                    final entry = entryNotifier.value;
+                    var subtitle = entry.subtitle;
+                    final params = entry.parameters;
+                    for (var p in params) {
+                      if (p.current.isNotEmpty) {
+                        subtitle = subtitle.replaceAll(p.name, p.current);
+                      }
+                    }
+                    Clipboard.setData(ClipboardData(text: subtitle));
                   },
                   focusNode: _searchFocusNode,
                 ),

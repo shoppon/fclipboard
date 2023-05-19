@@ -71,6 +71,11 @@ class _EntryListViewState extends State<EntryListView> {
       _curSelectedIndex = index;
       if (_preSelectedIndex != _curSelectedIndex) {
         widget.entryNotifier.value = entries[_curSelectedIndex];
+
+        final entry = entries[_curSelectedIndex];
+        if (entry.parameters.isEmpty) {
+          Clipboard.setData(ClipboardData(text: entry.subtitle));
+        }
       }
     });
   }
@@ -125,14 +130,7 @@ class _EntryListViewState extends State<EntryListView> {
     await _dbHelper.incEntryCounter(entries[index].title);
     setState(() {
       if (entries.length > index) {
-        _curSelectedIndex = index;
-        var subtitle = entries[index].subtitle;
-        final params = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-        for (var i = 0; i < params.length; i++) {
-          if (subtitle.contains('\$${params[i]}')) {
-          }
-        }
-        Clipboard.setData(ClipboardData(text: subtitle));
+        _setSelectedIndex(index);
       }
     });
   }
@@ -199,7 +197,7 @@ class _EntryListViewState extends State<EntryListView> {
       Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => EntryAddingPage(old: entries[index])),
+            builder: (context) => EntryAddingPage(entry: entries[index])),
       ).then((value) => loadEntries());
     }
     if (selectedValue == 1 && context.mounted) {

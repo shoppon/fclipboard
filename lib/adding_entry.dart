@@ -5,9 +5,9 @@ import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 
 class EntryAddingPage extends StatefulWidget {
-  const EntryAddingPage({Key? key, this.old}) : super(key: key);
+  const EntryAddingPage({Key? key, required this.entry}) : super(key: key);
 
-  final Entry? old;
+  final Entry entry;
 
   @override
   State<EntryAddingPage> createState() => _EntryAddingPageState();
@@ -21,7 +21,6 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
   String _title = '';
   String _content = '';
   Category _category = Category(name: 'all', icon: '😆');
-  List<Param> parameters = [];
 
   final List<Category> _categories = [];
 
@@ -84,7 +83,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                   _title = value;
                   return null;
                 },
-                initialValue: widget.old == null ? '' : '${widget.old?.title}',
+                initialValue: widget.entry.title,
               ),
               DropdownButtonFormField(
                   decoration: InputDecoration(
@@ -100,7 +99,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                   },
                   value: _categories.isNotEmpty
                       ? _categories.firstWhere(
-                          (element) => element.id == widget.old?.categoryId,
+                          (element) => element.id == widget.entry.categoryId,
                           orElse: () {
                             return _categories[0];
                           },
@@ -125,19 +124,18 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                 },
                 minLines: 5,
                 maxLines: 5,
-                initialValue:
-                    widget.old == null ? '' : '${widget.old?.subtitle}',
+                initialValue: widget.entry.subtitle,
               ),
               const SizedBox(height: 16.0),
               ListView.builder(
                   shrinkWrap: true,
-                  itemCount: parameters.length,
+                  itemCount: widget.entry.parameters.length,
                   itemBuilder: (BuildContext context, index) {
                     return ParameterInput(
-                        parameter: parameters[index],
+                        parameter: widget.entry.parameters[index],
                         onDelete: () {
                           setState(() {
-                            parameters.removeAt(index);
+                            widget.entry.parameters.removeAt(index);
                           });
                         });
                   }),
@@ -145,7 +143,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
               ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      parameters.add(Param());
+                      widget.entry.parameters.add(Param());
                     });
                   },
                   child: const Text('add')),
@@ -156,11 +154,12 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                       return;
                     }
                     final entry = Entry(
+                      id: widget.entry.id,
                       title: _title,
                       subtitle: _content,
                       counter: 0,
                       categoryId: _category.id,
-                      parameters: parameters,
+                      parameters: widget.entry.parameters,
                     );
                     _dbHelper.insertEntry(entry);
                     // toasts success
@@ -189,9 +188,6 @@ class ParameterInput extends StatefulWidget {
 }
 
 class _ParameterInputState extends State<ParameterInput> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _initialController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
@@ -199,7 +195,6 @@ class _ParameterInputState extends State<ParameterInput> {
 
   @override
   void dispose() {
-    _nameController.dispose();
     super.dispose();
   }
 
@@ -208,31 +203,34 @@ class _ParameterInputState extends State<ParameterInput> {
     return Card(
         child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'name'),
-                  onChanged: (value) {
-                    widget.parameter.name = value;
-                  },
-                ),
-                TextField(
-                  controller: _initialController,
-                  decoration: const InputDecoration(labelText: 'initial'),
-                  onChanged: (value) {
-                    widget.parameter.initial = value;
-                  },
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+            child: Form(
+                key: GlobalKey<FormState>(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextButton(
-                        onPressed: widget.onDelete, child: const Text('delete'))
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: 'name'),
+                      onChanged: (value) {
+                        widget.parameter.name = value;
+                      },
+                      initialValue: widget.parameter.name,
+                    ),
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: 'initial'),
+                      onChanged: (value) {
+                        widget.parameter.initial = value;
+                      },
+                      initialValue: widget.parameter.initial,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                            onPressed: widget.onDelete,
+                            child: const Text('delete'))
+                      ],
+                    )
                   ],
-                )
-              ],
-            )));
+                ))));
   }
 }

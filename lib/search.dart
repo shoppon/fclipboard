@@ -73,7 +73,7 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
                     ),
                   ),
                 ),
-                ..._entry.parameters.map((entry) => Expanded(
+                ..._entry.parameters.map((param) => Expanded(
                         child: Row(
                       children: [
                         Expanded(
@@ -81,11 +81,11 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
                             padding: const EdgeInsets.all(8.0),
                             child: TextField(
                               decoration:
-                                  InputDecoration(labelText: entry.name),
+                                  InputDecoration(labelText: param.name),
                               controller:
-                                  TextEditingController(text: entry.initial),
+                                  TextEditingController(text: param.initial),
                               onChanged: (value) {
-                                entry.current = value;
+                                param.current = value;
                               },
                               onEditingComplete: widget.onEditingComplete,
                             ),

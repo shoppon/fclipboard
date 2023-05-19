@@ -23,10 +23,12 @@ class Entry {
     required this.subtitle,
     required this.categoryId,
     required this.counter,
+    this.id = 0,
     this.icon = '',
     this.parameters = const [],
   });
 
+  final int id;
   final int categoryId;
   final String title;
   final String subtitle;
@@ -35,16 +37,26 @@ class Entry {
   final List<Param> parameters;
 
   Map<String, dynamic> toMap() {
-    return {
+    final map = {
       'title': title,
       'subtitle': subtitle,
       'counter': counter,
       'category_id': categoryId,
     };
+    if (id != 0) {
+      map['id'] = id;
+    }
+    return map;
   }
 
   static Entry empty() {
-    return Entry(categoryId: 0, title: '', subtitle: '', counter: 0);
+    return Entry(
+      categoryId: 0,
+      title: '',
+      subtitle: '',
+      counter: 0,
+      parameters: [],
+    );
   }
 }
 
@@ -58,7 +70,7 @@ class Param {
   String description = '';
 
   Param({
-    this.id = -1,
+    this.id = 0,
     this.name = '',
     this.initial = '',
     this.current = '',
@@ -68,12 +80,16 @@ class Param {
   });
 
   Map<String, dynamic> toMap(int entryId) {
-    return {
+    final map = {
       'name': name,
       'initial': initial,
       'entry_id': entryId,
       'required': required ? 1 : 0,
       'description': description,
     };
+    if (id != 0) {
+      map['id'] = id;
+    }
+    return map;
   }
 }
