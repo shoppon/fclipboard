@@ -1,9 +1,10 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fclipboard/dao.dart';
-import 'package:fclipboard/flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fclipboard/model.dart' as model;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
+import 'generated/l10n.dart';
 
 class CategoryAddingPage extends StatefulWidget {
   const CategoryAddingPage({Key? key}) : super(key: key);
@@ -59,7 +60,7 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context).addCategory),
+          title: Text(S.of(context).addCategory),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
@@ -80,11 +81,11 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
                     children: [
                       TextFormField(
                         decoration: InputDecoration(
-                          labelText: AppLocalizations.of(context).name,
+                          labelText: S.of(context).name,
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return AppLocalizations.of(context).categoryCannotBeEmpty;
+                            return S.of(context).categoryCannotBeEmpty;
                           }
                           _name = value;
                           return null;
@@ -130,10 +131,10 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
                             model.Category(name: _name, icon: _icon);
                         _dbHelper.insertCategory(category);
                         // toasts success
-                        showToast(AppLocalizations.of(context).addSuccessfully);
+                        showToast(S.of(context).addSuccessfully);
                         Navigator.pop(context);
                       },
-                      child: Text(AppLocalizations.of(context).save)),
+                      child: Text(S.of(context).save)),
                 ],
               ),
             ),

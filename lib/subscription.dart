@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:fclipboard/flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +9,7 @@ import 'package:json_schema2/json_schema2.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 import 'dao.dart';
+import 'generated/l10n.dart';
 import 'model.dart';
 
 class Subscriber {
@@ -78,7 +78,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).subscribe),
+        title: Text(S.of(context).subscribe),
       ),
       body: Padding(
         padding: const EdgeInsets.all(18.0),
@@ -104,26 +104,23 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               onPressed: () async {
                 ProgressDialog progressDialog =
                     ProgressDialog(context: context);
-                progressDialog.show(msg: AppLocalizations.of(context).loading);
+                progressDialog.show(msg: S.of(context).loading);
                 final subscriber = Subscriber(url: url);
                 final success = await subscriber.trySubscribe();
                 if (success) {
                   if (context.mounted) {
                     Navigator.pop(context);
                     showToast(
-                        context,
-                        AppLocalizations.of(context).subscribeSuccessfully,
-                        false);
+                        context, S.of(context).subscribeSuccessfully, false);
                   }
                 } else {
                   if (context.mounted) {
-                    showToast(context,
-                        AppLocalizations.of(context).subscribeFailed, true);
+                    showToast(context, S.of(context).subscribeFailed, true);
                   }
                 }
                 progressDialog.close();
               },
-              child: Text(AppLocalizations.of(context).subscribe),
+              child: Text(S.of(context).subscribe),
             )
           ],
         ),

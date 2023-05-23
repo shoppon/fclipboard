@@ -1,5 +1,5 @@
 import 'package:fclipboard/dao.dart';
-import 'package:fclipboard/flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fclipboard/generated/l10n.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +58,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).addEntry),
+        title: Text(S.of(context).addEntry),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -74,11 +74,10 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               TextFormField(
-                decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).title),
+                decoration: InputDecoration(labelText: S.of(context).title),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context).titleCannotBeEmpty;
+                    return S.of(context).titleCannotBeEmpty;
                   }
                   _title = value;
                   return null;
@@ -87,12 +86,12 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
               ),
               DropdownButtonFormField(
                   decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context).category,
+                    labelText: S.of(context).category,
                   ),
                   items: buildDropdownMenuItems(),
                   validator: (value) {
                     if (value == null) {
-                      return AppLocalizations.of(context).categoryCannotBeEmpty;
+                      return S.of(context).categoryCannotBeEmpty;
                     }
                     _category = value;
                     return null;
@@ -113,11 +112,11 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
               TextFormField(
                 keyboardType: TextInputType.multiline,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context).content,
+                  labelText: S.of(context).content,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context).contentCannotBeEmpty;
+                    return S.of(context).contentCannotBeEmpty;
                   }
                   _content = value;
                   return null;
@@ -146,7 +145,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                       widget.entry.parameters.add(Param());
                     });
                   },
-                  child: const Text('add')),
+                  child: Text(S.of(context).addParameter)),
               const SizedBox(height: 16.0),
               ElevatedButton(
                   onPressed: () {
@@ -163,11 +162,10 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                     );
                     _dbHelper.insertEntry(entry);
                     // toasts success
-                    showToast(context,
-                        AppLocalizations.of(context).addSuccessfully, false);
+                    showToast(context, S.of(context).addSuccessfully, false);
                     Navigator.pop(context);
                   },
-                  child: Text(AppLocalizations.of(context).save)),
+                  child: Text(S.of(context).save)),
             ],
           ),
         ),
@@ -209,14 +207,16 @@ class _ParameterInputState extends State<ParameterInput> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'name'),
+                      decoration:
+                          InputDecoration(labelText: S.of(context).name),
                       onChanged: (value) {
                         widget.parameter.name = value;
                       },
                       initialValue: widget.parameter.name,
                     ),
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'initial'),
+                      decoration:
+                          InputDecoration(labelText: S.of(context).initial),
                       onChanged: (value) {
                         widget.parameter.initial = value;
                       },
@@ -227,7 +227,7 @@ class _ParameterInputState extends State<ParameterInput> {
                       children: [
                         TextButton(
                             onPressed: widget.onDelete,
-                            child: const Text('delete'))
+                            child: Text(S.of(context).delete))
                       ],
                     )
                   ],

@@ -3,12 +3,13 @@ import 'dart:math';
 
 import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/dao.dart';
-import 'package:fclipboard/flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fclipboard/matcher.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'generated/l10n.dart';
 
 class EntryListView extends StatefulWidget {
   EntryListView({
@@ -29,7 +30,7 @@ class _EntryListViewState extends State<EntryListView> {
   List<Entry> entries = [];
 
   int _preSelectedIndex = -1;
-  int _curSelectedIndex = 0;
+  int _curSelectedIndex = -1;
 
   final _dbHelper = DBHelper();
   final _matcher = Matcher(10);
@@ -40,7 +41,6 @@ class _EntryListViewState extends State<EntryListView> {
   void initState() {
     super.initState();
     RawKeyboard.instance.addListener(_handleKeyEvent);
-    loadEntries();
     widget.filterNotifier.addListener(() {
       _filterEntries(widget.filterNotifier.value);
     });
@@ -53,7 +53,11 @@ class _EntryListViewState extends State<EntryListView> {
     super.dispose();
   }
 
-  void _filterEntries(String searchText) {
+  void _filterEntries(String searchText) async {
+    await loadEntries();
+    widget.entryNotifier.value = Entry.empty();
+    _curSelectedIndex = -1;
+    _preSelectedIndex = -1;
     setState(() {
       final searchTexts = searchText.split(' ');
       final matches = _matcher.match(searchTexts[0]);
@@ -61,7 +65,6 @@ class _EntryListViewState extends State<EntryListView> {
       for (final match in matches) {
         entries.add(match);
       }
-      _setSelectedIndex(0);
     });
   }
 
@@ -106,7 +109,7 @@ class _EntryListViewState extends State<EntryListView> {
     }
   }
 
-  void loadEntries() async {
+  Future<void> loadEntries() async {
     final entries = await _dbHelper.entries(null);
     _matcher.reset(entries);
     setState(() {
@@ -142,13 +145,13 @@ class _EntryListViewState extends State<EntryListView> {
           var title = 'Delete ${entries[index].title}';
           return AlertDialog(
             title: Text(title),
-            content: Text(AppLocalizations.of(context).confirmDelete),
+            content: Text(S.of(context).confirmDelete),
             actions: <Widget>[
               TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text(AppLocalizations.of(context).cancel)),
+                  child: Text(S.of(context).cancel)),
               TextButton(
                 onPressed: () {
                   // delete entry
@@ -157,11 +160,11 @@ class _EntryListViewState extends State<EntryListView> {
                       entries.removeAt(index);
                     });
                     showToast(context,
-                        AppLocalizations.of(context).deleteSuccess, false);
+                        S.of(context).deleteSuccess, false);
                   });
                   Navigator.of(context).pop();
                 },
-                child: Text(AppLocalizations.of(context).ok),
+                child: Text(S.of(context).ok),
               )
             ],
           );
@@ -187,10 +190,10 @@ class _EntryListViewState extends State<EntryListView> {
       items: <PopupMenuEntry<int>[
         PopupMenuItem(
             value: 0,
-            child: Text(AppLocalizations.of(context).update)),
+            child: Text(S.of(context).update)),
         PopupMenuItem(
             value: 1,
-            child: Text(AppLocalizations.of(context).delete)),
+            child: Text(S.of(context).delete)),
       ],
     );
     if (selectedValue == 0 && context.mounted) {

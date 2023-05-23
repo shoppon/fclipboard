@@ -15,7 +15,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:window_manager/window_manager.dart';
-import 'flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'generated/l10n.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -91,7 +92,7 @@ class _MainAppState extends State<MainApp> {
         primarySwatch: Colors.blue,
       ),
       localizationsDelegates: const [
-        AppLocalizations.delegate,
+        S.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -103,7 +104,7 @@ class _MainAppState extends State<MainApp> {
       home: Builder(builder: (context) {
         return Scaffold(
             appBar: AppBar(
-              title: Text(AppLocalizations.of(context).appTitle),
+              title: Text(S.of(context).appTitle),
               actions: <Widget>[
                 PopupMenuButton(
                   icon: const Icon(Icons.add),
@@ -119,7 +120,7 @@ class _MainAppState extends State<MainApp> {
                                     const CategoryAddingPage()),
                           );
                         },
-                        child: Text(AppLocalizations.of(context).addCategory),
+                        child: Text(S.of(context).addCategory),
                       ),
                     ),
                     PopupMenuItem(
@@ -133,7 +134,7 @@ class _MainAppState extends State<MainApp> {
                                     EntryAddingPage(entry: Entry.empty())),
                           ).then((value) => {});
                         },
-                        child: Text(AppLocalizations.of(context).addEntry),
+                        child: Text(S.of(context).addEntry),
                       ),
                     ),
                     PopupMenuItem(
@@ -146,8 +147,7 @@ class _MainAppState extends State<MainApp> {
                                 builder: (context) => const SubscriptionPage()),
                           ).then((value) => {});
                         },
-                        child:
-                            Text(AppLocalizations.of(context).addSubscription),
+                        child: Text(S.of(context).addSubscription),
                       ),
                     ),
                   ],
@@ -165,34 +165,30 @@ class _MainAppState extends State<MainApp> {
                       )),
                   ListTile(
                     leading: const Icon(Icons.clear),
-                    title: Text(AppLocalizations.of(context).clearAll),
+                    title: Text(S.of(context).clearAll),
                     onTap: () async {
                       showDialog(
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title:
-                                  Text(AppLocalizations.of(context).clearAll),
-                              content: Text(
-                                  AppLocalizations.of(context).confirmDelete),
+                              title: Text(S.of(context).clearAll),
+                              content: Text(S.of(context).confirmDelete),
                               actions: <Widget>[
                                 TextButton(
-                                  child:
-                                      Text(AppLocalizations.of(context).cancel),
+                                  child: Text(S.of(context).cancel),
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
                                 ),
                                 TextButton(
-                                  child: Text(AppLocalizations.of(context).ok),
+                                  child: Text(S.of(context).ok),
                                   onPressed: () async {
                                     await _dbHelper.deleteAll();
                                     if (context.mounted) {
                                       Navigator.of(context).pop();
                                       showToast(
                                           context,
-                                          AppLocalizations.of(context)
-                                              .deleteAllSuccess,
+                                          S.of(context).deleteAllSuccess,
                                           false);
                                     }
                                   },

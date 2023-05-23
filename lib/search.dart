@@ -1,6 +1,7 @@
-import 'package:fclipboard/flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:fclipboard/model.dart';
 import 'package:flutter/material.dart';
+
+import 'generated/l10n.dart';
 
 class SearchParamWidget extends StatefulWidget {
   const SearchParamWidget({
@@ -45,7 +46,7 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
               focusNode: widget.focusNode,
               onChanged: widget.onChanged,
               decoration: InputDecoration(
-                hintText: AppLocalizations.of(context).searchHint,
+                hintText: S.of(context).searchHint,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -69,7 +70,7 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
                     alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(AppLocalizations.of(context).noParameters),
+                      child: Text(S.of(context).noParameters),
                     ),
                   ),
                 ),
