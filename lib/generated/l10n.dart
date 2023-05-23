@@ -220,6 +220,16 @@ class S {
     );
   }
 
+  /// `Description`
+  String get description {
+    return Intl.message(
+      'Description',
+      name: 'description',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Initial`
   String get initial {
     return Intl.message(
@@ -275,6 +285,16 @@ class S {
     return Intl.message(
       'OK',
       name: 'ok',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Required`
+  String get required {
+    return Intl.message(
+      'Required',
+      name: 'required',
       desc: '',
       args: [],
     );

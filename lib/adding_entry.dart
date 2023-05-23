@@ -216,11 +216,31 @@ class _ParameterInputState extends State<ParameterInput> {
                     ),
                     TextFormField(
                       decoration:
+                          InputDecoration(labelText: S.of(context).description),
+                      onChanged: (value) {
+                        widget.parameter.description = value;
+                      },
+                      initialValue: widget.parameter.description,
+                    ),
+                    TextFormField(
+                      decoration:
                           InputDecoration(labelText: S.of(context).initial),
                       onChanged: (value) {
                         widget.parameter.initial = value;
                       },
                       initialValue: widget.parameter.initial,
+                    ),
+                    Row(
+                      children: [
+                        Checkbox(
+                            value: widget.parameter.required,
+                            onChanged: (value) {
+                              setState(() {
+                                widget.parameter.required = value!;
+                              });
+                            }),
+                        Text(S.of(context).required)
+                      ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,

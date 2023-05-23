@@ -59,8 +59,7 @@ class _EntryListViewState extends State<EntryListView> {
     _curSelectedIndex = -1;
     _preSelectedIndex = -1;
     setState(() {
-      final searchTexts = searchText.split(' ');
-      final matches = _matcher.match(searchTexts[0]);
+      final matches = _matcher.match(searchText);
       entries.clear();
       for (final match in matches) {
         entries.add(match);
@@ -78,6 +77,14 @@ class _EntryListViewState extends State<EntryListView> {
         final entry = entries[_curSelectedIndex];
         if (entry.parameters.isEmpty) {
           Clipboard.setData(ClipboardData(text: entry.subtitle));
+        } else {
+          var subtitle = entry.subtitle;
+          for (var p in entry.parameters) {
+            if (p.initial.isNotEmpty) {
+              subtitle = subtitle.replaceAll(p.name, p.initial);
+            }
+          }
+          Clipboard.setData(ClipboardData(text: subtitle));
         }
       }
     });

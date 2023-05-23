@@ -9,7 +9,6 @@ import 'package:fclipboard/search.dart';
 import 'package:fclipboard/subscription.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -207,17 +206,6 @@ class _MainAppState extends State<MainApp> {
                   entry: entryNotifier,
                   onChanged: (value) {
                     filterNotifier.value = value;
-                  },
-                  onEditingComplete: () {
-                    final entry = entryNotifier.value;
-                    var subtitle = entry.subtitle;
-                    final params = entry.parameters;
-                    for (var p in params) {
-                      if (p.current.isNotEmpty) {
-                        subtitle = subtitle.replaceAll(p.name, p.current);
-                      }
-                    }
-                    Clipboard.setData(ClipboardData(text: subtitle));
                   },
                   focusNode: _searchFocusNode,
                 ),
