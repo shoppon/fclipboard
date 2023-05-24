@@ -47,6 +47,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteSuccess":
             MessageLookupByLibrary.simpleMessage("Delete successfully"),
         "description": MessageLookupByLibrary.simpleMessage("Description"),
+        "export": MessageLookupByLibrary.simpleMessage("Export"),
+        "import": MessageLookupByLibrary.simpleMessage("Import"),
         "initial": MessageLookupByLibrary.simpleMessage("Initial"),
         "listing": MessageLookupByLibrary.simpleMessage("Listing"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading"),

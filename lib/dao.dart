@@ -155,6 +155,7 @@ class DBHelper {
           subtitle: r['subtitle'].toString(),
           counter: r['counter'] as int,
           categoryId: r['category_id'] as int,
+          categoryName: r['c_name'].toString(),
           icon: r['icon'].toString(),
           parameters: [],
         ));
@@ -210,5 +211,39 @@ class DBHelper {
     await db.delete('entry');
     // drop databases
     await deleteDatabase(await getDatabasePath());
+  }
+
+  Future<void> export(String filepath) async {
+    final allEntries = await entries(null);
+    final allCategories = await categories();
+    final file = File(filepath);
+    final sink = file.openWrite();
+    // write with yaml format
+    sink.writeln('---');
+    sink.writeln('categories:');
+    for (var c in allCategories) {
+      sink.writeln('  - name: ${c.name}');
+      sink.writeln('    icon: ${c.icon}');
+    }
+    sink.writeln('entries:');
+    for (var e in allEntries) {
+      sink.writeln('  - title: "${e.title}"');
+      // subtitle may contain special characters and has multiple lines
+      sink.writeln('    subtitle: |-');
+      for (var line in e.subtitle.split('\n')) {
+        sink.writeln('      $line');
+      }
+      sink.writeln('    counter: ${e.counter}');
+      sink.writeln('    category: "${e.categoryName}"');
+      sink.writeln('    parameters:');
+      for (var p in e.parameters) {
+        sink.writeln('      - name: ${p.name}');
+        sink.writeln('        initial: ${p.initial}');
+        sink.writeln('        description: ${p.description}');
+        sink.writeln('        required: ${p.required}');
+      }
+    }
+    await sink.flush();
+    await sink.close();
   }
 }

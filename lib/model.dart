@@ -25,11 +25,13 @@ class Entry {
     required this.counter,
     this.id = 0,
     this.icon = '',
+    this.categoryName = '',
     this.parameters = const [],
   });
 
   final int id;
   final int categoryId;
+  final String categoryName;
   final String title;
   final String subtitle;
   final String icon;

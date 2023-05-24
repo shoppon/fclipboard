@@ -8,6 +8,7 @@ import 'package:fclipboard/model.dart';
 import 'package:fclipboard/search.dart';
 import 'package:fclipboard/subscription.dart';
 import 'package:fclipboard/utils.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sqflite/sqflite.dart';
@@ -105,6 +106,35 @@ class _MainAppState extends State<MainApp> {
             appBar: AppBar(
               title: Text(S.of(context).appTitle),
               actions: <Widget>[
+                PopupMenuButton(
+                  icon: const Icon(Icons.import_export),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      child: TextButton(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                          String? output = await FilePicker.platform.saveFile(
+                            dialogTitle: S.of(context).export,
+                            fileName: 'fclipboard.yaml',
+                          );
+                          if (output == null) {
+                            return;
+                          }
+                          await DBHelper().export(output);
+                        },
+                        child: Text(S.of(context).export),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      child: TextButton(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                        },
+                        child: Text(S.of(context).import),
+                      ),
+                    ),
+                  ],
+                ),
                 PopupMenuButton(
                   icon: const Icon(Icons.add),
                   itemBuilder: (context) => [

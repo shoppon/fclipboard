@@ -40,6 +40,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAllSuccess": MessageLookupByLibrary.simpleMessage("已删除所有条目"),
         "deleteSuccess": MessageLookupByLibrary.simpleMessage("删除成功"),
         "description": MessageLookupByLibrary.simpleMessage("描述"),
+        "export": MessageLookupByLibrary.simpleMessage("导出"),
+        "import": MessageLookupByLibrary.simpleMessage("导入"),
         "initial": MessageLookupByLibrary.simpleMessage("初始值"),
         "listing": MessageLookupByLibrary.simpleMessage("列表"),
         "loading": MessageLookupByLibrary.simpleMessage("加载中"),
