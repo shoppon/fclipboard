@@ -240,11 +240,31 @@ class S {
     );
   }
 
+  /// `Export successfully`
+  String get exportSuccessfully {
+    return Intl.message(
+      'Export successfully',
+      name: 'exportSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Import`
   String get import {
     return Intl.message(
       'Import',
       name: 'import',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import successfully`
+  String get importSuccessfully {
+    return Intl.message(
+      'Import successfully',
+      name: 'importSuccessfully',
       desc: '',
       args: [],
     );

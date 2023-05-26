@@ -5,15 +5,19 @@ class Category {
     this.id = 0,
   });
 
+  final int id;
   final String name;
   final String icon;
-  final int id;
 
   Map<String, dynamic> toMap() {
-    return {
+    final map = <String, dynamic>{
       'name': name,
       'icon': icon,
     };
+    if (id != 0) {
+      map['id'] = id;
+    }
+    return map;
   }
 }
 

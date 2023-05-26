@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:yaml/yaml.dart';
 
 import 'model.dart';
 
@@ -117,25 +118,29 @@ class DBHelper {
     });
   }
 
-  Future<List<Entry>> entries(String? category) async {
+  Future<List<Entry>> entries({String? category, String? title}) async {
     final Database db = await database;
     List<Map<String, Object?>> results;
-    if (category == null || category == 'all') {
-      results = await db.rawQuery('''
+    var query = '''
       SELECT entry.id, entry.title, entry.subtitle, entry.counter, entry.category_id, category.name as c_name, category.icon, param.id as p_id, param.name as p_name, param.initial, param.description, param.required
       FROM entry
       INNER JOIN category ON entry.category_id = category.id
       LEFT JOIN param ON entry.id = param.entry_id
-    ''');
-    } else {
-      results = await db.rawQuery('''
-      SELECT entry.id, entry.title, entry.subtitle, entry.counter, entry.category_id, category.name as c_name, category.icon, param.id as p_id, param.name as p_name, param.initial, param.description, param.required
-      FROM entry
-      INNER JOIN category ON entry.category_id = category.id
-      LEFT JOIN param ON entry.id = param.entry_id
-      WHERE category.name = ?
-    ''', [category]);
+    ''';
+    final params = [];
+    if (title != null) {
+      query += '''
+        WHERE entry.id = ?
+      ''';
+      params.add(title);
     }
+    if (category != null) {
+      query += '''
+        WHERE category.name = ?
+      ''';
+      params.add(category);
+    }
+    results = await db.rawQuery(query, params);
     List<Entry> entries = [];
     for (var r in results) {
       // find existing entry
@@ -214,7 +219,7 @@ class DBHelper {
   }
 
   Future<void> export(String filepath) async {
-    final allEntries = await entries(null);
+    final allEntries = await entries();
     final allCategories = await categories();
     final file = File(filepath);
     final sink = file.openWrite();
@@ -222,8 +227,8 @@ class DBHelper {
     sink.writeln('---');
     sink.writeln('categories:');
     for (var c in allCategories) {
-      sink.writeln('  - name: ${c.name}');
-      sink.writeln('    icon: ${c.icon}');
+      sink.writeln('  - name: "${c.name}"');
+      sink.writeln('    icon: "${c.icon}"');
     }
     sink.writeln('entries:');
     for (var e in allEntries) {
@@ -237,13 +242,62 @@ class DBHelper {
       sink.writeln('    category: "${e.categoryName}"');
       sink.writeln('    parameters:');
       for (var p in e.parameters) {
-        sink.writeln('      - name: ${p.name}');
-        sink.writeln('        initial: ${p.initial}');
-        sink.writeln('        description: ${p.description}');
+        sink.writeln('      - name: "${p.name}"');
+        sink.writeln('        initial: "${p.initial}"');
+        sink.writeln('        description: "${p.description}"');
         sink.writeln('        required: ${p.required}');
       }
     }
     await sink.flush();
     await sink.close();
+  }
+
+  Future<void> import(String filepath) async {
+    // parse yaml file
+    final file = File(filepath);
+    final content = await file.readAsString();
+    final source = loadYaml(content);
+
+    // get current categories and entries
+    final cgs = await categories();
+    final curEntries = await entries();
+    final categoryIds = cgs.fold({}, (map, cgs) => map..[cgs.name] = cgs.id);
+
+    // insert categories
+    for (var c in source['categories']) {
+      await insertCategory(Category(
+        id: categoryIds[c['name']] ?? 0,
+        name: c['name'],
+        icon: c['icon'],
+      ));
+    }
+    // insert entries
+    for (var e in source['entries']) {
+      // find existing entry
+      final existing =
+          curEntries.firstWhereOrNull((ce) => ce.title == e['title']);
+      final params = <Param>[];
+      for (var p in e['parameters'] ?? []) {
+        final param =
+            existing?.parameters.firstWhereOrNull((pm) => pm.name == p['name']);
+        params.add(Param(
+          id: param == null ? 0 : param.id,
+          name: p['name'],
+          initial: p['initial'] ?? '',
+          description: p['description'] ?? '',
+          required: p['required'] ?? false,
+          entryId: existing == null ? 0 : existing.id,
+        ));
+      }
+      final entry = Entry(
+        id: existing == null ? 0 : existing.id,
+        title: e['title'],
+        subtitle: e['subtitle'],
+        counter: e['counter'],
+        categoryId: categoryIds[e['category']] as int,
+        parameters: params,
+      );
+      await insertEntry(entry);
+    }
   }
 }

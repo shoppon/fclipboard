@@ -117,7 +117,7 @@ class _EntryListViewState extends State<EntryListView> {
   }
 
   Future<void> loadEntries() async {
-    final entries = await _dbHelper.entries(null);
+    final entries = await _dbHelper.entries();
     _matcher.reset(entries);
     setState(() {
       // get most used 10 entries

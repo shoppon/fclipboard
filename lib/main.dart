@@ -112,7 +112,6 @@ class _MainAppState extends State<MainApp> {
                     PopupMenuItem(
                       child: TextButton(
                         onPressed: () async {
-                          Navigator.pop(context);
                           String? output = await FilePicker.platform.saveFile(
                             dialogTitle: S.of(context).export,
                             fileName: 'fclipboard.yaml',
@@ -121,6 +120,11 @@ class _MainAppState extends State<MainApp> {
                             return;
                           }
                           await DBHelper().export(output);
+                          if (mounted) {
+                            Navigator.pop(context);
+                            showToast(context, S.of(context).exportSuccessfully,
+                                false);
+                          }
                         },
                         child: Text(S.of(context).export),
                       ),
@@ -128,7 +132,17 @@ class _MainAppState extends State<MainApp> {
                     PopupMenuItem(
                       child: TextButton(
                         onPressed: () async {
-                          Navigator.pop(context);
+                          FilePickerResult? result = await FilePicker.platform
+                              .pickFiles(allowedExtensions: ['yaml']);
+                          if (result == null) {
+                            return;
+                          }
+                          await DBHelper().import(result.files.single.path!);
+                          if (mounted) {
+                            Navigator.pop(context);
+                            showToast(context, S.of(context).importSuccessfully,
+                                false);
+                          }
                         },
                         child: Text(S.of(context).import),
                       ),
