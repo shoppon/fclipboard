@@ -21,6 +21,30 @@ Future<String> getDatabasePath() async {
   }
 }
 
+void createCategoryTable(Database db) {
+  db.execute('''
+    CREATE TABLE category(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      icon TEXT NOT NULL,
+      is_private BOOLEAN DEFAULT FALSE
+    )
+  ''');
+}
+
+void createEntryTable(Database db) {
+  db.execute('''
+    CREATE TABLE entry(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL UNIQUE,
+      subtitle TEXT NOT NULL,
+      counter INTEGER NOT NULL,
+      category_id INTEGER NOT NULL,
+      FOREIGN KEY (category_id) REFERENCES category(id)
+    )
+  ''');
+}
+
 void createParamTable(db) {
   db.execute('''
     CREATE TABLE param(
@@ -35,42 +59,39 @@ void createParamTable(db) {
   ''');
 }
 
+void version1to2(Database db) {
+  // make title column UNIQUE
+  db.execute('''
+    CREATE UNIQUE INDEX idx_entry_title ON entry(title)
+  ''');
+  db.execute('''
+    CREATE UNIQUE INDEX idx_category_name ON category(name)
+  ''');
+}
+
+void version2to3(Database db) {
+  db.execute('''
+    ALTER TABLE category ADD COLUMN is_private BOOLEAN DEFAULT FALSE
+  ''');
+  createParamTable(db);
+}
+
 class DBHelper {
   Future<Database> get database async {
     return openDatabase(
       await getDatabasePath(),
       onCreate: (db, version) {
-        db.execute('''
-          CREATE TABLE category(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE,
-            icon TEXT NOT NULL
-          )
-        ''');
-        db.execute('''
-          CREATE TABLE entry(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL UNIQUE,
-            subtitle TEXT NOT NULL,
-            counter INTEGER NOT NULL,
-            category_id NOT NULL,
-            FOREIGN KEY (category_id) REFERENCES category(id)
-          )
-        ''');
+        createCategoryTable(db);
+        createEntryTable(db);
         createParamTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) {
-        if (oldVersion == 1) {
-          // make title column UNIQUE
-          db.execute('''
-            CREATE UNIQUE INDEX idx_entry_title ON entry(title)
-          ''');
-          db.execute('''
-            CREATE UNIQUE INDEX idx_category_name ON category(name)
-          ''');
-        }
-        if (oldVersion == 2) {
-          createParamTable(db);
+        final versions = {
+          1: version1to2,
+          2: version2to3,
+        };
+        for (var i = oldVersion; i < newVersion; i++) {
+          versions[i]!(db);
         }
       },
       version: 3,
@@ -114,6 +135,7 @@ class DBHelper {
         name: maps[i]['name'],
         icon: maps[i]['icon'],
         id: maps[i]['id'],
+        isPrivate: maps[i]['is_private'] == 1,
       );
     });
   }
@@ -227,11 +249,18 @@ class DBHelper {
     sink.writeln('---');
     sink.writeln('categories:');
     for (var c in allCategories) {
+      if (c.isPrivate) {
+        continue;
+      }
       sink.writeln('  - name: "${c.name}"');
       sink.writeln('    icon: "${c.icon}"');
     }
     sink.writeln('entries:');
     for (var e in allEntries) {
+      final category = allCategories.firstWhere((c) => c.id == e.categoryId);
+      if (category.isPrivate) {
+        continue;
+      }
       sink.writeln('  - title: "${e.title}"');
       // subtitle may contain special characters and has multiple lines
       sink.writeln('    subtitle: |-');
@@ -269,6 +298,7 @@ class DBHelper {
         id: categoryIds[c['name']] ?? 0,
         name: c['name'],
         icon: c['icon'],
+        isPrivate: c['isPrivate'] ?? false,
       ));
     }
     // insert entries

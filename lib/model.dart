@@ -3,16 +3,19 @@ class Category {
     required this.name,
     required this.icon,
     this.id = 0,
+    this.isPrivate = false,
   });
 
   final int id;
   final String name;
   final String icon;
+  final bool isPrivate;
 
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{
       'name': name,
       'icon': icon,
+      'is_private': isPrivate ? 1 : 0,
     };
     if (id != 0) {
       map['id'] = id;
