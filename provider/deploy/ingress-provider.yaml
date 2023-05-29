@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: provider
+  namespace: fclipboard
+  labels:
+    name: fclipboard
+  annotations:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite ^/fclipboard/(.*) /$1 break;
+spec:
+  rules:
+    - host: fclipboard.shoppon.club
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: provider
+                port:
+                  number: 8000
+    - host: fclipboard.shoppon.local
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: provider
+                port:
+                  number: 8000
+    - http:
+        paths:
+          - pathType: Prefix
+            path: /fclipboard
+            backend:
+              service:
+                name: provider
+                port:
+                  number: 8000

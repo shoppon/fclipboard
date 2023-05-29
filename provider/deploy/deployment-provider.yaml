@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: provider
+  namespace: fclipboard
+spec:
+  selector:
+    matchLabels:
+      application: fclipboard
+      component: provider
+  template:
+    metadata:
+      labels:
+        application: fclipboard
+        component: provider
+    spec:
+      containers:
+        - image: shoppon/fclipboard:latest
+          name: api
+          # command: ["/bin/bash", "-c", "--"]
+          # args: ["while true; do sleep 30; done;"]
+          command: ["/usr/bin/python3", "/opt/fclipboard/subscription.py"]
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+            requests:
+              cpu: 2000m
+              memory: 2Gi

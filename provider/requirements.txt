@@ -1,0 +1,5 @@
+fastapi
+fuzzywuzzy
+kubernetes
+pyyaml
+uvicorn
