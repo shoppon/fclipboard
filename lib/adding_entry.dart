@@ -67,109 +67,112 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              TextFormField(
-                decoration: InputDecoration(labelText: S.of(context).title),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return S.of(context).titleCannotBeEmpty;
-                  }
-                  _title = value;
-                  return null;
-                },
-                initialValue: widget.entry.title,
-              ),
-              DropdownButtonFormField(
-                  decoration: InputDecoration(
-                    labelText: S.of(context).category,
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  TextFormField(
+                    decoration: InputDecoration(labelText: S.of(context).title),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return S.of(context).titleCannotBeEmpty;
+                      }
+                      _title = value;
+                      return null;
+                    },
+                    initialValue: widget.entry.title,
                   ),
-                  items: buildDropdownMenuItems(),
-                  validator: (value) {
-                    if (value == null) {
-                      return S.of(context).categoryCannotBeEmpty;
-                    }
-                    _category = value;
-                    return null;
-                  },
-                  value: _categories.isNotEmpty
-                      ? _categories.firstWhere(
-                          (element) => element.id == widget.entry.categoryId,
-                          orElse: () {
-                            return _categories[0];
-                          },
-                        )
-                      : null,
-                  onChanged: (value) {
-                    setState(() {
-                      _category = value;
-                    });
-                  }),
-              TextFormField(
-                keyboardType: TextInputType.multiline,
-                decoration: InputDecoration(
-                  labelText: S.of(context).content,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return S.of(context).contentCannotBeEmpty;
-                  }
-                  _content = value;
-                  return null;
-                },
-                minLines: 5,
-                maxLines: 5,
-                initialValue: widget.entry.subtitle,
-              ),
-              const SizedBox(height: 16.0),
-              ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: widget.entry.parameters.length,
-                  itemBuilder: (BuildContext context, index) {
-                    return ParameterInput(
-                        parameter: widget.entry.parameters[index],
-                        onDelete: () {
-                          setState(() {
-                            widget.entry.parameters.removeAt(index);
-                          });
+                  DropdownButtonFormField(
+                      decoration: InputDecoration(
+                        labelText: S.of(context).category,
+                      ),
+                      items: buildDropdownMenuItems(),
+                      validator: (value) {
+                        if (value == null) {
+                          return S.of(context).categoryCannotBeEmpty;
+                        }
+                        _category = value;
+                        return null;
+                      },
+                      value: _categories.isNotEmpty
+                          ? _categories.firstWhere(
+                              (element) =>
+                                  element.id == widget.entry.categoryId,
+                              orElse: () {
+                                return _categories[0];
+                              },
+                            )
+                          : null,
+                      onChanged: (value) {
+                        setState(() {
+                          _category = value;
                         });
-                  }),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      widget.entry.parameters.add(Param());
-                    });
-                  },
-                  child: Text(S.of(context).addParameter)),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                  onPressed: () {
-                    if (!_formKey.currentState!.validate()) {
-                      return;
-                    }
-                    final entry = Entry(
-                      id: widget.entry.id,
-                      title: _title,
-                      subtitle: _content,
-                      counter: 0,
-                      categoryId: _category.id,
-                      parameters: widget.entry.parameters,
-                    );
-                    _dbHelper.insertEntry(entry);
-                    // toasts success
-                    showToast(context, S.of(context).addSuccessfully, false);
-                    Navigator.pop(context);
-                  },
-                  child: Text(S.of(context).save)),
-            ],
-          ),
-        ),
-      ),
+                      }),
+                  TextFormField(
+                    keyboardType: TextInputType.multiline,
+                    decoration: InputDecoration(
+                      labelText: S.of(context).content,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return S.of(context).contentCannotBeEmpty;
+                      }
+                      _content = value;
+                      return null;
+                    },
+                    minLines: 5,
+                    maxLines: 5,
+                    initialValue: widget.entry.subtitle,
+                  ),
+                  const SizedBox(height: 16.0),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: widget.entry.parameters.length,
+                      itemBuilder: (BuildContext context, index) {
+                        return ParameterInput(
+                            parameter: widget.entry.parameters[index],
+                            onDelete: () {
+                              setState(() {
+                                widget.entry.parameters.removeAt(index);
+                              });
+                            });
+                      }),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          widget.entry.parameters.add(Param());
+                        });
+                      },
+                      child: Text(S.of(context).addParameter)),
+                  const SizedBox(height: 16.0),
+                  ElevatedButton(
+                      onPressed: () {
+                        if (!_formKey.currentState!.validate()) {
+                          return;
+                        }
+                        final entry = Entry(
+                          id: widget.entry.id,
+                          title: _title,
+                          subtitle: _content,
+                          counter: 0,
+                          categoryId: _category.id,
+                          parameters: widget.entry.parameters,
+                        );
+                        _dbHelper.insertEntry(entry);
+                        // toasts success
+                        showToast(
+                            context, S.of(context).addSuccessfully, false);
+                        Navigator.pop(context);
+                      },
+                      child: Text(S.of(context).save)),
+                ],
+              ),
+            ),
+          )),
     );
   }
 }
