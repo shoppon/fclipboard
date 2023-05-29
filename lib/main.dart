@@ -11,6 +11,7 @@ import 'package:fclipboard/utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
@@ -102,6 +103,7 @@ class _MainAppState extends State<MainApp> {
         Locale('zh', 'CN'),
       ],
       home: Builder(builder: (context) {
+        ProgressDialog pd = ProgressDialog(context: context);
         return Scaffold(
             appBar: AppBar(
               title: Text(S.of(context).appTitle),
@@ -112,6 +114,7 @@ class _MainAppState extends State<MainApp> {
                     PopupMenuItem(
                       child: TextButton(
                         onPressed: () async {
+                          final msg = S.of(context).loading;
                           String? output = await FilePicker.platform.saveFile(
                             dialogTitle: S.of(context).export,
                             fileName: 'fclipboard.yaml',
@@ -119,12 +122,14 @@ class _MainAppState extends State<MainApp> {
                           if (output == null) {
                             return;
                           }
+                          pd.show(msg: msg);
                           await DBHelper().export(output);
                           if (mounted) {
                             Navigator.pop(context);
                             showToast(context, S.of(context).exportSuccessfully,
                                 false);
                           }
+                          pd.close();
                         },
                         child: Text(S.of(context).export),
                       ),
@@ -132,17 +137,20 @@ class _MainAppState extends State<MainApp> {
                     PopupMenuItem(
                       child: TextButton(
                         onPressed: () async {
+                          final msg = S.of(context).loading;
                           FilePickerResult? result = await FilePicker.platform
                               .pickFiles(allowedExtensions: ['yaml']);
                           if (result == null) {
                             return;
                           }
+                          pd.show(msg: msg);
                           await DBHelper().import(result.files.single.path!);
                           if (mounted) {
                             Navigator.pop(context);
                             showToast(context, S.of(context).importSuccessfully,
                                 false);
                           }
+                          pd.close();
                         },
                         child: Text(S.of(context).import),
                       ),
