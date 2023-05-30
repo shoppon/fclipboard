@@ -115,6 +115,12 @@ class DBHelper {
       entry.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    // delete existing parameters
+    await db.delete(
+      'param',
+      where: "entry_id = ?",
+      whereArgs: [id],
+    );
     if (entry.parameters.isNotEmpty) {
       for (var p in entry.parameters) {
         await db.insert(
