@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--file", type=str, default="subscription.yaml")
+parser.add_argument("--config", type=str, default="subscription.yaml")
 args = parser.parse_args()
 
 app = FastAPI()
@@ -13,7 +13,7 @@ app = FastAPI()
 
 @app.get("/subscription")
 def get_subscription():
-    with open(args.file, encoding='utf-8') as f:
+    with open(args.config, encoding='utf-8') as f:
         content = yaml.safe_load(f)
         return content
 

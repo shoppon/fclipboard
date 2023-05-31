@@ -15,11 +15,17 @@ spec:
         component: provider
     spec:
       containers:
-        - image: shoppon/fclipboard:latest
-          name: api
+        - image: fclipboard:latest
+          name: provider
           # command: ["/bin/bash", "-c", "--"]
           # args: ["while true; do sleep 30; done;"]
-          command: ["/usr/bin/python3", "/opt/fclipboard/subscription.py"]
+          command:
+            [
+              "/usr/bin/python3",
+              "/opt/fclipboard/subscription.py",
+              "--config",
+              "/opt/fclipboard/config.yaml",
+            ]
           imagePullPolicy: IfNotPresent
           resources:
             limits:
@@ -28,3 +34,11 @@ spec:
             requests:
               cpu: 2000m
               memory: 2Gi
+          volumeMounts:
+            - mountPath: /opt/fclipboard/config.yaml
+              name: config-file
+      volumes:
+        - name: config-file
+          hostPath:
+            path: /opt/fclipboard/config.yaml
+            type: File
