@@ -53,6 +53,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "required": MessageLookupByLibrary.simpleMessage("必填"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
         "searchHint": MessageLookupByLibrary.simpleMessage("搜索"),
+        "share": MessageLookupByLibrary.simpleMessage("分享"),
         "subscribe": MessageLookupByLibrary.simpleMessage("订阅"),
         "subscribeFailed": MessageLookupByLibrary.simpleMessage("订阅失败"),
         "subscribeSuccessfully": MessageLookupByLibrary.simpleMessage("订阅成功"),

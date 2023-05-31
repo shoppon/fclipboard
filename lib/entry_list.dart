@@ -201,6 +201,9 @@ class _EntryListViewState extends State<EntryListView> {
         PopupMenuItem(
             value: 1,
             child: Text(S.of(context).delete)),
+        PopupMenuItem(
+            value: 2,
+            child: Text(S.of(context).share)),
       ],
     );
     if (selectedValue == 0 && context.mounted) {
@@ -212,6 +215,11 @@ class _EntryListViewState extends State<EntryListView> {
     }
     if (selectedValue == 1 && context.mounted) {
       _deleteListItem(context, index);
+    }
+    if (selectedValue == 2) {
+      final entry = entries[index];
+      final decoded = entry.toJson();
+      Clipboard.setData(ClipboardData(text: decoded.toString()));
     }
   }
 

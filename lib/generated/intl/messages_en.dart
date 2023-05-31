@@ -62,6 +62,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "required": MessageLookupByLibrary.simpleMessage("Required"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "searchHint": MessageLookupByLibrary.simpleMessage("Search"),
+        "share": MessageLookupByLibrary.simpleMessage("Share"),
         "subscribe": MessageLookupByLibrary.simpleMessage("Subscribe"),
         "subscribeFailed":
             MessageLookupByLibrary.simpleMessage("Subscribe failed"),

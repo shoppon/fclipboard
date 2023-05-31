@@ -1,3 +1,7 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'model.g.dart';
+
 class Category {
   Category({
     required this.name,
@@ -24,6 +28,46 @@ class Category {
   }
 }
 
+@JsonSerializable(explicitToJson: true)
+class Param {
+  int id;
+  String name;
+  String initial;
+  String current;
+  int entryId;
+  bool required = false;
+  String description = '';
+
+  Param({
+    this.id = 0,
+    this.name = '',
+    this.initial = '',
+    this.current = '',
+    this.entryId = 0,
+    this.required = false,
+    this.description = '',
+  });
+
+  Map<String, dynamic> toMap(int entryId) {
+    final map = {
+      'name': name,
+      'initial': initial,
+      'entry_id': entryId,
+      'required': required ? 1 : 0,
+      'description': description,
+    };
+    if (id != 0) {
+      map['id'] = id;
+    }
+    return map;
+  }
+
+  factory Param.fromJson(Map<String, dynamic> json) => _$ParamFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ParamToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class Entry {
   Entry({
     required this.title,
@@ -67,38 +111,8 @@ class Entry {
       parameters: [],
     );
   }
-}
 
-class Param {
-  int id;
-  String name;
-  String initial;
-  String current;
-  int entryId;
-  bool required = false;
-  String description = '';
+  factory Entry.fromJson(Map<String, dynamic> json) => _$EntryFromJson(json);
 
-  Param({
-    this.id = 0,
-    this.name = '',
-    this.initial = '',
-    this.current = '',
-    this.entryId = 0,
-    this.required = false,
-    this.description = '',
-  });
-
-  Map<String, dynamic> toMap(int entryId) {
-    final map = {
-      'name': name,
-      'initial': initial,
-      'entry_id': entryId,
-      'required': required ? 1 : 0,
-      'description': description,
-    };
-    if (id != 0) {
-      map['id'] = id;
-    }
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$EntryToJson(this);
 }
