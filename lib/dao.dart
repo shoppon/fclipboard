@@ -246,7 +246,7 @@ class DBHelper {
     await deleteDatabase(await getDatabasePath());
   }
 
-  Future<void> export(String filepath) async {
+  Future<void> exportToFile(String filepath) async {
     final allEntries = await entries();
     final allCategories = await categories();
     final file = File(filepath);
@@ -287,12 +287,15 @@ class DBHelper {
     await sink.close();
   }
 
-  Future<void> import(String filepath) async {
+  Future<void> importFromFile(String filepath) async {
     // parse yaml file
     final file = File(filepath);
     final content = await file.readAsString();
     final source = loadYaml(content);
+    await importFromYaml(source);
+  }
 
+  Future<void> importFromYaml(dynamic source) async {
     // get current categories and entries
     final cgs = await categories();
     final curEntries = await entries();

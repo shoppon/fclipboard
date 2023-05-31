@@ -10,7 +10,6 @@ import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 import 'dao.dart';
 import 'generated/l10n.dart';
-import 'model.dart';
 
 class Subscriber {
   String url;
@@ -34,23 +33,7 @@ class Subscriber {
       throw Exception('Invalid schema');
     }
 
-    final dbHelper = DBHelper();
-    for (var c in decodedResponse['categories']) {
-      await dbHelper.insertCategory(Category(
-        name: c['name'],
-        icon: c['icon'],
-      ));
-    }
-    final categories = await dbHelper.categories();
-    for (var e in decodedResponse['entries']) {
-      final c = categories.firstWhere((c) => c.name == e['category']);
-      await dbHelper.insertEntry(Entry(
-        title: "${c.name}_${e['title']}",
-        subtitle: e['subtitle'],
-        counter: 0,
-        categoryId: c.id,
-      ));
-    }
+    await DBHelper().importFromYaml(decodedResponse);
   }
 
   Future<bool> trySubscribe() async {
@@ -102,9 +85,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () async {
-                ProgressDialog progressDialog =
-                    ProgressDialog(context: context);
-                progressDialog.show(msg: S.of(context).loading);
+                ProgressDialog pd = ProgressDialog(context: context);
+                pd.show(msg: S.of(context).loading);
                 final subscriber = Subscriber(url: url);
                 final success = await subscriber.trySubscribe();
                 if (success) {
@@ -118,7 +100,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     showToast(context, S.of(context).subscribeFailed, true);
                   }
                 }
-                progressDialog.close();
+                pd.close();
               },
               child: Text(S.of(context).subscribe),
             )

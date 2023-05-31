@@ -7,10 +7,17 @@
       "items": {
         "type": "object",
         "properties": {
-          "name": { "type": "string" },
-          "icon": { "type": "string" }
+          "name": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
         },
-        "required": ["name", "icon"]
+        "required": [
+          "name",
+          "icon"
+        ]
       }
     },
     "entries": {
@@ -18,13 +25,26 @@
       "items": {
         "type": "object",
         "properties": {
-          "title": { "type": "string" },
-          "subtitle": { "type": "string" },
-          "category": { "type": "string" }
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          }
         },
-        "required": ["title", "subtitle", "category"]
+        "required": [
+          "title",
+          "subtitle",
+          "category"
+        ]
       }
     }
   },
-  "required": ["categories", "entries"]
+  "required": [
+    "categories",
+    "entries"
+  ]
 }

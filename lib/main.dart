@@ -123,7 +123,7 @@ class _MainAppState extends State<MainApp> {
                             return;
                           }
                           pd.show(msg: msg);
-                          await DBHelper().export(output);
+                          await DBHelper().exportToFile(output);
                           if (mounted) {
                             Navigator.pop(context);
                             showToast(context, S.of(context).exportSuccessfully,
@@ -144,7 +144,7 @@ class _MainAppState extends State<MainApp> {
                             return;
                           }
                           pd.show(msg: msg);
-                          await DBHelper().import(result.files.single.path!);
+                          await DBHelper().importFromFile(result.files.single.path!);
                           if (mounted) {
                             Navigator.pop(context);
                             showToast(context, S.of(context).importSuccessfully,
