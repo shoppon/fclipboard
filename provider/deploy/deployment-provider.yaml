@@ -15,7 +15,7 @@ spec:
         component: provider
     spec:
       containers:
-        - image: fclipboard:latest
+        - image: shoppon/fclipboard:latest
           name: provider
           # command: ["/bin/bash", "-c", "--"]
           # args: ["while true; do sleep 30; done;"]
