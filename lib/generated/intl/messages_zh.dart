@@ -50,6 +50,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "name": MessageLookupByLibrary.simpleMessage("名称"),
         "noParameters": MessageLookupByLibrary.simpleMessage("没有参数"),
         "ok": MessageLookupByLibrary.simpleMessage("确定"),
+        "paste": MessageLookupByLibrary.simpleMessage("粘贴"),
         "required": MessageLookupByLibrary.simpleMessage("必填"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
         "searchHint": MessageLookupByLibrary.simpleMessage("搜索"),

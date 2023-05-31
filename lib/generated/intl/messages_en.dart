@@ -59,6 +59,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "noParameters": MessageLookupByLibrary.simpleMessage("No parameters"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
+        "paste": MessageLookupByLibrary.simpleMessage("Paste"),
         "required": MessageLookupByLibrary.simpleMessage("Required"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "searchHint": MessageLookupByLibrary.simpleMessage("Search"),

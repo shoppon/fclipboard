@@ -18,6 +18,7 @@ import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'generated/l10n.dart';
+import 'paste.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -144,7 +145,8 @@ class _MainAppState extends State<MainApp> {
                             return;
                           }
                           pd.show(msg: msg);
-                          await DBHelper().importFromFile(result.files.single.path!);
+                          await DBHelper()
+                              .importFromFile(result.files.single.path!);
                           if (mounted) {
                             Navigator.pop(context);
                             showToast(context, S.of(context).importSuccessfully,
@@ -201,6 +203,19 @@ class _MainAppState extends State<MainApp> {
                         child: Text(S.of(context).addSubscription),
                       ),
                     ),
+                    PopupMenuItem(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const PastePage()),
+                          ).then((value) => {});
+                        },
+                        child: Text(S.of(context).paste),
+                      ),
+                    )
                   ],
                 ),
               ],

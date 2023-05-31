@@ -330,6 +330,16 @@ class S {
     );
   }
 
+  /// `Paste`
+  String get paste {
+    return Intl.message(
+      'Paste',
+      name: 'paste',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Required`
   String get required {
     return Intl.message(
