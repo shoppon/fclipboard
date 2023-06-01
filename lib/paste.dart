@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart';
+import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 
 import 'generated/l10n.dart';
@@ -44,10 +45,17 @@ class _PastePageState extends State<PastePage> {
                 const SizedBox(height: 16.0),
                 ElevatedButton(
                   onPressed: () async {
-                    final entity = Entry.fromJson(jsonDecode(content));
-                    await DBHelper().insertEntry(entity);
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
+                    try {
+                      final entity = Entry.fromJson(
+                          jsonDecode(utf8.decode(base64Decode(content))));
+                      await DBHelper().insertEntry(entity);
+                      if (context.mounted) {
+                        showToast(
+                            context, S.of(context).pasteSuccessfully, false);
+                        Navigator.of(context).pop();
+                      }
+                    } catch (e) {
+                      showToast(context, S.of(context).errorFormat, true);
                     }
                   },
                   child: Text(S.of(context).ok),

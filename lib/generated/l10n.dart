@@ -230,6 +230,16 @@ class S {
     );
   }
 
+  /// `Error format`
+  String get errorFormat {
+    return Intl.message(
+      'Error format',
+      name: 'errorFormat',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Export`
   String get export {
     return Intl.message(
@@ -335,6 +345,16 @@ class S {
     return Intl.message(
       'Paste',
       name: 'paste',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paste successfully`
+  String get pasteSuccessfully {
+    return Intl.message(
+      'Paste successfully',
+      name: 'pasteSuccessfully',
       desc: '',
       args: [],
     );

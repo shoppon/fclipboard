@@ -47,6 +47,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteSuccess":
             MessageLookupByLibrary.simpleMessage("Delete successfully"),
         "description": MessageLookupByLibrary.simpleMessage("Description"),
+        "errorFormat": MessageLookupByLibrary.simpleMessage("Error format"),
         "export": MessageLookupByLibrary.simpleMessage("Export"),
         "exportSuccessfully":
             MessageLookupByLibrary.simpleMessage("Export successfully"),
@@ -60,6 +61,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noParameters": MessageLookupByLibrary.simpleMessage("No parameters"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "paste": MessageLookupByLibrary.simpleMessage("Paste"),
+        "pasteSuccessfully":
+            MessageLookupByLibrary.simpleMessage("Paste successfully"),
         "required": MessageLookupByLibrary.simpleMessage("Required"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "searchHint": MessageLookupByLibrary.simpleMessage("Search"),

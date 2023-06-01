@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -218,8 +219,8 @@ class _EntryListViewState extends State<EntryListView> {
     }
     if (selectedValue == 2) {
       final entry = entries[index];
-      final decoded = entry.toJson();
-      Clipboard.setData(ClipboardData(text: decoded.toString()));
+      final decoded = base64Encode(utf8.encode(jsonEncode(entry.toJson())));
+      Clipboard.setData(ClipboardData(text: decoded));
     }
   }
 
