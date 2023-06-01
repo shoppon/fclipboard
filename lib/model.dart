@@ -80,8 +80,8 @@ class Entry {
     this.parameters = const [],
   });
 
-  final int id;
-  final int categoryId;
+  int id;
+  int categoryId;
   final String categoryName;
   final String title;
   final String subtitle;

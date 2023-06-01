@@ -158,7 +158,7 @@ class DBHelper {
     final params = [];
     if (title != null) {
       query += '''
-        WHERE entry.id = ?
+        WHERE entry.title = ?
       ''';
       params.add(title);
     }
@@ -236,6 +236,24 @@ class DBHelper {
       SET counter = counter + 1
       WHERE title = ?
     ''', [title]);
+  }
+
+  Future<Category?> getCategoryByName(String name) async {
+    final Database db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'category',
+      where: "name = ?",
+      whereArgs: [name],
+    );
+    if (maps.isEmpty) {
+      return null;
+    }
+    return Category(
+      name: maps[0]['name'],
+      icon: maps[0]['icon'],
+      id: maps[0]['id'],
+      isPrivate: maps[0]['is_private'] == 1,
+    );
   }
 
   Future<void> deleteAll() async {
