@@ -75,6 +75,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "title": MessageLookupByLibrary.simpleMessage("Title"),
         "titleCannotBeEmpty":
             MessageLookupByLibrary.simpleMessage("Title cannot be empty"),
-        "update": MessageLookupByLibrary.simpleMessage("Update")
+        "update": MessageLookupByLibrary.simpleMessage("Update"),
+        "version": MessageLookupByLibrary.simpleMessage("Version")
       };
 }

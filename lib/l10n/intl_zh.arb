@@ -40,5 +40,6 @@
   "subscribeSuccessfully": "订阅成功",
   "title": "标题",
   "titleCannotBeEmpty": "标题不能为空",
-  "update": "修改"
+  "update": "修改",
+  "version": "当前版本号"
 }

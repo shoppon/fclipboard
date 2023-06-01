@@ -62,6 +62,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "subscribeSuccessfully": MessageLookupByLibrary.simpleMessage("订阅成功"),
         "title": MessageLookupByLibrary.simpleMessage("标题"),
         "titleCannotBeEmpty": MessageLookupByLibrary.simpleMessage("标题不能为空"),
-        "update": MessageLookupByLibrary.simpleMessage("修改")
+        "update": MessageLookupByLibrary.simpleMessage("修改"),
+        "version": MessageLookupByLibrary.simpleMessage("当前版本号")
       };
 }

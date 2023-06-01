@@ -11,6 +11,7 @@ import 'package:fclipboard/utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -79,6 +80,11 @@ class _MainAppState extends State<MainApp> {
     if (isDesktop()) {
       registerHotkey(_searchFocusNode);
     }
+  }
+
+  Future<String> getVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    return packageInfo.version;
   }
 
   @override
@@ -263,6 +269,22 @@ class _MainAppState extends State<MainApp> {
                             );
                           }).then((value) => {});
                     },
+                  ),
+                  // current version
+                  ListTile(
+                    leading: const Icon(Icons.info),
+                    title: Text(S.of(context).version),
+                    subtitle: FutureBuilder(
+                      future: getVersion(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(snapshot.data!);
+                        } else {
+                          return const Text('');
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),

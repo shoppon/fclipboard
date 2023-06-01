@@ -40,5 +40,6 @@
   "subscribeSuccessfully": "Subscribe successfully",
   "title": "Title",
   "titleCannotBeEmpty": "Title cannot be empty",
-  "update": "Update"
+  "update": "Update",
+  "version": "Version"
 }
