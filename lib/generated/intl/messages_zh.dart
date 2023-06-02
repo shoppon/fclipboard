@@ -33,6 +33,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "categoryCannotBeEmpty": MessageLookupByLibrary.simpleMessage("分类不能为空"),
         "categoryNotEmpty": MessageLookupByLibrary.simpleMessage("分类不为空"),
         "clearAll": MessageLookupByLibrary.simpleMessage("删除所有数据"),
+        "clearWarning": MessageLookupByLibrary.simpleMessage("请谨慎操作"),
         "confirmDelete": MessageLookupByLibrary.simpleMessage("确认删除吗？"),
         "content": MessageLookupByLibrary.simpleMessage("内容"),
         "contentCannotBeEmpty": MessageLookupByLibrary.simpleMessage("内容不能为空"),

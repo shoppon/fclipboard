@@ -242,6 +242,7 @@ class _MainAppState extends State<MainApp> {
                   ListTile(
                     leading: const Icon(Icons.clear),
                     title: Text(S.of(context).clearAll),
+                    subtitle: Text(S.of(context).clearWarning),
                     onTap: () async {
                       showDialog(
                           context: context,

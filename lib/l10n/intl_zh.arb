@@ -11,6 +11,7 @@
   "categoryCannotBeEmpty": "分类不能为空",
   "categoryNotEmpty": "分类不为空",
   "clearAll": "删除所有数据",
+  "clearWarning": "请谨慎操作",
   "confirmDelete": "确认删除吗？",
   "content": "内容",
   "contentCannotBeEmpty": "内容不能为空",

@@ -11,6 +11,7 @@
   "categoryCannotBeEmpty": "Category cannot be empty",
   "categoryNotEmpty": "Category is not empty",
   "clearAll": "Clear All",
+  "clearWarning": "Be careful!",
   "confirmDelete": "Are you sure?",
   "content": "Content",
   "contentCannotBeEmpty": "Content cannot be empty",

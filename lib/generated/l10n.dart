@@ -160,6 +160,16 @@ class S {
     );
   }
 
+  /// `Be careful!`
+  String get clearWarning {
+    return Intl.message(
+      'Be careful!',
+      name: 'clearWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Are you sure?`
   String get confirmDelete {
     return Intl.message(

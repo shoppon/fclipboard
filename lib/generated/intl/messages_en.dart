@@ -37,6 +37,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "categoryNotEmpty":
             MessageLookupByLibrary.simpleMessage("Category is not empty"),
         "clearAll": MessageLookupByLibrary.simpleMessage("Clear All"),
+        "clearWarning": MessageLookupByLibrary.simpleMessage("Be careful!"),
         "confirmDelete": MessageLookupByLibrary.simpleMessage("Are you sure?"),
         "content": MessageLookupByLibrary.simpleMessage("Content"),
         "contentCannotBeEmpty":
