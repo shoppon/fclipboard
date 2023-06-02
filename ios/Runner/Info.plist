@@ -49,5 +49,7 @@
 		<true />
 		<key>NSFileProtectionKey</key>
 		<string>NSFileProtectionCompleteUntilFirstUserAuthentication</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<true />
 	</dict>
 </plist>
