@@ -115,56 +115,60 @@ class _MainAppState extends State<MainApp> {
             appBar: AppBar(
               title: Text(S.of(context).appTitle),
               actions: <Widget>[
-                PopupMenuButton(
-                  icon: const Icon(Icons.import_export),
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      child: TextButton(
-                        onPressed: () async {
-                          final msg = S.of(context).loading;
-                          String? output = await FilePicker.platform.saveFile(
-                            dialogTitle: S.of(context).export,
-                            fileName: 'fclipboard.yaml',
-                          );
-                          if (output == null) {
-                            return;
-                          }
-                          pd.show(msg: msg);
-                          await DBHelper().exportToFile(output);
-                          if (mounted) {
-                            Navigator.pop(context);
-                            showToast(context, S.of(context).exportSuccessfully,
-                                false);
-                          }
-                          pd.close();
-                        },
-                        child: Text(S.of(context).export),
-                      ),
-                    ),
-                    PopupMenuItem(
-                      child: TextButton(
-                        onPressed: () async {
-                          final msg = S.of(context).loading;
-                          FilePickerResult? result = await FilePicker.platform
-                              .pickFiles(allowedExtensions: ['yaml']);
-                          if (result == null) {
-                            return;
-                          }
-                          pd.show(msg: msg);
-                          await DBHelper()
-                              .importFromFile(result.files.single.path!);
-                          if (mounted) {
-                            Navigator.pop(context);
-                            showToast(context, S.of(context).importSuccessfully,
-                                false);
-                          }
-                          pd.close();
-                        },
-                        child: Text(S.of(context).import),
-                      ),
-                    ),
-                  ],
-                ),
+                isDesktop()
+                    ? PopupMenuButton(
+                        icon: const Icon(Icons.import_export),
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            child: TextButton(
+                              onPressed: () async {
+                                final msg = S.of(context).loading;
+                                String? output =
+                                    await FilePicker.platform.saveFile(
+                                  dialogTitle: S.of(context).export,
+                                  fileName: 'fclipboard.yaml',
+                                );
+                                if (output == null) {
+                                  return;
+                                }
+                                pd.show(msg: msg);
+                                await DBHelper().exportToFile(output);
+                                if (mounted) {
+                                  Navigator.pop(context);
+                                  showToast(context,
+                                      S.of(context).exportSuccessfully, false);
+                                }
+                                pd.close();
+                              },
+                              child: Text(S.of(context).export),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            child: TextButton(
+                              onPressed: () async {
+                                final msg = S.of(context).loading;
+                                FilePickerResult? result = await FilePicker
+                                    .platform
+                                    .pickFiles(allowedExtensions: ['yaml']);
+                                if (result == null) {
+                                  return;
+                                }
+                                pd.show(msg: msg);
+                                await DBHelper()
+                                    .importFromFile(result.files.single.path!);
+                                if (mounted) {
+                                  Navigator.pop(context);
+                                  showToast(context,
+                                      S.of(context).importSuccessfully, false);
+                                }
+                                pd.close();
+                              },
+                              child: Text(S.of(context).import),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(),
                 PopupMenuButton(
                   icon: const Icon(Icons.add),
                   itemBuilder: (context) => [
