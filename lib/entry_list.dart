@@ -81,6 +81,10 @@ class _EntryListViewState extends State<EntryListView> {
         } else {
           var subtitle = entry.subtitle;
           for (var p in entry.parameters) {
+            if (p.required && p.initial.isEmpty) {
+              return;
+            }
+
             if (p.initial.isNotEmpty) {
               subtitle = subtitle.replaceAll(p.name, p.initial);
             }
