@@ -29,7 +29,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add Subscription"),
         "addSuccessfully":
             MessageLookupByLibrary.simpleMessage("Add successfully"),
-        "appTitle": MessageLookupByLibrary.simpleMessage("fclipboard"),
+        "appTitle": MessageLookupByLibrary.simpleMessage("Your Second Brain"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "category": MessageLookupByLibrary.simpleMessage("Category"),
         "categoryCannotBeEmpty":

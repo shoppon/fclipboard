@@ -100,10 +100,10 @@ class S {
     );
   }
 
-  /// `fclipboard`
+  /// `Your Second Brain`
   String get appTitle {
     return Intl.message(
-      'fclipboard',
+      'Your Second Brain',
       name: 'appTitle',
       desc: '',
       args: [],

@@ -1,5 +1,9 @@
+attrs
 fastapi
 fuzzywuzzy
 kubernetes
+loguru
+pydantic
+pymongo
 pyyaml
 uvicorn

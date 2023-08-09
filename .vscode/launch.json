@@ -8,13 +8,9 @@
       "name": "subscription",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/provider/subscription.py",
+      "program": "${workspaceFolder}/provider/api_debug.py",
       "console": "integratedTerminal",
       "justMyCode": false,
-      "args": [
-        "--file",
-        "~/Downloads/fclipboard.yaml"
-      ]
     }
   ]
 }

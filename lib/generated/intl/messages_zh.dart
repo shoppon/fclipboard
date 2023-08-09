@@ -27,7 +27,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addParameter": MessageLookupByLibrary.simpleMessage("添加参数"),
         "addSubscription": MessageLookupByLibrary.simpleMessage("订阅"),
         "addSuccessfully": MessageLookupByLibrary.simpleMessage("添加成功"),
-        "appTitle": MessageLookupByLibrary.simpleMessage("快搜"),
+        "appTitle": MessageLookupByLibrary.simpleMessage("第二大脑"),
         "cancel": MessageLookupByLibrary.simpleMessage("取消"),
         "category": MessageLookupByLibrary.simpleMessage("分类"),
         "categoryCannotBeEmpty": MessageLookupByLibrary.simpleMessage("分类不能为空"),
