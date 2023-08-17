@@ -30,6 +30,8 @@ dependencies:
   file_picker: ^5.3.1
   json_annotation: ^4.8.1
   package_info_plus: ^4.0.2
+  openapi:
+    path: ./apis/out/dart/
 
 dev_dependencies:
   flutter_test:
