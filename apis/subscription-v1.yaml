@@ -66,8 +66,72 @@ paths:
                 $ref: "#/components/schemas/Subscription"
         500:
           description: "Internal Server Error"
+  /v1/subscriptions/{sid}/pull:
+    get:
+      summary: "Pull a subscription"
+      description: "Pull a subscription"
+      operationId: "pullSubscription"
+      parameters:
+        - name: "sid"
+          in: "path"
+          description: "The subscription id"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+            example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionPullResp"
+        500:
+          description: "Internal Server Error"
 components:
   schemas:
+    Entry:
+      type: "object"
+      properties:
+        title:
+          type: "string"
+          description: "The title of the entry"
+          example: "Foo Bar Baz"
+        content:
+          type: "string"
+          description: "The content of the entry"
+          example: "foo bar baz"
+        category:
+          type: "string"
+          description: "The category of the entry"
+          example: "news"
+        counter:
+          type: "integer"
+          description: "The counter of the entry"
+          example: 1
+        parameters:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+                description: "The name of the parameter"
+                example: "foo"
+              initial:
+                type: "string"
+                description: "The initial value of the parameter"
+                example: "bar"
+              required:
+                type: "boolean"
+                description: "Whether the parameter is required"
+                example: true
+              description:
+                type: "string"
+                description: "The description of the parameter"
+                example: "Foo Bar Baz"
+
     Subscription:
       type: "object"
       properties:
@@ -106,42 +170,11 @@ components:
         entries:
           type: "array"
           items:
-            type: "object"
-            properties:
-              title:
-                type: "string"
-                description: "The title of the entry"
-                example: "Foo Bar Baz"
-              content:
-                type: "string"
-                description: "The content of the entry"
-                example: "foo bar baz"
-              category:
-                type: "string"
-                description: "The category of the entry"
-                example: "news"
-              counter:
-                type: "integer"
-                description: "The counter of the entry"
-                example: 1
-              parameters:
-                type: "array"
-                items:
-                  type: "object"
-                  properties:
-                    name:
-                      type: "string"
-                      description: "The name of the parameter"
-                      example: "foo"
-                    initial:
-                      type: "string"
-                      description: "The initial value of the parameter"
-                      example: "bar"
-                    required:
-                      type: "boolean"
-                      description: "Whether the parameter is required"
-                      example: true
-                    description:
-                      type: "string"
-                      description: "The description of the parameter"
-                      example: "Foo Bar Baz"
+            $ref: "#/components/schemas/Entry"
+    SubscriptionPullResp:
+      type: "object"
+      properties:
+        entries:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Entry"

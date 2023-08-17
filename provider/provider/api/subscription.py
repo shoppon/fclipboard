@@ -3,6 +3,7 @@ from loguru import logger
 from pydantic import BaseModel
 from pydantic.typing import Optional
 
+from provider.clients import mongo
 from provider.objects.entry import Entry as EntryObject
 from provider.objects.subscription import Subscription as SubscriptionObject
 
@@ -59,8 +60,21 @@ def create_subscription(request: SubscriptionRequest):
 @app.post("/subscriptions/{sid}/push")
 def push_subscription(sid: str, request: PushRequest):
     logger.info(f'Pushing subscription {sid}, request: {request}.')
-    # TODO(xp): batch insert
+    ops = []
     for req in request.entries:
-        EntryObject(**req.dict()).create()
+        eb = EntryObject(**req.dict())
+        eb.subscriptions = list(set(eb.subscriptions + [sid]))
+        ops.append(eb.build())
+    mongo.batch_insert(mongo.get_collection('entry'), ops)
     logger.info(f'Pushing subscription {sid} done.')
     return {'id': sid}
+
+
+@app.get("/subscriptions/{sid}/pull")
+def pull_subscription(sid: str):
+    logger.info(f'Pulling subscription {sid}.')
+    entries = EntryObject.get_all(sid)
+    for entry in entries:
+        entry['id'] = entry.pop('_id').binary.hex()
+    logger.info(f'Pulling subscription {sid} done.')
+    return {'entries': entries}

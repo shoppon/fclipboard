@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import attrs
+from pymongo import UpdateOne
 
 from provider.clients import mongo
 
@@ -22,14 +23,28 @@ class Entry:
     counter: int = attrs.Factory(int)
     parameters: list[Param] = attrs.Factory(list)
     created_at: str = attrs.Factory(datetime.utcnow)
+    subscriptions: list[str] = attrs.Factory(list)
 
     def get(self, sid):
         return mongo.get_collection('entry').find_one({'sid': sid})
 
-    def get_all(self):
-        return mongo.get_collection('entry').find()
+    @staticmethod
+    def get_all(sid):
+        return list(mongo.get_collection('entry').find({
+            "subscriptions": {
+                "$elemMatch": {
+                    "$eq": sid
+                }
+            }
+        }))
 
-    def create(self):
-        created = mongo.get_collection('entry').insert_one(
-            attrs.asdict(self)).inserted_id
-        return created.binary.hex()
+    def build(self):
+        update_op = UpdateOne(
+            {
+                'name': self.name
+            }, {
+                '$set': attrs.asdict(self),
+            },
+            upsert=True
+        )
+        return update_op
