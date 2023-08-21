@@ -69,6 +69,7 @@ Class | Method | HTTP request | Description
  - [Entry](doc//Entry.md)
  - [EntryParametersInner](doc//EntryParametersInner.md)
  - [Subscription](doc//Subscription.md)
+ - [SubscriptionListResp](doc//SubscriptionListResp.md)
  - [SubscriptionPostReq](doc//SubscriptionPostReq.md)
  - [SubscriptionPostReqSubscription](doc//SubscriptionPostReqSubscription.md)
  - [SubscriptionPostResp](doc//SubscriptionPostResp.md)

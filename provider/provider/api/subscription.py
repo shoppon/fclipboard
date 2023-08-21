@@ -40,7 +40,7 @@ class PushRequest(BaseModel):
     entries: list[Entry]
 
 
-@app.get("/subscriptions")
+@app.get("/v1/subscriptions")
 def get_subscription():
     subscriptions = SubscriptionObject.get_all()
     # convert ObjectId to id field
@@ -49,7 +49,7 @@ def get_subscription():
     return {'subscriptions': subscriptions}
 
 
-@app.post("/subscriptions")
+@app.post("/v1/subscriptions")
 def create_subscription(request: SubscriptionRequest):
     logger.info(f'Creating subscription, request: {request}.')
     created = SubscriptionObject(**request.subscription.dict()).create()
@@ -57,7 +57,7 @@ def create_subscription(request: SubscriptionRequest):
     return {'id': created}
 
 
-@app.post("/subscriptions/{sid}/push")
+@app.post("/v1/subscriptions/{sid}/push")
 def push_subscription(sid: str, request: PushRequest):
     logger.info(f'Pushing subscription {sid}, request: {request}.')
     ops = []
@@ -70,7 +70,7 @@ def push_subscription(sid: str, request: PushRequest):
     return {'id': sid}
 
 
-@app.get("/subscriptions/{sid}/pull")
+@app.get("/v1/subscriptions/{sid}/pull")
 def pull_subscription(sid: str):
     logger.info(f'Pulling subscription {sid}.')
     entries = EntryObject.get_all(sid)

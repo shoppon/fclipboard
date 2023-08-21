@@ -73,6 +73,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Subscribe failed"),
         "subscribeSuccessfully":
             MessageLookupByLibrary.simpleMessage("Subscribe successfully"),
+        "subscriptionList":
+            MessageLookupByLibrary.simpleMessage("Subscription List"),
         "title": MessageLookupByLibrary.simpleMessage("Title"),
         "titleCannotBeEmpty":
             MessageLookupByLibrary.simpleMessage("Title cannot be empty"),

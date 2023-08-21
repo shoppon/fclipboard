@@ -188,6 +188,8 @@ class ApiClient {
           return EntryParametersInner.fromJson(value);
         case 'Subscription':
           return Subscription.fromJson(value);
+        case 'SubscriptionListResp':
+          return SubscriptionListResp.fromJson(value);
         case 'SubscriptionPostReq':
           return SubscriptionPostReq.fromJson(value);
         case 'SubscriptionPostReqSubscription':

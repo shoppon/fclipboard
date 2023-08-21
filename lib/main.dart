@@ -7,6 +7,7 @@ import 'package:fclipboard/entry_list.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/search.dart';
 import 'package:fclipboard/subscription.dart';
+import 'package:fclipboard/subscription_list.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -169,6 +170,25 @@ class _MainAppState extends State<MainApp> {
                         ],
                       )
                     : Container(),
+                PopupMenuButton(
+                  icon: const Icon(Icons.cloud),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const SubscriptionListView()),
+                          ).then((value) => {});
+                        },
+                        child: Text(S.of(context).subscriptionList),
+                      ),
+                    )
+                  ],
+                ),
                 PopupMenuButton(
                   icon: const Icon(Icons.add),
                   itemBuilder: (context) => [

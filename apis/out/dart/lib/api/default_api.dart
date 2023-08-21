@@ -105,7 +105,7 @@ class DefaultApi {
   /// List subscriptions
   ///
   /// List subscriptions
-  Future<List<Subscription>?> listSubscriptions() async {
+  Future<SubscriptionListResp?> listSubscriptions() async {
     final response = await listSubscriptionsWithHttpInfo();
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
@@ -114,11 +114,8 @@ class DefaultApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      final responseBody = await _decodeBodyBytes(response);
-      return (await apiClient.deserializeAsync(responseBody, 'List<Subscription>') as List)
-        .cast<Subscription>()
-        .toList(growable: false);
-
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SubscriptionListResp',) as SubscriptionListResp;
+    
     }
     return null;
   }

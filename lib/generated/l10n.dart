@@ -420,6 +420,16 @@ class S {
     );
   }
 
+  /// `Subscription List`
+  String get subscriptionList {
+    return Intl.message(
+      'Subscription List',
+      name: 'subscriptionList',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Subscribe failed`
   String get subscribeFailed {
     return Intl.message(

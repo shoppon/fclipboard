@@ -61,6 +61,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "subscribe": MessageLookupByLibrary.simpleMessage("订阅"),
         "subscribeFailed": MessageLookupByLibrary.simpleMessage("订阅失败"),
         "subscribeSuccessfully": MessageLookupByLibrary.simpleMessage("订阅成功"),
+        "subscriptionList": MessageLookupByLibrary.simpleMessage("订阅列表"),
         "title": MessageLookupByLibrary.simpleMessage("标题"),
         "titleCannotBeEmpty": MessageLookupByLibrary.simpleMessage("标题不能为空"),
         "update": MessageLookupByLibrary.simpleMessage("修改"),

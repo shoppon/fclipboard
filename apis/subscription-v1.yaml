@@ -15,9 +15,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Subscription"
+                $ref: "#/components/schemas/SubscriptionListResp"
         500:
           description: "Internal Server Error"
     post:
@@ -131,7 +129,6 @@ components:
                 type: "string"
                 description: "The description of the parameter"
                 example: "Foo Bar Baz"
-
     Subscription:
       type: "object"
       properties:
@@ -139,6 +136,27 @@ components:
           type: "string"
           format: "uuid"
           example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        url:
+          type: "string"
+          description: "The url of the subscription"
+          example: "https://example.com"
+        categories:
+          type: "array"
+          items:
+            type: "string"
+            description: "The categories of the subscription"
+            example: "news"
+        created_at:
+          type: "string"
+          format: "date-time"
+          example: "2019-11-29T09:42:31.123Z"
+    SubscriptionListResp:
+      type: "object"
+      properties:
+        subscriptions:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Subscription"
     SubscriptionPostReq:
       type: "object"
       properties:

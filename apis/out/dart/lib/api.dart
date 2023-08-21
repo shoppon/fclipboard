@@ -33,6 +33,7 @@ part 'api/default_api.dart';
 part 'model/entry.dart';
 part 'model/entry_parameters_inner.dart';
 part 'model/subscription.dart';
+part 'model/subscription_list_resp.dart';
 part 'model/subscription_post_req.dart';
 part 'model/subscription_post_req_subscription.dart';
 part 'model/subscription_post_resp.dart';

@@ -59,7 +59,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listSubscriptions**
-> List<Subscription> listSubscriptions()
+> SubscriptionListResp listSubscriptions()
 
 List subscriptions
 
@@ -84,7 +84,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**List<Subscription>**](Subscription.md)
+[**SubscriptionListResp**](SubscriptionListResp.md)
 
 ### Authorization
 

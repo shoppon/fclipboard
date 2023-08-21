@@ -14,6 +14,9 @@ class Subscription {
   /// Returns a new [Subscription] instance.
   Subscription({
     this.id,
+    this.url,
+    this.categories = const [],
+    this.createdAt,
   });
 
   ///
@@ -24,17 +27,42 @@ class Subscription {
   ///
   String? id;
 
+  /// The url of the subscription
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? url;
+
+  List<String> categories;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  DateTime? createdAt;
+
   @override
   bool operator ==(Object other) => identical(this, other) || other is Subscription &&
-    other.id == id;
+    other.id == id &&
+    other.url == url &&
+    _deepEquality.equals(other.categories, categories) &&
+    other.createdAt == createdAt;
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (id == null ? 0 : id!.hashCode);
+    (id == null ? 0 : id!.hashCode) +
+    (url == null ? 0 : url!.hashCode) +
+    (categories.hashCode) +
+    (createdAt == null ? 0 : createdAt!.hashCode);
 
   @override
-  String toString() => 'Subscription[id=$id]';
+  String toString() => 'Subscription[id=$id, url=$url, categories=$categories, createdAt=$createdAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -42,6 +70,17 @@ class Subscription {
       json[r'id'] = this.id;
     } else {
       json[r'id'] = null;
+    }
+    if (this.url != null) {
+      json[r'url'] = this.url;
+    } else {
+      json[r'url'] = null;
+    }
+      json[r'categories'] = this.categories;
+    if (this.createdAt != null) {
+      json[r'created_at'] = this.createdAt!.toUtc().toIso8601String();
+    } else {
+      json[r'created_at'] = null;
     }
     return json;
   }
@@ -66,6 +105,11 @@ class Subscription {
 
       return Subscription(
         id: mapValueOfType<String>(json, r'id'),
+        url: mapValueOfType<String>(json, r'url'),
+        categories: json[r'categories'] is Iterable
+            ? (json[r'categories'] as Iterable).cast<String>().toList(growable: false)
+            : const [],
+        createdAt: mapDateTime(json, r'created_at', r''),
       );
     }
     return null;

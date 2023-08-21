@@ -1,5 +1,4 @@
 .gitignore
-.openapi-generator-ignore
 .travis.yml
 README.md
 analysis_options.yaml
@@ -7,6 +6,7 @@ doc/DefaultApi.md
 doc/Entry.md
 doc/EntryParametersInner.md
 doc/Subscription.md
+doc/SubscriptionListResp.md
 doc/SubscriptionPostReq.md
 doc/SubscriptionPostReqSubscription.md
 doc/SubscriptionPostResp.md
@@ -26,18 +26,11 @@ lib/auth/oauth.dart
 lib/model/entry.dart
 lib/model/entry_parameters_inner.dart
 lib/model/subscription.dart
+lib/model/subscription_list_resp.dart
 lib/model/subscription_post_req.dart
 lib/model/subscription_post_req_subscription.dart
 lib/model/subscription_post_resp.dart
 lib/model/subscription_pull_resp.dart
 lib/model/subscription_push_req.dart
 pubspec.yaml
-test/default_api_test.dart
-test/entry_parameters_inner_test.dart
-test/entry_test.dart
-test/subscription_post_req_subscription_test.dart
-test/subscription_post_req_test.dart
-test/subscription_post_resp_test.dart
-test/subscription_pull_resp_test.dart
-test/subscription_push_req_test.dart
-test/subscription_test.dart
+test/subscription_list_resp_test.dart
