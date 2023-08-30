@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 import 'dao.dart';
 
@@ -32,19 +33,26 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
   }
 
   Future<void> _pushSubscription(Subscription subscription) async {
+    ProgressDialog pd = ProgressDialog(context: context);
+    pd.show(msg: "Loading...");
     final apiInstance =
         DefaultApi(ApiClient(basePath: 'http://localhost:8000'));
-    final dbs = await _dbHelper.entries(category: subscription.categories[0]);
+    final dbs = await _dbHelper.entries(categories: subscription.categories);
+    if (dbs.isEmpty) {
+      pd.close();
+      return;
+    }
     final List<Entry> entries = [];
     for (final db in dbs) {
       entries.add(Entry(
-        title: db.title,
+        name: db.title,
         content: db.subtitle,
         category: db.categoryName,
       ));
     }
     await apiInstance.pushSubscription(subscription.id!,
         subscriptionPushReq: SubscriptionPushReq(entries: entries));
+    pd.close();
   }
 
   @override

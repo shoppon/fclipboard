@@ -146,7 +146,7 @@ class DBHelper {
     });
   }
 
-  Future<List<Entry>> entries({String? category, String? title}) async {
+  Future<List<Entry>> entries({List<String>? categories, String? title}) async {
     final Database db = await database;
     List<Map<String, Object?>> results;
     var query = '''
@@ -155,20 +155,21 @@ class DBHelper {
       INNER JOIN category ON entry.category_id = category.id
       LEFT JOIN param ON entry.id = param.entry_id
     ''';
-    final params = [];
     if (title != null) {
       query += '''
-        WHERE entry.title = ?
+        WHERE entry.title = '$title'
       ''';
-      params.add(title);
     }
-    if (category != null) {
+    if (categories != null) {
+      List<String> cats = [];
+      for (var c in categories) {
+        cats.add("'$c'");
+      }
       query += '''
-        WHERE category.name = ?
+        WHERE category.name IN (${cats.join(", ")})
       ''';
-      params.add(category);
     }
-    results = await db.rawQuery(query, params);
+    results = await db.rawQuery(query);
     List<Entry> entries = [];
     for (var r in results) {
       // find existing entry

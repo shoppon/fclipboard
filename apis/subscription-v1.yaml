@@ -92,9 +92,9 @@ components:
     Entry:
       type: "object"
       properties:
-        title:
+        name:
           type: "string"
-          description: "The title of the entry"
+          description: "The name of the entry"
           example: "Foo Bar Baz"
         content:
           type: "string"

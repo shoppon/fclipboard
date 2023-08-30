@@ -13,21 +13,21 @@ part of openapi.api;
 class Entry {
   /// Returns a new [Entry] instance.
   Entry({
-    this.title,
+    this.name,
     this.content,
     this.category,
     this.counter,
     this.parameters = const [],
   });
 
-  /// The title of the entry
+  /// The name of the entry
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
   /// does not include a default value (using the "default:" property), however, the generated
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  String? title;
+  String? name;
 
   /// The content of the entry
   ///
@@ -60,7 +60,7 @@ class Entry {
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is Entry &&
-    other.title == title &&
+    other.name == name &&
     other.content == content &&
     other.category == category &&
     other.counter == counter &&
@@ -69,21 +69,21 @@ class Entry {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (title == null ? 0 : title!.hashCode) +
+    (name == null ? 0 : name!.hashCode) +
     (content == null ? 0 : content!.hashCode) +
     (category == null ? 0 : category!.hashCode) +
     (counter == null ? 0 : counter!.hashCode) +
     (parameters.hashCode);
 
   @override
-  String toString() => 'Entry[title=$title, content=$content, category=$category, counter=$counter, parameters=$parameters]';
+  String toString() => 'Entry[name=$name, content=$content, category=$category, counter=$counter, parameters=$parameters]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.title != null) {
-      json[r'title'] = this.title;
+    if (this.name != null) {
+      json[r'name'] = this.name;
     } else {
-      json[r'title'] = null;
+      json[r'name'] = null;
     }
     if (this.content != null) {
       json[r'content'] = this.content;
@@ -123,7 +123,7 @@ class Entry {
       }());
 
       return Entry(
-        title: mapValueOfType<String>(json, r'title'),
+        name: mapValueOfType<String>(json, r'name'),
         content: mapValueOfType<String>(json, r'content'),
         category: mapValueOfType<String>(json, r'category'),
         counter: mapValueOfType<int>(json, r'counter'),

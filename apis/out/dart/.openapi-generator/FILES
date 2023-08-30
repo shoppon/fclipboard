@@ -33,4 +33,3 @@ lib/model/subscription_post_resp.dart
 lib/model/subscription_pull_resp.dart
 lib/model/subscription_push_req.dart
 pubspec.yaml
-test/subscription_list_resp_test.dart
