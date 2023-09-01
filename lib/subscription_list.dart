@@ -55,6 +55,13 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
     pd.close();
   }
 
+  Future<void> _pullSubscription(Subscription subscription) async {
+    ProgressDialog pd = ProgressDialog(context: context);
+    pd.show(msg: "Loading...");
+
+    pd.close();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,15 +79,25 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
           itemBuilder: (context, index) {
             final subscription = _subscriptions[index];
             return ListTile(
-              title: Text(subscription.url ?? ''),
-              subtitle: Text(subscription.categories.join(', ')),
-              trailing: IconButton(
-                icon: const Icon(Icons.sync),
-                onPressed: () {
-                  _pushSubscription(subscription);
-                },
-              ),
-            );
+                title: Text(subscription.url ?? ''),
+                subtitle: Text(subscription.categories.join(', ')),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.download),
+                      onPressed: () {
+                        _pullSubscription(subscription);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.publish_outlined),
+                      onPressed: () {
+                        _pushSubscription(subscription);
+                      },
+                    ),
+                  ],
+                ));
           },
         ));
   }
