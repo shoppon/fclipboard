@@ -4,6 +4,7 @@ import 'package:fclipboard/adding_category.dart';
 import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/entry_list.dart';
+import 'package:fclipboard/login.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/search.dart';
 import 'package:fclipboard/subscription.dart';
@@ -14,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -310,6 +310,19 @@ class _MainAppState extends State<MainApp> {
                         }
                       },
                     ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.login),
+                    title: const Text("Login..."),
+                    subtitle: const Text("login with google"),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const GoogleLoginScreen()),
+                      );
+                    },
                   ),
                 ],
               ),

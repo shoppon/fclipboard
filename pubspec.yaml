@@ -16,9 +16,9 @@ dependencies:
   yaml: ^3.1.1
   path: ^1.8.0
   path_provider: ^2.0.2
-  sqflite: ^2.2.6
+  sqflite: ^2.3.0
   sqflite_common_ffi: ^2.2.2
-  sqlite3_flutter_libs: ^0.5.13
+  sqlite3_flutter_libs: ^0.5.16
   hotkey_manager: ^0.1.7
   window_manager: ^0.3.1
   fluttertoast: ^8.2.1
@@ -30,6 +30,7 @@ dependencies:
   file_picker: ^5.3.1
   json_annotation: ^4.8.1
   package_info_plus: ^4.0.2
+  flutter_web_auth_2: ^2.0.0
   openapi:
     path: ./apis/out/dart/
 
