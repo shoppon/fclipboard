@@ -4,11 +4,19 @@ info:
   description: "The Subscription API allows you to subscribe to events that happen in the system."
   version: "1.0.0"
 paths:
-  /v1/subscriptions:
+  /v1/{uid}/subscriptions:
     get:
       summary: "List subscriptions"
       description: "List subscriptions"
       operationId: "listSubscriptions"
+      parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
       responses:
         200:
           description: "OK"
@@ -22,6 +30,14 @@ paths:
       summary: "Create a subscription"
       description: "Create a subscription"
       operationId: "createSubscription"
+      parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
       requestBody:
         content:
           application/json:
@@ -36,12 +52,19 @@ paths:
                 $ref: "#/components/schemas/SubscriptionPostResp"
         500:
           description: "Internal Server Error"
-  /v1/subscriptions/{sid}/push:
+  /v1/{uid}subscriptions/{sid}/push:
     post:
       summary: "Push a subscription"
       description: "Push a subscription"
       operationId: "pushSubscription"
       parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
         - name: "sid"
           in: "path"
           description: "The subscription id"
@@ -64,12 +87,19 @@ paths:
                 $ref: "#/components/schemas/Subscription"
         500:
           description: "Internal Server Error"
-  /v1/subscriptions/{sid}/pull:
+  /v1/{uid}/subscriptions/{sid}/pull:
     get:
       summary: "Pull a subscription"
       description: "Pull a subscription"
       operationId: "pullSubscription"
       parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
         - name: "sid"
           in: "path"
           description: "The subscription id"

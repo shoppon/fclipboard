@@ -9,14 +9,14 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**createSubscription**](DefaultApi.md#createsubscription) | **POST** /v1/subscriptions | Create a subscription
-[**listSubscriptions**](DefaultApi.md#listsubscriptions) | **GET** /v1/subscriptions | List subscriptions
-[**pullSubscription**](DefaultApi.md#pullsubscription) | **GET** /v1/subscriptions/{sid}/pull | Pull a subscription
-[**pushSubscription**](DefaultApi.md#pushsubscription) | **POST** /v1/subscriptions/{sid}/push | Push a subscription
+[**createSubscription**](DefaultApi.md#createsubscription) | **POST** /v1/{uid}/subscriptions | Create a subscription
+[**listSubscriptions**](DefaultApi.md#listsubscriptions) | **GET** /v1/{uid}/subscriptions | List subscriptions
+[**pullSubscription**](DefaultApi.md#pullsubscription) | **GET** /v1/{uid}/subscriptions/{sid}/pull | Pull a subscription
+[**pushSubscription**](DefaultApi.md#pushsubscription) | **POST** /v1/{uid}subscriptions/{sid}/push | Push a subscription
 
 
 # **createSubscription**
-> SubscriptionPostResp createSubscription(subscriptionPostReq)
+> SubscriptionPostResp createSubscription(uid, subscriptionPostReq)
 
 Create a subscription
 
@@ -27,10 +27,11 @@ Create a subscription
 import 'package:openapi/api.dart';
 
 final api_instance = DefaultApi();
+final uid = shopppon@gmail.com; // String | The user id
 final subscriptionPostReq = SubscriptionPostReq(); // SubscriptionPostReq | 
 
 try {
-    final result = api_instance.createSubscription(subscriptionPostReq);
+    final result = api_instance.createSubscription(uid, subscriptionPostReq);
     print(result);
 } catch (e) {
     print('Exception when calling DefaultApi->createSubscription: $e\n');
@@ -41,6 +42,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **uid** | **String**| The user id | 
  **subscriptionPostReq** | [**SubscriptionPostReq**](SubscriptionPostReq.md)|  | [optional] 
 
 ### Return type
@@ -59,7 +61,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listSubscriptions**
-> SubscriptionListResp listSubscriptions()
+> SubscriptionListResp listSubscriptions(uid)
 
 List subscriptions
 
@@ -70,9 +72,10 @@ List subscriptions
 import 'package:openapi/api.dart';
 
 final api_instance = DefaultApi();
+final uid = shopppon@gmail.com; // String | The user id
 
 try {
-    final result = api_instance.listSubscriptions();
+    final result = api_instance.listSubscriptions(uid);
     print(result);
 } catch (e) {
     print('Exception when calling DefaultApi->listSubscriptions: $e\n');
@@ -80,7 +83,10 @@ try {
 ```
 
 ### Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **uid** | **String**| The user id | 
 
 ### Return type
 
@@ -98,7 +104,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **pullSubscription**
-> SubscriptionPullResp pullSubscription(sid)
+> SubscriptionPullResp pullSubscription(uid, sid)
 
 Pull a subscription
 
@@ -109,10 +115,11 @@ Pull a subscription
 import 'package:openapi/api.dart';
 
 final api_instance = DefaultApi();
+final uid = shopppon@gmail.com; // String | The user id
 final sid = d290f1ee-6c54-4b01-90e6-d701748f0851; // String | The subscription id
 
 try {
-    final result = api_instance.pullSubscription(sid);
+    final result = api_instance.pullSubscription(uid, sid);
     print(result);
 } catch (e) {
     print('Exception when calling DefaultApi->pullSubscription: $e\n');
@@ -123,6 +130,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **uid** | **String**| The user id | 
  **sid** | **String**| The subscription id | 
 
 ### Return type
@@ -141,7 +149,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **pushSubscription**
-> Subscription pushSubscription(sid, subscriptionPushReq)
+> Subscription pushSubscription(uid, sid, subscriptionPushReq)
 
 Push a subscription
 
@@ -152,11 +160,12 @@ Push a subscription
 import 'package:openapi/api.dart';
 
 final api_instance = DefaultApi();
+final uid = shopppon@gmail.com; // String | The user id
 final sid = d290f1ee-6c54-4b01-90e6-d701748f0851; // String | The subscription id
 final subscriptionPushReq = SubscriptionPushReq(); // SubscriptionPushReq | 
 
 try {
-    final result = api_instance.pushSubscription(sid, subscriptionPushReq);
+    final result = api_instance.pushSubscription(uid, sid, subscriptionPushReq);
     print(result);
 } catch (e) {
     print('Exception when calling DefaultApi->pushSubscription: $e\n');
@@ -167,6 +176,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **uid** | **String**| The user id | 
  **sid** | **String**| The subscription id | 
  **subscriptionPushReq** | [**SubscriptionPushReq**](SubscriptionPushReq.md)|  | [optional] 
 

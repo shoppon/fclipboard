@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dao.dart';
 
@@ -23,10 +24,16 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
     _loadSubscriptions();
   }
 
+  Future<String> _loadUserEmail() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString("fclipboard.email")!;
+  }
+
   Future<void> _loadSubscriptions() async {
+    final email = await _loadUserEmail();
     final apiInstance =
         DefaultApi(ApiClient(basePath: 'http://localhost:8000'));
-    final listResp = await apiInstance.listSubscriptions();
+    final listResp = await apiInstance.listSubscriptions(email);
     setState(() {
       _subscriptions = listResp!.subscriptions;
     });
@@ -50,7 +57,8 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
         category: db.categoryName,
       ));
     }
-    await apiInstance.pushSubscription(subscription.id!,
+    final email = await _loadUserEmail();
+    await apiInstance.pushSubscription(email, subscription.id!,
         subscriptionPushReq: SubscriptionPushReq(entries: entries));
     pd.close();
   }

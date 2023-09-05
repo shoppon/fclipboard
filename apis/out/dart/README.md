@@ -41,10 +41,11 @@ import 'package:openapi/api.dart';
 
 
 final api_instance = DefaultApi();
+final uid = shopppon@gmail.com; // String | The user id
 final subscriptionPostReq = SubscriptionPostReq(); // SubscriptionPostReq | 
 
 try {
-    final result = api_instance.createSubscription(subscriptionPostReq);
+    final result = api_instance.createSubscription(uid, subscriptionPostReq);
     print(result);
 } catch (e) {
     print('Exception when calling DefaultApi->createSubscription: $e\n');
@@ -58,10 +59,10 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*DefaultApi* | [**createSubscription**](doc//DefaultApi.md#createsubscription) | **POST** /v1/subscriptions | Create a subscription
-*DefaultApi* | [**listSubscriptions**](doc//DefaultApi.md#listsubscriptions) | **GET** /v1/subscriptions | List subscriptions
-*DefaultApi* | [**pullSubscription**](doc//DefaultApi.md#pullsubscription) | **GET** /v1/subscriptions/{sid}/pull | Pull a subscription
-*DefaultApi* | [**pushSubscription**](doc//DefaultApi.md#pushsubscription) | **POST** /v1/subscriptions/{sid}/push | Push a subscription
+*DefaultApi* | [**createSubscription**](doc//DefaultApi.md#createsubscription) | **POST** /v1/{uid}/subscriptions | Create a subscription
+*DefaultApi* | [**listSubscriptions**](doc//DefaultApi.md#listsubscriptions) | **GET** /v1/{uid}/subscriptions | List subscriptions
+*DefaultApi* | [**pullSubscription**](doc//DefaultApi.md#pullsubscription) | **GET** /v1/{uid}/subscriptions/{sid}/pull | Pull a subscription
+*DefaultApi* | [**pushSubscription**](doc//DefaultApi.md#pushsubscription) | **POST** /v1/{uid}subscriptions/{sid}/push | Push a subscription
 
 
 ## Documentation For Models

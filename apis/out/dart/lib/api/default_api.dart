@@ -24,10 +24,14 @@ class DefaultApi {
   ///
   /// Parameters:
   ///
+  /// * [String] uid (required):
+  ///   The user id
+  ///
   /// * [SubscriptionPostReq] subscriptionPostReq:
-  Future<Response> createSubscriptionWithHttpInfo({ SubscriptionPostReq? subscriptionPostReq, }) async {
+  Future<Response> createSubscriptionWithHttpInfo(String uid, { SubscriptionPostReq? subscriptionPostReq, }) async {
     // ignore: prefer_const_declarations
-    final path = r'/v1/subscriptions';
+    final path = r'/v1/{uid}/subscriptions'
+      .replaceAll('{uid}', uid);
 
     // ignore: prefer_final_locals
     Object? postBody = subscriptionPostReq;
@@ -56,9 +60,12 @@ class DefaultApi {
   ///
   /// Parameters:
   ///
+  /// * [String] uid (required):
+  ///   The user id
+  ///
   /// * [SubscriptionPostReq] subscriptionPostReq:
-  Future<SubscriptionPostResp?> createSubscription({ SubscriptionPostReq? subscriptionPostReq, }) async {
-    final response = await createSubscriptionWithHttpInfo( subscriptionPostReq: subscriptionPostReq, );
+  Future<SubscriptionPostResp?> createSubscription(String uid, { SubscriptionPostReq? subscriptionPostReq, }) async {
+    final response = await createSubscriptionWithHttpInfo(uid,  subscriptionPostReq: subscriptionPostReq, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -77,9 +84,15 @@ class DefaultApi {
   /// List subscriptions
   ///
   /// Note: This method returns the HTTP [Response].
-  Future<Response> listSubscriptionsWithHttpInfo() async {
+  ///
+  /// Parameters:
+  ///
+  /// * [String] uid (required):
+  ///   The user id
+  Future<Response> listSubscriptionsWithHttpInfo(String uid,) async {
     // ignore: prefer_const_declarations
-    final path = r'/v1/subscriptions';
+    final path = r'/v1/{uid}/subscriptions'
+      .replaceAll('{uid}', uid);
 
     // ignore: prefer_final_locals
     Object? postBody;
@@ -105,8 +118,13 @@ class DefaultApi {
   /// List subscriptions
   ///
   /// List subscriptions
-  Future<SubscriptionListResp?> listSubscriptions() async {
-    final response = await listSubscriptionsWithHttpInfo();
+  ///
+  /// Parameters:
+  ///
+  /// * [String] uid (required):
+  ///   The user id
+  Future<SubscriptionListResp?> listSubscriptions(String uid,) async {
+    final response = await listSubscriptionsWithHttpInfo(uid,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -128,11 +146,15 @@ class DefaultApi {
   ///
   /// Parameters:
   ///
+  /// * [String] uid (required):
+  ///   The user id
+  ///
   /// * [String] sid (required):
   ///   The subscription id
-  Future<Response> pullSubscriptionWithHttpInfo(String sid,) async {
+  Future<Response> pullSubscriptionWithHttpInfo(String uid, String sid,) async {
     // ignore: prefer_const_declarations
-    final path = r'/v1/subscriptions/{sid}/pull'
+    final path = r'/v1/{uid}/subscriptions/{sid}/pull'
+      .replaceAll('{uid}', uid)
       .replaceAll('{sid}', sid);
 
     // ignore: prefer_final_locals
@@ -162,10 +184,13 @@ class DefaultApi {
   ///
   /// Parameters:
   ///
+  /// * [String] uid (required):
+  ///   The user id
+  ///
   /// * [String] sid (required):
   ///   The subscription id
-  Future<SubscriptionPullResp?> pullSubscription(String sid,) async {
-    final response = await pullSubscriptionWithHttpInfo(sid,);
+  Future<SubscriptionPullResp?> pullSubscription(String uid, String sid,) async {
+    final response = await pullSubscriptionWithHttpInfo(uid, sid,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -187,13 +212,17 @@ class DefaultApi {
   ///
   /// Parameters:
   ///
+  /// * [String] uid (required):
+  ///   The user id
+  ///
   /// * [String] sid (required):
   ///   The subscription id
   ///
   /// * [SubscriptionPushReq] subscriptionPushReq:
-  Future<Response> pushSubscriptionWithHttpInfo(String sid, { SubscriptionPushReq? subscriptionPushReq, }) async {
+  Future<Response> pushSubscriptionWithHttpInfo(String uid, String sid, { SubscriptionPushReq? subscriptionPushReq, }) async {
     // ignore: prefer_const_declarations
-    final path = r'/v1/subscriptions/{sid}/push'
+    final path = r'/v1/{uid}subscriptions/{sid}/push'
+      .replaceAll('{uid}', uid)
       .replaceAll('{sid}', sid);
 
     // ignore: prefer_final_locals
@@ -223,12 +252,15 @@ class DefaultApi {
   ///
   /// Parameters:
   ///
+  /// * [String] uid (required):
+  ///   The user id
+  ///
   /// * [String] sid (required):
   ///   The subscription id
   ///
   /// * [SubscriptionPushReq] subscriptionPushReq:
-  Future<Subscription?> pushSubscription(String sid, { SubscriptionPushReq? subscriptionPushReq, }) async {
-    final response = await pushSubscriptionWithHttpInfo(sid,  subscriptionPushReq: subscriptionPushReq, );
+  Future<Subscription?> pushSubscription(String uid, String sid, { SubscriptionPushReq? subscriptionPushReq, }) async {
+    final response = await pushSubscriptionWithHttpInfo(uid, sid,  subscriptionPushReq: subscriptionPushReq, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }

@@ -40,19 +40,22 @@ class PushRequest(BaseModel):
     entries: list[Entry]
 
 
-@app.get("/v1/subscriptions")
-def get_subscription():
-    subscriptions = SubscriptionObject.get_all()
+@app.get("/v1/{uid}/subscriptions")
+def get_subscription(uid: str):
+    subscriptions = SubscriptionObject.get_all(uid)
     # convert ObjectId to id field
     for subscription in subscriptions:
         subscription['id'] = subscription.pop('_id').binary.hex()
     return {'subscriptions': subscriptions}
 
 
-@app.post("/v1/subscriptions")
-def create_subscription(request: SubscriptionRequest):
+@app.post("/v1/{uid}/subscriptions")
+def create_subscription(uid: str, request: SubscriptionRequest):
     logger.info(f'Creating subscription, request: {request}.')
-    created = SubscriptionObject(**request.subscription.dict()).create()
+    subscription = SubscriptionObject(**request.subscription.dict())
+    subscription.create_by = uid
+    subscription.users.append(uid)
+    created = subscription.create()
     logger.info('Creating subscription done.')
     return {'id': created}
 
