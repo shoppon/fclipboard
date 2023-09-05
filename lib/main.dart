@@ -4,7 +4,7 @@ import 'package:fclipboard/adding_category.dart';
 import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/entry_list.dart';
-import 'package:fclipboard/login.dart';
+import 'package:fclipboard/login_google.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/search.dart';
 import 'package:fclipboard/subscription.dart';

@@ -17,8 +17,9 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
   Future<void> _loginWithGoogle() async {
     final authorizationEndpoint =
         Uri.parse('https://accounts.google.com/o/oauth2/v2/auth');
-    final redirectUri = Uri.parse('http://localhost:8000');
-    const clientId =
+    final redirectUri = Uri.parse(
+        'com.googleusercontent.apps.605059586369-7j8lsdtq3vg5mta1r1gk0gml0jok2i2s');
+    final clientId =
         '605059586369-et8rg4k80c70flk7tevcblmt4kadg89g.apps.googleusercontent.com';
     final scopes = ['openid', 'email', 'profile'];
 
@@ -40,13 +41,15 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen> {
     final code = Uri.parse(result).queryParameters['code'];
 
     // Step 2: Exchange authorization code for access token
-    final url = Uri.https('www.googleapis.com', 'oauth2/v4/token');
+    final url = Uri.https('oauth2.googleapis.com', 'token');
+    final clientSecret = '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';
     final tokenResponse = await http.post(
       url,
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: {
         'code': code,
         'client_id': clientId,
+        'client_secret': clientSecret,
         'redirect_uri': redirectUri.toString(),
         'grant_type': 'authorization_code',
       },

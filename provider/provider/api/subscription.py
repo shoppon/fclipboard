@@ -78,3 +78,8 @@ def pull_subscription(sid: str):
         entry['id'] = entry.pop('_id').binary.hex()
     logger.info(f'Pulling subscription {sid} done.')
     return {'entries': entries}
+
+
+@app.get("/v1/oauth/callback")
+def oauth_callback():
+    return {}
