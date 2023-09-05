@@ -4,7 +4,6 @@ import 'package:fclipboard/adding_category.dart';
 import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/entry_list.dart';
-import 'package:fclipboard/login_google.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/search.dart';
 import 'package:fclipboard/subscription.dart';
@@ -18,6 +17,8 @@ import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'generated/l10n.dart';
 import 'paste.dart';
@@ -70,6 +71,9 @@ class _MainAppState extends State<MainApp> {
 
   final _dbHelper = DBHelper();
 
+  String _givenName = "N/A";
+  String _email = "N/A";
+
   @override
   void initState() {
     super.initState();
@@ -81,6 +85,22 @@ class _MainAppState extends State<MainApp> {
     if (isDesktop()) {
       registerHotkey(_searchFocusNode);
     }
+
+    loadUserInfo();
+  }
+
+  Future<void> loadUserInfo() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      final email = prefs.getString("fclipboard.email")!;
+      if (email.isNotEmpty) {
+        _email = email;
+      }
+      final givenName = prefs.getString("fclipboard.givenName")!;
+      if (givenName.isNotEmpty) {
+        _givenName = givenName;
+      }
+    });
   }
 
   Future<String> getVersion() async {
@@ -253,10 +273,10 @@ class _MainAppState extends State<MainApp> {
             drawer: Drawer(
               child: ListView(
                 children: <Widget>[
-                  const UserAccountsDrawerHeader(
-                      accountName: Text('Shoppon'),
-                      accountEmail: Text('shopppon@gmail.com'),
-                      currentAccountPicture: CircleAvatar(
+                  UserAccountsDrawerHeader(
+                      accountName: Text(_givenName),
+                      accountEmail: Text(_email),
+                      currentAccountPicture: const CircleAvatar(
                         child: Icon(Icons.person),
                       )),
                   ListTile(
@@ -311,18 +331,30 @@ class _MainAppState extends State<MainApp> {
                       },
                     ),
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.login),
-                    title: const Text("Login..."),
-                    subtitle: const Text("login with google"),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const GoogleLoginScreen()),
-                      );
-                    },
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SignInWithAppleButton(
+                      onPressed: () async {
+                        final credential =
+                            await SignInWithApple.getAppleIDCredential(
+                          scopes: [
+                            AppleIDAuthorizationScopes.email,
+                            AppleIDAuthorizationScopes.fullName,
+                          ],
+                        );
+
+                        if (credential.email!.isNotEmpty) {
+                          final SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          await prefs.setString(
+                              "fclipboard.email", credential.email!);
+                          await prefs.setString(
+                              "fclipboard.givenName", credential.givenName!);
+                        }
+
+                        await loadUserInfo();
+                      },
+                    ),
                   ),
                 ],
               ),
