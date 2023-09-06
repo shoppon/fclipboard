@@ -13,19 +13,13 @@ part of openapi.api;
 class Subscription {
   /// Returns a new [Subscription] instance.
   Subscription({
-    this.id,
+    required this.id,
     this.url,
     this.categories = const [],
     this.createdAt,
   });
 
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? id;
+  String id;
 
   /// The url of the subscription
   ///
@@ -56,7 +50,7 @@ class Subscription {
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (id == null ? 0 : id!.hashCode) +
+    (id.hashCode) +
     (url == null ? 0 : url!.hashCode) +
     (categories.hashCode) +
     (createdAt == null ? 0 : createdAt!.hashCode);
@@ -66,11 +60,7 @@ class Subscription {
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.id != null) {
       json[r'id'] = this.id;
-    } else {
-      json[r'id'] = null;
-    }
     if (this.url != null) {
       json[r'url'] = this.url;
     } else {
@@ -104,7 +94,7 @@ class Subscription {
       }());
 
       return Subscription(
-        id: mapValueOfType<String>(json, r'id'),
+        id: mapValueOfType<String>(json, r'id')!,
         url: mapValueOfType<String>(json, r'url'),
         categories: json[r'categories'] is Iterable
             ? (json[r'categories'] as Iterable).cast<String>().toList(growable: false)
@@ -157,6 +147,8 @@ class Subscription {
 
   /// The list of required keys that must be present in a JSON.
   static const requiredKeys = <String>{
+    'id',
+    'categories',
   };
 }
 

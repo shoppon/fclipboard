@@ -358,4 +358,25 @@ class DBHelper {
       await insertEntry(entry);
     }
   }
+
+  Future<void> importEntry(Entry entry) async {
+    // set entry id
+    final ets = await entries(title: entry.title);
+    if (ets.isNotEmpty) {
+      entry.id = ets.first.id;
+    } else {
+      entry.id = 0;
+    }
+    // add category if not exists
+    final category = await getCategoryByName(entry.categoryName);
+    if (category == null) {
+      final id =
+          await insertCategory(Category(name: entry.categoryName, icon: '😆'));
+      entry.categoryId = id;
+    } else {
+      entry.categoryId = category.id;
+    }
+    // insert entry
+    await insertEntry(entry);
+  }
 }

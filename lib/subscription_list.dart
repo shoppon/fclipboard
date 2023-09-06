@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dao.dart';
+import 'model.dart' as model;
 
 class SubscriptionListView extends StatefulWidget {
   const SubscriptionListView({
@@ -58,7 +61,7 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
       ));
     }
     final email = await _loadUserEmail();
-    await apiInstance.pushSubscription(email, subscription.id!,
+    await apiInstance.pushSubscription(email, subscription.id,
         subscriptionPushReq: SubscriptionPushReq(entries: entries));
     pd.close();
   }
@@ -66,8 +69,37 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
   Future<void> _pullSubscription(Subscription subscription) async {
     ProgressDialog pd = ProgressDialog(context: context);
     pd.show(msg: "Loading...");
-
-    pd.close();
+    final apiInstance =
+        DefaultApi(ApiClient(basePath: 'http://localhost:8000'));
+    final email = await _loadUserEmail();
+    try {
+      final resp = await apiInstance.pullSubscription(email, subscription.id);
+      // FIXME(xp): this operation may be very slow
+      final total = resp?.entries.length;
+      var count = 0;
+      for (final e in resp!.entries) {
+        List<model.Param> params = [];
+        for (final p in e.parameters) {
+          params.add(model.Param.fromJson(p.toJson()));
+        }
+        final entry = model.Entry(
+            title: e.name!,
+            subtitle: e.content!,
+            parameters: params,
+            categoryId: 0,
+            categoryName: e.category!,
+            counter: e.counter ?? 0);
+        await _dbHelper.importEntry(entry);
+        setState(() {
+          pd.update(value: count * 100 ~/ total!, msg: entry.title);
+        });
+        count++;
+      }
+    } catch (e) {
+      log(e.toString());
+    } finally {
+      pd.close();
+    }
   }
 
   @override

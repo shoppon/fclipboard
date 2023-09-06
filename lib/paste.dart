@@ -46,28 +46,9 @@ class _PastePageState extends State<PastePage> {
                 ElevatedButton(
                   onPressed: () async {
                     try {
-                      final entity = Entry.fromJson(
+                      final entry = Entry.fromJson(
                           jsonDecode(utf8.decode(base64Decode(content))));
-                      // set entry id
-                      final entries =
-                          await DBHelper().entries(title: entity.title);
-                      if (entries.isNotEmpty) {
-                        entity.id = entries.first.id;
-                      } else {
-                        entity.id = 0;
-                      }
-                      // add category if not exists
-                      final category = await DBHelper()
-                          .getCategoryByName(entity.categoryName);
-                      if (category == null) {
-                        final id = await DBHelper().insertCategory(
-                            Category(name: entity.categoryName, icon: '😆'));
-                        entity.categoryId = id;
-                      } else {
-                        entity.categoryId = category.id;
-                      }
-                      // insert entry
-                      await DBHelper().insertEntry(entity);
+                      await DBHelper().importEntry(entry);
                       if (context.mounted) {
                         showToast(
                             context, S.of(context).pasteSuccessfully, false);

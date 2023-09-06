@@ -161,6 +161,9 @@ components:
                 example: "Foo Bar Baz"
     Subscription:
       type: "object"
+      required:
+        - "id"
+        - "categories"
       properties:
         id:
           type: "string"

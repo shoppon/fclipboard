@@ -60,8 +60,8 @@ def create_subscription(uid: str, request: SubscriptionRequest):
     return {'id': created}
 
 
-@app.post("/v1/subscriptions/{sid}/push")
-def push_subscription(sid: str, request: PushRequest):
+@app.post("/v1/{udi}/subscriptions/{sid}/push")
+def push_subscription(uid: str, sid: str, request: PushRequest):
     logger.info(f'Pushing subscription {sid}, request: {request}.')
     ops = []
     for req in request.entries:
@@ -73,8 +73,8 @@ def push_subscription(sid: str, request: PushRequest):
     return {'id': sid}
 
 
-@app.get("/v1/subscriptions/{sid}/pull")
-def pull_subscription(sid: str):
+@app.get("/v1/{uid}/subscriptions/{sid}/pull")
+def pull_subscription(uid: str, sid: str):
     logger.info(f'Pulling subscription {sid}.')
     entries = EntryObject.get_all(sid)
     for entry in entries:
