@@ -11,6 +11,9 @@
       "program": "${workspaceFolder}/provider/api_debug.py",
       "console": "integratedTerminal",
       "justMyCode": false,
+      "args": [
+        "${workspaceFolder}/provider/settings.toml"
+      ]
     }
   ]
 }

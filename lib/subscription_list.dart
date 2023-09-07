@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:fclipboard/constants.dart';
 import 'package:fclipboard/generated/l10n.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
@@ -40,8 +41,7 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
 
   Future<void> _loadSubscriptions() async {
     final email = await _loadUserEmail();
-    final apiInstance =
-        DefaultApi(ApiClient(basePath: 'http://localhost:8000'));
+    final apiInstance = DefaultApi(ApiClient(basePath: baseURL));
     final listResp = await apiInstance.listSubscriptions(email);
     setState(() {
       _subscriptions = listResp!.subscriptions;
@@ -51,8 +51,7 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
   Future<void> _pushSubscription(Subscription subscription) async {
     ProgressDialog pd = ProgressDialog(context: context);
     pd.show(msg: S.of(context).pushing);
-    final apiInstance =
-        DefaultApi(ApiClient(basePath: 'http://localhost:8000'));
+    final apiInstance = DefaultApi(ApiClient(basePath: baseURL));
     final dbs = await _dbHelper.entries(categories: subscription.categories);
     if (dbs.isEmpty) {
       pd.close();
@@ -96,8 +95,7 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
   Future<void> _pullSubscription(Subscription subscription) async {
     ProgressDialog pd = ProgressDialog(context: context);
     pd.show(msg: "Loading...");
-    final apiInstance =
-        DefaultApi(ApiClient(basePath: 'http://localhost:8000'));
+    final apiInstance = DefaultApi(ApiClient(basePath: baseURL));
     final email = await _loadUserEmail();
     try {
       final resp = await apiInstance.pullSubscription(email, subscription.id);

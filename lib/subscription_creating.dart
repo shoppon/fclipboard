@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fclipboard/constants.dart';
 import 'package:fclipboard/model.dart';
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
@@ -51,8 +52,7 @@ class _SubscriptionCreatingState extends State<SubscriptionCreatingPage> {
     ProgressDialog pd = ProgressDialog(context: context);
     pd.show(msg: "Loading...");
     final email = await _loadUserEmail();
-    final apiInstance =
-        DefaultApi(ApiClient(basePath: 'http://localhost:8000'));
+    final apiInstance = DefaultApi(ApiClient(basePath: baseURL));
     final req = SubscriptionPostReq(
       subscription: SubscriptionPostReqSubscription(
         categories: categories,

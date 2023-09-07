@@ -1,0 +1,1 @@
+mongo_url = "mongodb://root:mongo@localhost:32717/"

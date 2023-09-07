@@ -1,8 +1,10 @@
 from pymongo.mongo_client import MongoClient
 
+from provider.config import settings
+
 
 def get_collection(name):
-    mc = MongoClient('mongodb://root:mongo@localhost:32717/')
+    mc = MongoClient(settings.mongo_url)
     return mc['fclipboard'][name]
 
 
