@@ -221,7 +221,7 @@ class DefaultApi {
   /// * [SubscriptionPushReq] subscriptionPushReq:
   Future<Response> pushSubscriptionWithHttpInfo(String uid, String sid, { SubscriptionPushReq? subscriptionPushReq, }) async {
     // ignore: prefer_const_declarations
-    final path = r'/v1/{uid}subscriptions/{sid}/push'
+    final path = r'/v1/{uid}/subscriptions/{sid}/push'
       .replaceAll('{uid}', uid)
       .replaceAll('{sid}', sid);
 
@@ -259,7 +259,7 @@ class DefaultApi {
   ///   The subscription id
   ///
   /// * [SubscriptionPushReq] subscriptionPushReq:
-  Future<Subscription?> pushSubscription(String uid, String sid, { SubscriptionPushReq? subscriptionPushReq, }) async {
+  Future<SubscriptionPushResp?> pushSubscription(String uid, String sid, { SubscriptionPushReq? subscriptionPushReq, }) async {
     final response = await pushSubscriptionWithHttpInfo(uid, sid,  subscriptionPushReq: subscriptionPushReq, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
@@ -268,7 +268,7 @@ class DefaultApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'Subscription',) as Subscription;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SubscriptionPushResp',) as SubscriptionPushResp;
     
     }
     return null;

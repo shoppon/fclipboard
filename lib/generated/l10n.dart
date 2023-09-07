@@ -70,6 +70,16 @@ class S {
     );
   }
 
+  /// `Add Failed`
+  String get addFailed {
+    return Intl.message(
+      'Add Failed',
+      name: 'addFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add Parameter`
   String get addParameter {
     return Intl.message(
@@ -200,6 +210,16 @@ class S {
     );
   }
 
+  /// `Creating Subscription`
+  String get creatingSubscription {
+    return Intl.message(
+      'Creating Subscription',
+      name: 'creatingSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Delete`
   String get delete {
     return Intl.message(
@@ -275,6 +295,16 @@ class S {
     return Intl.message(
       'Import',
       name: 'import',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import failed`
+  String get importFailed {
+    return Intl.message(
+      'Import failed',
+      name: 'importFailed',
       desc: '',
       args: [],
     );
@@ -370,6 +400,16 @@ class S {
     );
   }
 
+  /// `Pusing...`
+  String get pushing {
+    return Intl.message(
+      'Pusing...',
+      name: 'pushing',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Required`
   String get required {
     return Intl.message(
@@ -420,16 +460,6 @@ class S {
     );
   }
 
-  /// `Subscription List`
-  String get subscriptionList {
-    return Intl.message(
-      'Subscription List',
-      name: 'subscriptionList',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Subscribe failed`
   String get subscribeFailed {
     return Intl.message(
@@ -445,6 +475,16 @@ class S {
     return Intl.message(
       'Subscribe successfully',
       name: 'subscribeSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription List`
+  String get subscriptionList {
+    return Intl.message(
+      'Subscription List',
+      name: 'subscriptionList',
       desc: '',
       args: [],
     );

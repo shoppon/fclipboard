@@ -1,12 +1,17 @@
 import 'dart:developer';
 
+import 'package:fclipboard/generated/l10n.dart';
+import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:openapi/api.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dao.dart';
 import 'model.dart' as model;
+
+var logger = Logger();
 
 class SubscriptionListView extends StatefulWidget {
   const SubscriptionListView({
@@ -20,6 +25,7 @@ class SubscriptionListView extends StatefulWidget {
 class _SubscriptionListViewState extends State<SubscriptionListView> {
   List<Subscription> _subscriptions = [];
   final _dbHelper = DBHelper();
+  int _curSelected = -1;
 
   @override
   void initState() {
@@ -44,7 +50,7 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
 
   Future<void> _pushSubscription(Subscription subscription) async {
     ProgressDialog pd = ProgressDialog(context: context);
-    pd.show(msg: "Loading...");
+    pd.show(msg: S.of(context).pushing);
     final apiInstance =
         DefaultApi(ApiClient(basePath: 'http://localhost:8000'));
     final dbs = await _dbHelper.entries(categories: subscription.categories);
@@ -54,16 +60,37 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
     }
     final List<Entry> entries = [];
     for (final db in dbs) {
+      final params = db.parameters
+          .map((e) => EntryParametersInner(
+                name: e.name,
+                initial: e.initial,
+                required_: e.required,
+                description: e.description,
+              ))
+          .toList();
       entries.add(Entry(
         name: db.title,
         content: db.subtitle,
+        counter: db.counter,
         category: db.categoryName,
+        parameters: params,
       ));
     }
-    final email = await _loadUserEmail();
-    await apiInstance.pushSubscription(email, subscription.id,
-        subscriptionPushReq: SubscriptionPushReq(entries: entries));
-    pd.close();
+    try {
+      final email = await _loadUserEmail();
+      await apiInstance.pushSubscription(email, subscription.id,
+          subscriptionPushReq: SubscriptionPushReq(entries: entries));
+      if (context.mounted) {
+        showToast(context, S.of(context).addSuccessfully, false);
+      }
+    } catch (e) {
+      logger.e("Failed to push", error: e);
+      if (context.mounted) {
+        showToast(context, S.of(context).addFailed, true);
+      }
+    } finally {
+      pd.close();
+    }
   }
 
   Future<void> _pullSubscription(Subscription subscription) async {
@@ -118,8 +145,12 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
           itemCount: _subscriptions.length,
           itemBuilder: (context, index) {
             final subscription = _subscriptions[index];
-            return ListTile(
-                title: Text(subscription.url ?? ''),
+            return Container(
+              color: _curSelected == index
+                  ? const Color.fromARGB(255, 199, 226, 248)
+                  : null,
+              child: ListTile(
+                title: Text(subscription.name ?? ''),
                 subtitle: Text(subscription.categories.join(', ')),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -137,7 +168,15 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
                       },
                     ),
                   ],
-                ));
+                ),
+                selected: _curSelected == index,
+                onTap: () {
+                  setState(() {
+                    _curSelected = index;
+                  });
+                },
+              ),
+            );
           },
         ));
   }

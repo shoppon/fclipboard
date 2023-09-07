@@ -12,7 +12,7 @@ Method | HTTP request | Description
 [**createSubscription**](DefaultApi.md#createsubscription) | **POST** /v1/{uid}/subscriptions | Create a subscription
 [**listSubscriptions**](DefaultApi.md#listsubscriptions) | **GET** /v1/{uid}/subscriptions | List subscriptions
 [**pullSubscription**](DefaultApi.md#pullsubscription) | **GET** /v1/{uid}/subscriptions/{sid}/pull | Pull a subscription
-[**pushSubscription**](DefaultApi.md#pushsubscription) | **POST** /v1/{uid}subscriptions/{sid}/push | Push a subscription
+[**pushSubscription**](DefaultApi.md#pushsubscription) | **POST** /v1/{uid}/subscriptions/{sid}/push | Push a subscription
 
 
 # **createSubscription**
@@ -149,7 +149,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **pushSubscription**
-> Subscription pushSubscription(uid, sid, subscriptionPushReq)
+> SubscriptionPushResp pushSubscription(uid, sid, subscriptionPushReq)
 
 Push a subscription
 
@@ -182,7 +182,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Subscription**](Subscription.md)
+[**SubscriptionPushResp**](SubscriptionPushResp.md)
 
 ### Authorization
 

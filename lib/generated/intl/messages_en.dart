@@ -24,6 +24,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "addCategory": MessageLookupByLibrary.simpleMessage("Add Category"),
         "addEntry": MessageLookupByLibrary.simpleMessage("Add Entry"),
+        "addFailed": MessageLookupByLibrary.simpleMessage("Add Failed"),
         "addParameter": MessageLookupByLibrary.simpleMessage("Add Parameter"),
         "addSubscription":
             MessageLookupByLibrary.simpleMessage("Add Subscription"),
@@ -42,6 +43,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "content": MessageLookupByLibrary.simpleMessage("Content"),
         "contentCannotBeEmpty":
             MessageLookupByLibrary.simpleMessage("Content cannot be empty"),
+        "creatingSubscription":
+            MessageLookupByLibrary.simpleMessage("Creating Subscription"),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deleteAllSuccess": MessageLookupByLibrary.simpleMessage(
             "All entries deleted successfully"),
@@ -53,6 +56,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportSuccessfully":
             MessageLookupByLibrary.simpleMessage("Export successfully"),
         "import": MessageLookupByLibrary.simpleMessage("Import"),
+        "importFailed": MessageLookupByLibrary.simpleMessage("Import failed"),
         "importSuccessfully":
             MessageLookupByLibrary.simpleMessage("Import successfully"),
         "initial": MessageLookupByLibrary.simpleMessage("Initial"),
@@ -64,6 +68,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "paste": MessageLookupByLibrary.simpleMessage("Paste"),
         "pasteSuccessfully":
             MessageLookupByLibrary.simpleMessage("Paste successfully"),
+        "pushing": MessageLookupByLibrary.simpleMessage("Pusing..."),
         "required": MessageLookupByLibrary.simpleMessage("Required"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "searchHint": MessageLookupByLibrary.simpleMessage("Search"),

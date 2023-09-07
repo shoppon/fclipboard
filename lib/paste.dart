@@ -55,7 +55,9 @@ class _PastePageState extends State<PastePage> {
                         Navigator.of(context).pop();
                       }
                     } catch (e) {
-                      showToast(context, S.of(context).errorFormat, true);
+                      if (context.mounted) {
+                        showToast(context, S.of(context).errorFormat, true);
+                      }
                     }
                   },
                   child: Text(S.of(context).ok),

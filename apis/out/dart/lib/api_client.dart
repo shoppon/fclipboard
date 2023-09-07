@@ -200,6 +200,8 @@ class ApiClient {
           return SubscriptionPullResp.fromJson(value);
         case 'SubscriptionPushReq':
           return SubscriptionPushReq.fromJson(value);
+        case 'SubscriptionPushResp':
+          return SubscriptionPushResp.fromJson(value);
         default:
           dynamic match;
           if (value is List && (match = _regList.firstMatch(targetType)?.group(1)) != null) {

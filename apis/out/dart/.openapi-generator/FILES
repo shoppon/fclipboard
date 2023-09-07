@@ -12,6 +12,7 @@ doc/SubscriptionPostReqSubscription.md
 doc/SubscriptionPostResp.md
 doc/SubscriptionPullResp.md
 doc/SubscriptionPushReq.md
+doc/SubscriptionPushResp.md
 git_push.sh
 lib/api.dart
 lib/api/default_api.dart
@@ -32,4 +33,6 @@ lib/model/subscription_post_req_subscription.dart
 lib/model/subscription_post_resp.dart
 lib/model/subscription_pull_resp.dart
 lib/model/subscription_push_req.dart
+lib/model/subscription_push_resp.dart
 pubspec.yaml
+test/subscription_push_resp_test.dart

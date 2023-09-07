@@ -62,7 +62,7 @@ Class | Method | HTTP request | Description
 *DefaultApi* | [**createSubscription**](doc//DefaultApi.md#createsubscription) | **POST** /v1/{uid}/subscriptions | Create a subscription
 *DefaultApi* | [**listSubscriptions**](doc//DefaultApi.md#listsubscriptions) | **GET** /v1/{uid}/subscriptions | List subscriptions
 *DefaultApi* | [**pullSubscription**](doc//DefaultApi.md#pullsubscription) | **GET** /v1/{uid}/subscriptions/{sid}/pull | Pull a subscription
-*DefaultApi* | [**pushSubscription**](doc//DefaultApi.md#pushsubscription) | **POST** /v1/{uid}subscriptions/{sid}/push | Push a subscription
+*DefaultApi* | [**pushSubscription**](doc//DefaultApi.md#pushsubscription) | **POST** /v1/{uid}/subscriptions/{sid}/push | Push a subscription
 
 
 ## Documentation For Models
@@ -76,6 +76,7 @@ Class | Method | HTTP request | Description
  - [SubscriptionPostResp](doc//SubscriptionPostResp.md)
  - [SubscriptionPullResp](doc//SubscriptionPullResp.md)
  - [SubscriptionPushReq](doc//SubscriptionPushReq.md)
+ - [SubscriptionPushResp](doc//SubscriptionPushResp.md)
 
 
 ## Documentation For Authorization

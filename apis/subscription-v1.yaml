@@ -52,7 +52,7 @@ paths:
                 $ref: "#/components/schemas/SubscriptionPostResp"
         500:
           description: "Internal Server Error"
-  /v1/{uid}subscriptions/{sid}/push:
+  /v1/{uid}/subscriptions/{sid}/push:
     post:
       summary: "Push a subscription"
       description: "Push a subscription"
@@ -84,7 +84,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Subscription"
+                $ref: "#/components/schemas/SubscriptionPushResp"
         500:
           description: "Internal Server Error"
   /v1/{uid}/subscriptions/{sid}/pull:
@@ -169,6 +169,10 @@ components:
           type: "string"
           format: "uuid"
           example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        name:
+          type: "string"
+          description: "The name of the subscription"
+          example: "subscription name"
         url:
           type: "string"
           description: "The url of the subscription"
@@ -222,6 +226,13 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Entry"
+    SubscriptionPushResp:
+      type: "object"
+      properties:
+        sid:
+          type: string
+          description: "subscription id"
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
     SubscriptionPullResp:
       type: "object"
       properties:

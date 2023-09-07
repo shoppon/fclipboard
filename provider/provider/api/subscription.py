@@ -60,7 +60,7 @@ def create_subscription(uid: str, request: SubscriptionRequest):
     return {'id': created}
 
 
-@app.post("/v1/{udi}/subscriptions/{sid}/push")
+@app.post("/v1/{uid}/subscriptions/{sid}/push")
 def push_subscription(uid: str, sid: str, request: PushRequest):
     logger.info(f'Pushing subscription {sid}, request: {request}.')
     ops = []

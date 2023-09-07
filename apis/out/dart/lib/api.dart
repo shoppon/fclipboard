@@ -39,6 +39,7 @@ part 'model/subscription_post_req_subscription.dart';
 part 'model/subscription_post_resp.dart';
 part 'model/subscription_pull_resp.dart';
 part 'model/subscription_push_req.dart';
+part 'model/subscription_push_resp.dart';
 
 
 /// An [ApiClient] instance that uses the default values obtained from

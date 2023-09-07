@@ -6,7 +6,8 @@ import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/entry_list.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/search.dart';
-import 'package:fclipboard/subscription.dart';
+import 'package:fclipboard/subscription_adding.dart';
+import 'package:fclipboard/subscription_creating.dart';
 import 'package:fclipboard/subscription_list.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:file_picker/file_picker.dart';
@@ -19,9 +20,12 @@ import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logger/logger.dart';
 
 import 'generated/l10n.dart';
 import 'paste.dart';
+
+var logger = Logger();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -175,14 +179,27 @@ class _MainAppState extends State<MainApp> {
                                   return;
                                 }
                                 pd.show(msg: msg);
-                                await DBHelper()
-                                    .importFromFile(result.files.single.path!);
-                                if (mounted) {
-                                  Navigator.pop(context);
-                                  showToast(context,
-                                      S.of(context).importSuccessfully, false);
+                                try {
+                                  await DBHelper().importFromFile(
+                                      result.files.single.path!);
+                                  if (mounted) {
+                                    showToast(
+                                        context,
+                                        S.of(context).importSuccessfully,
+                                        false);
+                                  }
+                                } catch (e) {
+                                  logger.e('Failed to import.', error: e);
+                                  if (mounted) {
+                                    showToast(context,
+                                        S.of(context).importFailed, true);
+                                  }
+                                } finally {
+                                  if (mounted) {
+                                    Navigator.pop(context);
+                                  }
+                                  pd.close();
                                 }
-                                pd.close();
                               },
                               child: Text(S.of(context).import),
                             ),
@@ -206,7 +223,35 @@ class _MainAppState extends State<MainApp> {
                         },
                         child: Text(S.of(context).subscriptionList),
                       ),
-                    )
+                    ),
+                    PopupMenuItem(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const SubscriptionAddingPage()),
+                          ).then((value) => {});
+                        },
+                        child: Text(S.of(context).addSubscription),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const SubscriptionCreatingPage()),
+                          ).then((value) => {});
+                        },
+                        child: Text(S.of(context).creatingSubscription),
+                      ),
+                    ),
                   ],
                 ),
                 PopupMenuButton(
@@ -238,19 +283,6 @@ class _MainAppState extends State<MainApp> {
                           ).then((value) => {});
                         },
                         child: Text(S.of(context).addEntry),
-                      ),
-                    ),
-                    PopupMenuItem(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const SubscriptionPage()),
-                          ).then((value) => {});
-                        },
-                        child: Text(S.of(context).addSubscription),
                       ),
                     ),
                     PopupMenuItem(

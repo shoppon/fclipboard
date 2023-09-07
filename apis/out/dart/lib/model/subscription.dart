@@ -14,12 +14,22 @@ class Subscription {
   /// Returns a new [Subscription] instance.
   Subscription({
     required this.id,
+    this.name,
     this.url,
     this.categories = const [],
     this.createdAt,
   });
 
   String id;
+
+  /// The name of the subscription
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  String? name;
 
   /// The url of the subscription
   ///
@@ -43,6 +53,7 @@ class Subscription {
   @override
   bool operator ==(Object other) => identical(this, other) || other is Subscription &&
     other.id == id &&
+    other.name == name &&
     other.url == url &&
     _deepEquality.equals(other.categories, categories) &&
     other.createdAt == createdAt;
@@ -51,16 +62,22 @@ class Subscription {
   int get hashCode =>
     // ignore: unnecessary_parenthesis
     (id.hashCode) +
+    (name == null ? 0 : name!.hashCode) +
     (url == null ? 0 : url!.hashCode) +
     (categories.hashCode) +
     (createdAt == null ? 0 : createdAt!.hashCode);
 
   @override
-  String toString() => 'Subscription[id=$id, url=$url, categories=$categories, createdAt=$createdAt]';
+  String toString() => 'Subscription[id=$id, name=$name, url=$url, categories=$categories, createdAt=$createdAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
       json[r'id'] = this.id;
+    if (this.name != null) {
+      json[r'name'] = this.name;
+    } else {
+      json[r'name'] = null;
+    }
     if (this.url != null) {
       json[r'url'] = this.url;
     } else {
@@ -95,6 +112,7 @@ class Subscription {
 
       return Subscription(
         id: mapValueOfType<String>(json, r'id')!,
+        name: mapValueOfType<String>(json, r'name'),
         url: mapValueOfType<String>(json, r'url'),
         categories: json[r'categories'] is Iterable
             ? (json[r'categories'] as Iterable).cast<String>().toList(growable: false)

@@ -5,7 +5,7 @@ import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:json_schema2/json_schema2.dart';
+import 'package:json_schema/json_schema.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 import 'dao.dart';
@@ -27,9 +27,9 @@ class Subscriber {
     final decodedResponse = json.decode(utf8.decode(response.bodyBytes));
     final content =
         await rootBundle.loadString('assets/schemas/subscription.json');
-    final schema = JsonSchema.createSchema(json.decode(content));
-    final isValid = schema.validate(decodedResponse);
-    if (!isValid) {
+    final schema = JsonSchema.create(json.decode(content));
+    final result = schema.validate(decodedResponse);
+    if (!result.isValid) {
       throw Exception('Invalid schema');
     }
 
@@ -47,14 +47,14 @@ class Subscriber {
   }
 }
 
-class SubscriptionPage extends StatefulWidget {
-  const SubscriptionPage({Key? key}) : super(key: key);
+class SubscriptionAddingPage extends StatefulWidget {
+  const SubscriptionAddingPage({Key? key}) : super(key: key);
 
   @override
-  State<SubscriptionPage> createState() => _SubscriptionPageState();
+  State<SubscriptionAddingPage> createState() => _SubscriptionAddingPageState();
 }
 
-class _SubscriptionPageState extends State<SubscriptionPage> {
+class _SubscriptionAddingPageState extends State<SubscriptionAddingPage> {
   String url = '';
 
   @override
