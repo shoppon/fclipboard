@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel
@@ -12,7 +14,7 @@ app = FastAPI()
 
 class Subscription(BaseModel):
     name: str
-    description: str
+    description: Optional[str]
     categories: list[str]
 
 
@@ -22,17 +24,17 @@ class SubscriptionRequest(BaseModel):
 
 class Parameter(BaseModel):
     name: str
-    description: str
-    initial: str
-    required: bool
+    description: Optional[str]
+    initial: Optional[str]
+    required: Optional[bool]
 
 
 class Entry(BaseModel):
     name: str
     content: str
     category: str
-    counter: int
-    parameters: list[Parameter]
+    counter: Optional[int]
+    parameters: Optional[list[Parameter]]
 
 
 class PushRequest(BaseModel):

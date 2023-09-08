@@ -42,10 +42,17 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
   Future<void> _loadSubscriptions() async {
     final email = await _loadUserEmail();
     final apiInstance = DefaultApi(ApiClient(basePath: baseURL));
-    final listResp = await apiInstance.listSubscriptions(email);
-    setState(() {
-      _subscriptions = listResp!.subscriptions;
-    });
+    try {
+      final listResp = await apiInstance.listSubscriptions(email);
+      setState(() {
+        _subscriptions = listResp!.subscriptions;
+      });
+    } catch (e) {
+      logger.e("Failed to load subscription", error: e);
+      if (context.mounted) {
+        showToast(context, S.of(context).loadFailed, true);
+      }
+    }
   }
 
   Future<void> _pushSubscription(Subscription subscription) async {

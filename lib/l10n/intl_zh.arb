@@ -30,6 +30,7 @@
   "initial": "初始值",
   "listing": "列表",
   "loading": "加载中",
+  "loadFailed": "加载失败",
   "name": "名称",
   "noParameters": "没有参数",
   "ok": "确定",

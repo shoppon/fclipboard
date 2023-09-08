@@ -30,6 +30,7 @@
   "initial": "Initial",
   "listing": "Listing",
   "loading": "Loading",
+  "loadFailed": "Loading failed",
   "name": "Name",
   "noParameters": "No parameters",
   "ok": "OK",

@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:fclipboard/constants.dart';
 import 'package:fclipboard/model.dart';
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:openapi/api.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dao.dart';
 import 'utils.dart';
 import 'generated/l10n.dart';
+
+var logger = Logger();
 
 class SubscriptionCreatingPage extends StatefulWidget {
   const SubscriptionCreatingPage({super.key});
@@ -65,8 +68,9 @@ class _SubscriptionCreatingState extends State<SubscriptionCreatingPage> {
         showToast(context, S.of(context).addSuccessfully, false);
       }
     } catch (e) {
+      logger.e("Failed to create subscription", error: e);
       if (context.mounted) {
-        showToast(context, S.of(context).addFailed, false);
+        showToast(context, S.of(context).addFailed, true);
       }
     } finally {
       pd.close();

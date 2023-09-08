@@ -51,6 +51,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "importSuccessfully": MessageLookupByLibrary.simpleMessage("导入成功"),
         "initial": MessageLookupByLibrary.simpleMessage("初始值"),
         "listing": MessageLookupByLibrary.simpleMessage("列表"),
+        "loadFailed": MessageLookupByLibrary.simpleMessage("加载失败"),
         "loading": MessageLookupByLibrary.simpleMessage("加载中"),
         "name": MessageLookupByLibrary.simpleMessage("名称"),
         "noParameters": MessageLookupByLibrary.simpleMessage("没有参数"),

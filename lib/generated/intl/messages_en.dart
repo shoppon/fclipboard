@@ -61,6 +61,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Import successfully"),
         "initial": MessageLookupByLibrary.simpleMessage("Initial"),
         "listing": MessageLookupByLibrary.simpleMessage("Listing"),
+        "loadFailed": MessageLookupByLibrary.simpleMessage("Loading failed"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "noParameters": MessageLookupByLibrary.simpleMessage("No parameters"),

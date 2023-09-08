@@ -350,6 +350,16 @@ class S {
     );
   }
 
+  /// `Loading failed`
+  String get loadFailed {
+    return Intl.message(
+      'Loading failed',
+      name: 'loadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Name`
   String get name {
     return Intl.message(
