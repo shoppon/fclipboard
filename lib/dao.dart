@@ -1,21 +1,25 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:collection/collection.dart';
+import 'package:fclipboard/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:yaml/yaml.dart';
 
-import 'model.dart';
+import 'model.dart' as m;
 
 Future<String> getDatabasePath() async {
-  if (Platform.isIOS || Platform.isAndroid) {
+  if (isMobile()) {
     final directory = await getApplicationDocumentsDirectory();
     if (!await directory.exists()) {
       await directory.create(recursive: true);
     }
     final path = join(directory.path, 'fclipboard.db');
     return path;
+  } else if (kIsWeb) {
+    return "fclipboard.db";
   } else {
     return join(await databaseFactory.getDatabasesPath(), 'fclipboard.db');
   }
@@ -98,7 +102,7 @@ class DBHelper {
     );
   }
 
-  Future<int> insertCategory(Category category) async {
+  Future<int> insertCategory(m.Category category) async {
     final Database db = await database;
     final id = await db.insert(
       'category',
@@ -108,7 +112,7 @@ class DBHelper {
     return id;
   }
 
-  Future<int> insertEntry(Entry entry) async {
+  Future<int> insertEntry(m.Entry entry) async {
     final Database db = await database;
     final int id = await db.insert(
       'entry',
@@ -133,11 +137,11 @@ class DBHelper {
     return id;
   }
 
-  Future<List<Category>> categories() async {
+  Future<List<m.Category>> categories() async {
     final Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query('category');
     return List.generate(maps.length, (i) {
-      return Category(
+      return m.Category(
         name: maps[i]['name'],
         icon: maps[i]['icon'],
         id: maps[i]['id'],
@@ -146,7 +150,8 @@ class DBHelper {
     });
   }
 
-  Future<List<Entry>> entries({List<String>? categories, String? title}) async {
+  Future<List<m.Entry>> entries(
+      {List<String>? categories, String? title}) async {
     final Database db = await database;
     List<Map<String, Object?>> results;
     var query = '''
@@ -170,12 +175,12 @@ class DBHelper {
       ''';
     }
     results = await db.rawQuery(query);
-    List<Entry> entries = [];
+    List<m.Entry> entries = [];
     for (var r in results) {
       // find existing entry
-      Entry? entry = entries.firstWhereOrNull((e) => e.title == r['title']);
+      m.Entry? entry = entries.firstWhereOrNull((e) => e.title == r['title']);
       if (entry != null) {
-        entry.parameters.add(Param(
+        entry.parameters.add(m.Param(
           id: r['p_id'] as int,
           name: r['p_name'].toString(),
           initial: r['initial'].toString(),
@@ -183,7 +188,7 @@ class DBHelper {
           required: r['required'] == 1,
         ));
       } else {
-        entries.add(Entry(
+        entries.add(m.Entry(
           id: r['id'] as int,
           title: r['title'].toString(),
           subtitle: r['subtitle'].toString(),
@@ -194,7 +199,7 @@ class DBHelper {
           parameters: [],
         ));
         if (r['p_name'] != null) {
-          entries.last.parameters.add(Param(
+          entries.last.parameters.add(m.Param(
             id: r['p_id'] as int,
             name: r['p_name'].toString(),
             initial: r['initial'].toString(),
@@ -239,7 +244,7 @@ class DBHelper {
     ''', [title]);
   }
 
-  Future<Category?> getCategoryByName(String name) async {
+  Future<m.Category?> getCategoryByName(String name) async {
     final Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'category',
@@ -249,7 +254,7 @@ class DBHelper {
     if (maps.isEmpty) {
       return null;
     }
-    return Category(
+    return m.Category(
       name: maps[0]['name'],
       icon: maps[0]['icon'],
       id: maps[0]['id'],
@@ -322,7 +327,7 @@ class DBHelper {
 
     // insert categories
     for (var c in source['categories']) {
-      await insertCategory(Category(
+      await insertCategory(m.Category(
         id: categoryIds[c['name']] ?? 0,
         name: c['name'],
         icon: c['icon'],
@@ -334,11 +339,11 @@ class DBHelper {
       // find existing entry
       final existing =
           curEntries.firstWhereOrNull((ce) => ce.title == e['title']);
-      final params = <Param>[];
+      final params = <m.Param>[];
       for (var p in e['parameters'] ?? []) {
         final param =
             existing?.parameters.firstWhereOrNull((pm) => pm.name == p['name']);
-        params.add(Param(
+        params.add(m.Param(
           id: param == null ? 0 : param.id,
           name: p['name'],
           initial: p['initial'] ?? '',
@@ -347,7 +352,7 @@ class DBHelper {
           entryId: existing == null ? 0 : existing.id,
         ));
       }
-      final entry = Entry(
+      final entry = m.Entry(
         id: existing == null ? 0 : existing.id,
         title: e['title'],
         subtitle: e['subtitle'],
@@ -359,7 +364,7 @@ class DBHelper {
     }
   }
 
-  Future<void> importEntry(Entry entry) async {
+  Future<void> importEntry(m.Entry entry) async {
     // set entry id
     final ets = await entries(title: entry.title);
     if (ets.isNotEmpty) {
@@ -370,8 +375,8 @@ class DBHelper {
     // add category if not exists
     final category = await getCategoryByName(entry.categoryName);
     if (category == null) {
-      final id =
-          await insertCategory(Category(name: entry.categoryName, icon: '😆'));
+      final id = await insertCategory(
+          m.Category(name: entry.categoryName, icon: '😆'));
       entry.categoryId = id;
     } else {
       entry.categoryId = category.id;

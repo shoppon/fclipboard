@@ -97,8 +97,8 @@ class _EntryListViewState extends State<EntryListView> {
 
   void _handleKeyEvent(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
-      if (event.isAltPressed && Platform.isWindows ||
-          event.isMetaPressed && Platform.isMacOS) {
+      if (event.isAltPressed && isWindows() ||
+          event.isMetaPressed && isMacOS()) {
         final logicalKey = event.logicalKey.keyLabel;
         int number = logicalKey.codeUnitAt(0) - 49;
         if (number >= 0 && number <= 9) {
@@ -132,9 +132,9 @@ class _EntryListViewState extends State<EntryListView> {
   }
 
   String _getTrailingText(int index) {
-    if (Platform.isWindows) {
+    if (isWindows()) {
       return 'alt+${index + 1}';
-    } else if (Platform.isMacOS) {
+    } else if (isMacOS()) {
       return 'cmd+${index + 1}';
     } else {
       return '';

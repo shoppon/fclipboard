@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:fclipboard/adding_category.dart';
 import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/constants.dart';
@@ -12,12 +10,14 @@ import 'package:fclipboard/subscription_creating.dart';
 import 'package:fclipboard/subscription_list.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,10 +34,17 @@ void main() async {
     await windowManager.ensureInitialized();
     await hotKeyManager.unregisterAll();
   }
-  if (Platform.isWindows || Platform.isLinux) {
+  if (isWindowsOrLinux()) {
     sqfliteFfiInit();
   }
-  databaseFactory = databaseFactoryFfi;
+
+  if (kIsWeb) {
+    // Change default factory on the web
+    databaseFactory = databaseFactoryFfiWeb;
+  } else {
+    databaseFactory = databaseFactoryFfi;
+  }
+
   runApp(const MainApp());
 }
 
