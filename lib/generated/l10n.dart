@@ -360,6 +360,16 @@ class S {
     );
   }
 
+  /// `Please retry after login`
+  String get loginTooltip {
+    return Intl.message(
+      'Please retry after login',
+      name: 'loginTooltip',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Name`
   String get name {
     return Intl.message(

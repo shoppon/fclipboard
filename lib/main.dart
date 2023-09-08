@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fclipboard/adding_category.dart';
 import 'package:fclipboard/adding_entry.dart';
+import 'package:fclipboard/constants.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/entry_list.dart';
 import 'package:fclipboard/model.dart';
@@ -76,7 +77,7 @@ class _MainAppState extends State<MainApp> {
   final _dbHelper = DBHelper();
 
   String _givenName = "N/A";
-  String _email = "N/A";
+  String _email = defaultEmail;
 
   @override
   void initState() {
@@ -211,9 +212,15 @@ class _MainAppState extends State<MainApp> {
                   icon: const Icon(Icons.cloud),
                   itemBuilder: (context) => [
                     PopupMenuItem(
+                      enabled: _email != defaultEmail,
                       child: TextButton(
                         onPressed: () {
                           Navigator.pop(context);
+                          if (_email == defaultEmail) {
+                            showToast(
+                                context, S.of(context).loginTooltip, true);
+                            return;
+                          }
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -225,9 +232,15 @@ class _MainAppState extends State<MainApp> {
                       ),
                     ),
                     PopupMenuItem(
+                      enabled: _email != defaultEmail,
                       child: TextButton(
                         onPressed: () {
                           Navigator.pop(context);
+                          if (_email == defaultEmail) {
+                            showToast(
+                                context, S.of(context).loginTooltip, true);
+                            return;
+                          }
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -239,9 +252,15 @@ class _MainAppState extends State<MainApp> {
                       ),
                     ),
                     PopupMenuItem(
+                      enabled: _email != defaultEmail,
                       child: TextButton(
                         onPressed: () {
                           Navigator.pop(context);
+                          if (_email == defaultEmail) {
+                            showToast(
+                                context, S.of(context).loginTooltip, true);
+                            return;
+                          }
                           Navigator.push(
                             context,
                             MaterialPageRoute(

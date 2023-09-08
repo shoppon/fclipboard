@@ -63,6 +63,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "listing": MessageLookupByLibrary.simpleMessage("Listing"),
         "loadFailed": MessageLookupByLibrary.simpleMessage("Loading failed"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading"),
+        "loginTooltip":
+            MessageLookupByLibrary.simpleMessage("Please retry after login"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "noParameters": MessageLookupByLibrary.simpleMessage("No parameters"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),

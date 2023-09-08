@@ -53,6 +53,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "listing": MessageLookupByLibrary.simpleMessage("列表"),
         "loadFailed": MessageLookupByLibrary.simpleMessage("加载失败"),
         "loading": MessageLookupByLibrary.simpleMessage("加载中"),
+        "loginTooltip": MessageLookupByLibrary.simpleMessage("请登陆后再使用该功能"),
         "name": MessageLookupByLibrary.simpleMessage("名称"),
         "noParameters": MessageLookupByLibrary.simpleMessage("没有参数"),
         "ok": MessageLookupByLibrary.simpleMessage("确定"),

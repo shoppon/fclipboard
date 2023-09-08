@@ -31,6 +31,7 @@
   "listing": "Listing",
   "loading": "Loading",
   "loadFailed": "Loading failed",
+  "loginTooltip": "Please retry after login",
   "name": "Name",
   "noParameters": "No parameters",
   "ok": "OK",
