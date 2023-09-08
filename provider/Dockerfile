@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -13,5 +13,7 @@ COPY requirements.txt /opt/fclipboard/requirements.txt
 RUN pip install -r /opt/fclipboard/requirements.txt -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 
 COPY . /opt/fclipboard/
+
+RUN cd /opt/fclipboard && python3 setup.py install
 
 CMD ["/bin/bash"]

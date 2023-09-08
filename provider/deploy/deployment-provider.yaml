@@ -21,10 +21,8 @@ spec:
           # args: ["while true; do sleep 30; done;"]
           command:
             [
-              "/usr/bin/python3",
-              "/opt/fclipboard/subscription.py",
-              "--config",
-              "/opt/fclipboard/config.yaml",
+              "fclipboard-provider",
+              "/opt/fclipboard/settings.toml",
             ]
           imagePullPolicy: IfNotPresent
           resources:
@@ -35,10 +33,11 @@ spec:
               cpu: 2000m
               memory: 2Gi
           volumeMounts:
-            - mountPath: /opt/fclipboard/config.yaml
+            - mountPath: /opt/fclipboard/settings.toml
               name: config-file
+              subPath: settings.toml
+              readOnly: true
       volumes:
         - name: config-file
-          hostPath:
-            path: /opt/fclipboard/config.yaml
-            type: File
+          configMap:
+            name: provider-etc

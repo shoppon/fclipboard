@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel
-from pydantic.typing import Optional
 
 from provider.clients import mongo
 from provider.objects.entry import Entry as EntryObject
@@ -13,7 +12,7 @@ app = FastAPI()
 
 class Subscription(BaseModel):
     name: str
-    description: Optional[str]
+    description: str
     categories: list[str]
 
 
@@ -23,8 +22,8 @@ class SubscriptionRequest(BaseModel):
 
 class Parameter(BaseModel):
     name: str
-    description: Optional[str]
-    initial: Optional[str]
+    description: str
+    initial: str
     required: bool
 
 
@@ -32,8 +31,8 @@ class Entry(BaseModel):
     name: str
     content: str
     category: str
-    counter: Optional[int]
-    parameters: Optional[list[Parameter]]
+    counter: int
+    parameters: list[Parameter]
 
 
 class PushRequest(BaseModel):
