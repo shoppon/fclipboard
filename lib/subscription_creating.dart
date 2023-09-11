@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:openapi/api.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dao.dart';
 import 'utils.dart';
@@ -46,20 +45,17 @@ class _SubscriptionCreatingState extends State<SubscriptionCreatingPage> {
     return categories;
   }
 
-  Future<String> _loadUserEmail() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("fclipboard.email")!;
-  }
-
   Future<void> _createCategory(List<String> categories, String name) async {
     ProgressDialog pd = ProgressDialog(context: context);
     pd.show(msg: "Loading...");
-    final email = await _loadUserEmail();
+    final email = await loadUserEmail();
     final apiInstance = DefaultApi(ApiClient(basePath: baseURL));
     final req = SubscriptionPostReq(
       subscription: SubscriptionPostReqSubscription(
         categories: categories,
         name: name,
+        // TODO(xp): add public input
+        public: false,
       ),
     );
     try {

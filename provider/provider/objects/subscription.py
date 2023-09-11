@@ -13,6 +13,7 @@ class Subscription:
     description: str = attrs.Factory(str)
     categories: list = attrs.Factory(list)
     users: list = attrs.Factory(list)
+    public: bool = attrs.Factory(bool)
     created_at: str = attrs.Factory(datetime.utcnow)
     create_by: str = attrs.Factory(str)
 
@@ -24,11 +25,15 @@ class Subscription:
     def get_all(uid=None):
         if uid is not None:
             _filter = {
-                "users": {
-                    "$elemMatch": {
-                        "$eq": uid
-                    }
-                }
+                "$or": [{
+                    "users": {
+                        "$elemMatch": {
+                            "$eq": uid
+                        }
+                    },
+                }, {
+                    "public": True,
+                }]
             }
         else:
             _filter = {}

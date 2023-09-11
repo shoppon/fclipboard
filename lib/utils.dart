@@ -1,6 +1,8 @@
+import 'package:fclipboard/constants.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 bool isDesktop() {
   if (kIsWeb) {
@@ -67,4 +69,9 @@ void showToast(BuildContext context, String content, bool negative) {
     gravity: ToastGravity.BOTTOM,
     toastDuration: const Duration(seconds: 2),
   );
+}
+
+Future<String> loadUserEmail() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString("fclipboard.email") ?? defaultEmail;
 }

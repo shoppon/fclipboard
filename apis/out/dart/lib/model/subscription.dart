@@ -16,6 +16,7 @@ class Subscription {
     required this.id,
     this.name,
     this.url,
+    this.public,
     this.categories = const [],
     this.createdAt,
   });
@@ -40,6 +41,15 @@ class Subscription {
   ///
   String? url;
 
+  /// whether the subscription is public
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? public;
+
   List<String> categories;
 
   ///
@@ -55,6 +65,7 @@ class Subscription {
     other.id == id &&
     other.name == name &&
     other.url == url &&
+    other.public == public &&
     _deepEquality.equals(other.categories, categories) &&
     other.createdAt == createdAt;
 
@@ -64,11 +75,12 @@ class Subscription {
     (id.hashCode) +
     (name == null ? 0 : name!.hashCode) +
     (url == null ? 0 : url!.hashCode) +
+    (public == null ? 0 : public!.hashCode) +
     (categories.hashCode) +
     (createdAt == null ? 0 : createdAt!.hashCode);
 
   @override
-  String toString() => 'Subscription[id=$id, name=$name, url=$url, categories=$categories, createdAt=$createdAt]';
+  String toString() => 'Subscription[id=$id, name=$name, url=$url, public=$public, categories=$categories, createdAt=$createdAt]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -82,6 +94,11 @@ class Subscription {
       json[r'url'] = this.url;
     } else {
       json[r'url'] = null;
+    }
+    if (this.public != null) {
+      json[r'public'] = this.public;
+    } else {
+      json[r'public'] = null;
     }
       json[r'categories'] = this.categories;
     if (this.createdAt != null) {
@@ -114,6 +131,7 @@ class Subscription {
         id: mapValueOfType<String>(json, r'id')!,
         name: mapValueOfType<String>(json, r'name'),
         url: mapValueOfType<String>(json, r'url'),
+        public: mapValueOfType<bool>(json, r'public'),
         categories: json[r'categories'] is Iterable
             ? (json[r'categories'] as Iterable).cast<String>().toList(growable: false)
             : const [],

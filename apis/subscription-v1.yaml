@@ -177,6 +177,10 @@ components:
           type: "string"
           description: "The url of the subscription"
           example: "https://example.com"
+        public:
+          type: boolean
+          description: "whether the subscription is public"
+          example: true
         categories:
           type: "array"
           items:
@@ -214,6 +218,10 @@ components:
                 type: "string"
                 description: "The categories of the subscription"
                 example: "news"
+            public:
+              type: boolean
+              description: "whether the subscription is public"
+              example: true
     SubscriptionPostResp:
       type: "object"
       properties:

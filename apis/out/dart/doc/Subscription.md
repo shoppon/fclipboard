@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **id** | **String** |  | 
 **name** | **String** | The name of the subscription | [optional] 
 **url** | **String** | The url of the subscription | [optional] 
+**public** | **bool** | whether the subscription is public | [optional] 
 **categories** | **List<String>** |  | [default to const []]
 **createdAt** | [**DateTime**](DateTime.md) |  | [optional] 
 

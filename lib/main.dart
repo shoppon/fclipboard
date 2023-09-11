@@ -83,7 +83,7 @@ class _MainAppState extends State<MainApp> {
 
   final _dbHelper = DBHelper();
 
-  String _givenName = "N/A";
+  String _givenName = "anonymous";
   String _email = defaultEmail;
 
   @override
@@ -104,11 +104,11 @@ class _MainAppState extends State<MainApp> {
   Future<void> loadUserInfo() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      final email = prefs.getString("fclipboard.email")!;
+      final email = prefs.getString("fclipboard.email") ?? "";
       if (email.isNotEmpty) {
         _email = email;
       }
-      final givenName = prefs.getString("fclipboard.givenName")!;
+      final givenName = prefs.getString("fclipboard.givenName") ?? "";
       if (givenName.isNotEmpty) {
         _givenName = givenName;
       }
@@ -219,15 +219,8 @@ class _MainAppState extends State<MainApp> {
                   icon: const Icon(Icons.cloud),
                   itemBuilder: (context) => [
                     PopupMenuItem(
-                      enabled: _email != defaultEmail,
                       child: TextButton(
                         onPressed: () {
-                          Navigator.pop(context);
-                          if (_email == defaultEmail) {
-                            showToast(
-                                context, S.of(context).loginTooltip, true);
-                            return;
-                          }
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -239,15 +232,8 @@ class _MainAppState extends State<MainApp> {
                       ),
                     ),
                     PopupMenuItem(
-                      enabled: _email != defaultEmail,
                       child: TextButton(
                         onPressed: () {
-                          Navigator.pop(context);
-                          if (_email == defaultEmail) {
-                            showToast(
-                                context, S.of(context).loginTooltip, true);
-                            return;
-                          }
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -259,15 +245,9 @@ class _MainAppState extends State<MainApp> {
                       ),
                     ),
                     PopupMenuItem(
-                      enabled: _email != defaultEmail,
                       child: TextButton(
                         onPressed: () {
                           Navigator.pop(context);
-                          if (_email == defaultEmail) {
-                            showToast(
-                                context, S.of(context).loginTooltip, true);
-                            return;
-                          }
                           Navigator.push(
                             context,
                             MaterialPageRoute(

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:openapi/api.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dao.dart';
 import 'model.dart' as model;
@@ -34,13 +33,8 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
     _loadSubscriptions();
   }
 
-  Future<String> _loadUserEmail() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("fclipboard.email")!;
-  }
-
   Future<void> _loadSubscriptions() async {
-    final email = await _loadUserEmail();
+    final email = await loadUserEmail();
     final apiInstance = DefaultApi(ApiClient(basePath: baseURL));
     try {
       final listResp = await apiInstance.listSubscriptions(email);
@@ -83,7 +77,7 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
       ));
     }
     try {
-      final email = await _loadUserEmail();
+      final email = await loadUserEmail();
       await apiInstance.pushSubscription(email, subscription.id,
           subscriptionPushReq: SubscriptionPushReq(entries: entries));
       if (context.mounted) {
@@ -103,7 +97,7 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
     ProgressDialog pd = ProgressDialog(context: context);
     pd.show(msg: "Loading...");
     final apiInstance = DefaultApi(ApiClient(basePath: baseURL));
-    final email = await _loadUserEmail();
+    final email = await loadUserEmail();
     try {
       final resp = await apiInstance.pullSubscription(email, subscription.id);
       // FIXME(xp): this operation may be very slow
