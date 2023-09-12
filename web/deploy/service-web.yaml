@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: fclipboard
+spec:
+  type: ClusterIP
+  ports:
+    - name: fclipboard
+      port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    application: fclipboard
+    component: web

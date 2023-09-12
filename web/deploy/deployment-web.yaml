@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: fclipboard
+spec:
+  selector:
+    matchLabels:
+      application: fclipboard
+      component: web
+  template:
+    metadata:
+      labels:
+        application: fclipboard
+        component: web
+    spec:
+      containers:
+        - image: shoppon/fclipboard-web:latest
+          name: web
+          # command: ["/bin/bash", "-c", "--"]
+          # args: ["while true; do sleep 30; done;"]
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
