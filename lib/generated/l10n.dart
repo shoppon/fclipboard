@@ -260,6 +260,16 @@ class S {
     );
   }
 
+  /// `Edit Server Address`
+  String get editServerAddr {
+    return Intl.message(
+      'Edit Server Address',
+      name: 'editServerAddr',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Error format`
   String get errorFormat {
     return Intl.message(
@@ -325,6 +335,16 @@ class S {
     return Intl.message(
       'Initial',
       name: 'initial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `invalid format`
+  String get invalidFormat {
+    return Intl.message(
+      'invalid format',
+      name: 'invalidFormat',
       desc: '',
       args: [],
     );
@@ -455,6 +475,26 @@ class S {
     return Intl.message(
       'Search',
       name: 'searchHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server Address`
+  String get serverAddr {
+    return Intl.message(
+      'Server Address',
+      name: 'serverAddr',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Setting successfully`
+  String get settingSuccess {
+    return Intl.message(
+      'Setting successfully',
+      name: 'settingSuccess',
       desc: '',
       args: [],
     );

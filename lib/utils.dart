@@ -75,3 +75,8 @@ Future<String> loadUserEmail() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   return prefs.getString("fclipboard.email") ?? defaultEmail;
 }
+
+Future<String> loadServerAddr() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString("fclipboard.serverAddr") ?? baseURL;
+}

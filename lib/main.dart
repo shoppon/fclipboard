@@ -85,6 +85,9 @@ class _MainAppState extends State<MainApp> {
 
   String _givenName = "anonymous";
   String _email = defaultEmail;
+  String _serverAddr = "N/A";
+  final _serverAddrCtrl = TextEditingController();
+  bool _isServerAddrValid = true;
 
   @override
   void initState() {
@@ -118,6 +121,12 @@ class _MainAppState extends State<MainApp> {
   Future<String> getVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
     return packageInfo.version;
+  }
+
+  Future<String> getServerAddr() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    _serverAddr = prefs.getString("fclipboard.serverAddr") ?? baseURL;
+    return _serverAddr;
   }
 
   @override
@@ -351,6 +360,78 @@ class _MainAppState extends State<MainApp> {
                               ],
                             );
                           }).then((value) => {});
+                    },
+                  ),
+                  // server address
+                  ListTile(
+                    leading: const Icon(Icons.web),
+                    title: Text(S.of(context).serverAddr),
+                    subtitle: FutureBuilder(
+                      future: getServerAddr(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(snapshot.data!);
+                        } else {
+                          return const Text('');
+                        }
+                      },
+                    ),
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text(S.of(context).addCategory),
+                              content: TextFormField(
+                                controller: _serverAddrCtrl,
+                                onChanged: (value) {
+                                  try {
+                                    Uri.parse(value);
+                                  } catch (e) {
+                                    setState(() {
+                                      _isServerAddrValid = false;
+                                    });
+                                    return;
+                                  }
+                                  setState(() {
+                                    _isServerAddrValid = true;
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  errorText: _isServerAddrValid
+                                      ? null
+                                      : S.of(context).invalidFormat,
+                                ),
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text(S.of(context).cancel),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text(S.of(context).ok),
+                                  onPressed: () async {
+                                    if (!_isServerAddrValid) {
+                                      return;
+                                    }
+                                    final SharedPreferences prefs =
+                                        await SharedPreferences.getInstance();
+                                    prefs.setString("fclipboard.serverAddr",
+                                        _serverAddrCtrl.text);
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop();
+                                      showToast(context,
+                                          S.of(context).settingSuccess, false);
+                                      setState(() {});
+                                    }
+                                  },
+                                )
+                              ],
+                            );
+                          });
                     },
                   ),
                   // current version

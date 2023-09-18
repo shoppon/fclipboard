@@ -51,6 +51,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteSuccess":
             MessageLookupByLibrary.simpleMessage("Delete successfully"),
         "description": MessageLookupByLibrary.simpleMessage("Description"),
+        "editServerAddr":
+            MessageLookupByLibrary.simpleMessage("Edit Server Address"),
         "errorFormat": MessageLookupByLibrary.simpleMessage("Error format"),
         "export": MessageLookupByLibrary.simpleMessage("Export"),
         "exportSuccessfully":
@@ -60,6 +62,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "importSuccessfully":
             MessageLookupByLibrary.simpleMessage("Import successfully"),
         "initial": MessageLookupByLibrary.simpleMessage("Initial"),
+        "invalidFormat": MessageLookupByLibrary.simpleMessage("invalid format"),
         "listing": MessageLookupByLibrary.simpleMessage("Listing"),
         "loadFailed": MessageLookupByLibrary.simpleMessage("Loading failed"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading"),
@@ -75,6 +78,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "required": MessageLookupByLibrary.simpleMessage("Required"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "searchHint": MessageLookupByLibrary.simpleMessage("Search"),
+        "serverAddr": MessageLookupByLibrary.simpleMessage("Server Address"),
+        "settingSuccess":
+            MessageLookupByLibrary.simpleMessage("Setting successfully"),
         "share": MessageLookupByLibrary.simpleMessage("Share"),
         "subscribe": MessageLookupByLibrary.simpleMessage("Subscribe"),
         "subscribeFailed":
