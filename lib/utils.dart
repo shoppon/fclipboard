@@ -29,6 +29,10 @@ bool isMobile() {
       defaultTargetPlatform == TargetPlatform.android;
 }
 
+bool isWeb() {
+  return kIsWeb;
+}
+
 bool isWindows() {
   if (kIsWeb) {
     return false;

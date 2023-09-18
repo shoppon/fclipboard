@@ -97,7 +97,8 @@ class _EntryListViewState extends State<EntryListView> {
   void _handleKeyEvent(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       if (event.isAltPressed && isWindows() ||
-          event.isMetaPressed && isMacOS()) {
+          event.isMetaPressed && isMacOS() ||
+          event.isControlPressed && isWeb()) {
         final logicalKey = event.logicalKey.keyLabel;
         int number = logicalKey.codeUnitAt(0) - 49;
         if (number >= 0 && number <= 9) {
@@ -135,6 +136,8 @@ class _EntryListViewState extends State<EntryListView> {
       return 'alt+${index + 1}';
     } else if (isMacOS()) {
       return 'cmd+${index + 1}';
+    } else if (isWeb()) {
+      return 'ctrl+${index + 1}';
     } else {
       return '';
     }

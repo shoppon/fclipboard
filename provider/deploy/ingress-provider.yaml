@@ -20,6 +20,16 @@ spec:
                 name: provider
                 port:
                   number: 8000
+    - host: fclipboard.shoppon.club
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/v1"
+            backend:
+              service:
+                name: provider
+                port:
+                  number: 8000
     - host: fclipboard-provider.shoppon.local
       http:
         paths:
