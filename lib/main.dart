@@ -19,7 +19,6 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
 
@@ -447,31 +446,6 @@ class _MainAppState extends State<MainApp> {
                         } else {
                           return const Text('');
                         }
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SignInWithAppleButton(
-                      onPressed: () async {
-                        final credential =
-                            await SignInWithApple.getAppleIDCredential(
-                          scopes: [
-                            AppleIDAuthorizationScopes.email,
-                            AppleIDAuthorizationScopes.fullName,
-                          ],
-                        );
-
-                        if (credential.email!.isNotEmpty) {
-                          final SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
-                          await prefs.setString(
-                              "fclipboard.email", credential.email!);
-                          await prefs.setString(
-                              "fclipboard.givenName", credential.givenName!);
-                        }
-
-                        await loadUserInfo();
                       },
                     ),
                   ),
