@@ -4,6 +4,8 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
+  firebase_auth
+  firebase_core
   hotkey_manager
   screen_retriever
   sqlite3_flutter_libs

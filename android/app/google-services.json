@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "748110936399",
+    "project_id": "shoppon",
+    "storage_bucket": "shoppon.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748110936399:android:a0881e37b170ab791a2d3a",
+        "android_client_info": {
+          "package_name": "com.shoppon.fclipboard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "748110936399-qpmsrv4b7i6btvh9p5j6a9arm1b1i5sq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1SwJ9EmNj0ULV21jRz_0G5RjA8kioE_g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "748110936399-qpmsrv4b7i6btvh9p5j6a9arm1b1i5sq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "748110936399-muciuelgki5n6klvpmtd5s61urm673ca.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.shoppon.fclipboard.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

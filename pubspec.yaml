@@ -35,6 +35,8 @@ dependencies:
   logger: ^2.0.2
   openapi:
     path: ./apis/out/dart/
+  firebase_auth: ^4.14.1
+  firebase_core: ^2.23.0
 
 dev_dependencies:
   flutter_test:
