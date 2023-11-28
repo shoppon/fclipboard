@@ -1,28 +1,27 @@
-import 'package:fclipboard/cloud_sync.dart';
-import 'package:fclipboard/creating.dart';
-import 'package:fclipboard/export.dart';
-import 'package:fclipboard/login.dart';
-import 'package:fclipboard/profile.dart';
-import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
-
 import 'email_verify.dart';
 import 'firebase_options.dart';
+import 'package:fclipboard/clear_data.dart';
+import 'package:fclipboard/cloud_sync.dart';
 import 'package:fclipboard/constants.dart';
-import 'package:fclipboard/dao.dart';
+import 'package:fclipboard/creating.dart';
 import 'package:fclipboard/entry_list.dart';
+import 'package:fclipboard/export.dart';
+import 'package:fclipboard/login.dart';
 import 'package:fclipboard/model.dart';
+import 'package:fclipboard/profile.dart';
 import 'package:fclipboard/search.dart';
+import 'package:fclipboard/server_configuration.dart';
 import 'package:fclipboard/utils.dart';
+import 'package:fclipboard/version.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:logger/logger.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:window_manager/window_manager.dart';
@@ -80,9 +79,6 @@ Future<void> registerHotkey(FocusNode focusNode) async {
       focusNode.requestFocus();
     },
   );
-
-  // await hotKeyManager.unregister(hotkey);
-  // await hotKeyManager.unregisterAll();
 }
 
 class MainApp extends StatefulWidget {
@@ -99,13 +95,8 @@ class _MainAppState extends State<MainApp> {
   // focus node for the search field
   final _searchFocusNode = FocusNode();
 
-  final _dbHelper = DBHelper();
-
   String _givenName = "anonymous";
   String _email = defaultEmail;
-  String _serverAddr = "N/A";
-  final _serverAddrCtrl = TextEditingController();
-  bool _isServerAddrValid = true;
 
   @override
   void initState() {
@@ -133,17 +124,6 @@ class _MainAppState extends State<MainApp> {
         _givenName = user.displayName ?? "anonymous";
       }
     });
-  }
-
-  Future<String> getVersion() async {
-    final packageInfo = await PackageInfo.fromPlatform();
-    return packageInfo.version;
-  }
-
-  Future<String> getServerAddr() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    _serverAddr = prefs.getString("fclipboard.serverAddr") ?? baseURL;
-    return _serverAddr;
   }
 
   @override
@@ -209,130 +189,9 @@ class _MainAppState extends State<MainApp> {
                       }
                     },
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.clear),
-                    title: Text(S.of(context).clearAll),
-                    subtitle: Text(S.of(context).clearWarning),
-                    onTap: () async {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text(S.of(context).clearAll),
-                              content: Text(S.of(context).confirmDelete),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: Text(S.of(context).cancel),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                                TextButton(
-                                  child: Text(S.of(context).ok),
-                                  onPressed: () async {
-                                    await _dbHelper.deleteAll();
-                                    if (context.mounted) {
-                                      Navigator.of(context).pop();
-                                      showToast(
-                                          context,
-                                          S.of(context).deleteAllSuccess,
-                                          false);
-                                    }
-                                  },
-                                )
-                              ],
-                            );
-                          }).then((value) => {});
-                    },
-                  ),
-                  // server address
-                  ListTile(
-                    leading: const Icon(Icons.web),
-                    title: Text(S.of(context).serverAddr),
-                    subtitle: FutureBuilder(
-                      future: getServerAddr(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<String> snapshot) {
-                        if (snapshot.hasData) {
-                          return Text(snapshot.data!);
-                        } else {
-                          return const Text('');
-                        }
-                      },
-                    ),
-                    onTap: () {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text(S.of(context).addCategory),
-                              content: TextFormField(
-                                controller: _serverAddrCtrl,
-                                onChanged: (value) {
-                                  try {
-                                    Uri.parse(value);
-                                  } catch (e) {
-                                    setState(() {
-                                      _isServerAddrValid = false;
-                                    });
-                                    return;
-                                  }
-                                  setState(() {
-                                    _isServerAddrValid = true;
-                                  });
-                                },
-                                decoration: InputDecoration(
-                                  errorText: _isServerAddrValid
-                                      ? null
-                                      : S.of(context).invalidFormat,
-                                ),
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: Text(S.of(context).cancel),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                                TextButton(
-                                  child: Text(S.of(context).ok),
-                                  onPressed: () async {
-                                    if (!_isServerAddrValid) {
-                                      return;
-                                    }
-                                    final SharedPreferences prefs =
-                                        await SharedPreferences.getInstance();
-                                    prefs.setString("fclipboard.serverAddr",
-                                        _serverAddrCtrl.text);
-                                    if (context.mounted) {
-                                      Navigator.of(context).pop();
-                                      showToast(context,
-                                          S.of(context).settingSuccess, false);
-                                      setState(() {});
-                                    }
-                                  },
-                                )
-                              ],
-                            );
-                          });
-                    },
-                  ),
-                  // current version
-                  ListTile(
-                    leading: const Icon(Icons.info),
-                    title: Text(S.of(context).version),
-                    subtitle: FutureBuilder(
-                      future: getVersion(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<String> snapshot) {
-                        if (snapshot.hasData) {
-                          return Text(snapshot.data!);
-                        } else {
-                          return const Text('');
-                        }
-                      },
-                    ),
-                  ),
+                  const ClearDataButton(),
+                  const ServerConfiguration(),
+                  const VersionLine(),
                 ],
               ),
             ),
