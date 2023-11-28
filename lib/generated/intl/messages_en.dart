@@ -66,6 +66,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "listing": MessageLookupByLibrary.simpleMessage("Listing"),
         "loadFailed": MessageLookupByLibrary.simpleMessage("Loading failed"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading"),
+        "login": MessageLookupByLibrary.simpleMessage("Login"),
         "loginTooltip":
             MessageLookupByLibrary.simpleMessage("Please retry after login"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
@@ -74,6 +75,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "paste": MessageLookupByLibrary.simpleMessage("Paste"),
         "pasteSuccessfully":
             MessageLookupByLibrary.simpleMessage("Paste successfully"),
+        "profile": MessageLookupByLibrary.simpleMessage("Profile"),
         "pushing": MessageLookupByLibrary.simpleMessage("Pusing..."),
         "required": MessageLookupByLibrary.simpleMessage("Required"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),

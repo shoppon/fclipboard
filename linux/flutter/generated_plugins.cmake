@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  desktop_webview_auth
   emoji_picker_flutter
   hotkey_manager
   screen_retriever

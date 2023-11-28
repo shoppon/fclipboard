@@ -1,3 +1,9 @@
+import 'package:fclipboard/login.dart';
+import 'package:fclipboard/profile.dart';
+import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
+
+import 'email_verify.dart';
+import 'firebase_options.dart';
 import 'package:fclipboard/adding_category.dart';
 import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/constants.dart';
@@ -10,24 +16,29 @@ import 'package:fclipboard/subscription_creating.dart';
 import 'package:fclipboard/subscription_list.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
+import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:logger/logger.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 
 import 'generated/l10n.dart';
 import 'paste.dart';
 
 var logger = Logger();
+bool shouldUseFirebaseEmulator = true;
+
+late final FirebaseApp app;
+late final FirebaseAuth auth;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,9 +57,16 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
-  await Firebase.initializeApp(
+  app = await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  auth = FirebaseAuth.instanceFor(app: app);
+  if (shouldUseFirebaseEmulator) {
+    await auth.useAuthEmulator('localhost', 9099);
+  }
+  FirebaseUIAuth.configureProviders([
+    EmailAuthProvider(),
+  ]);
 
   runApp(const MainApp());
 }
@@ -110,15 +128,14 @@ class _MainAppState extends State<MainApp> {
   }
 
   Future<void> loadUserInfo() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final user = FirebaseAuth.instance.currentUser;
     setState(() {
-      final email = prefs.getString("fclipboard.email") ?? "";
-      if (email.isNotEmpty) {
-        _email = email;
-      }
-      final givenName = prefs.getString("fclipboard.givenName") ?? "";
-      if (givenName.isNotEmpty) {
-        _givenName = givenName;
+      if (user == null) {
+        _email = defaultEmail;
+        _givenName = "anonymous";
+      } else {
+        _email = user.email ?? defaultEmail;
+        _givenName = user.displayName ?? "anonymous";
       }
     });
   }
@@ -146,16 +163,29 @@ class _MainAppState extends State<MainApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      localizationsDelegates: const [
+      localizationsDelegates: [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
+        FirebaseUILocalizations.delegate,
       ],
       supportedLocales: const [
         Locale('en', 'US'),
         Locale('zh', 'CN'),
       ],
+      debugShowCheckedModeBanner: false,
+      routes: {
+        '/sign-in': (context) {
+          return const LoginPage();
+        },
+        '/verify-email': (context) {
+          return const EmailVerifyPage();
+        },
+        '/profile': (context) {
+          return const ProfilePage();
+        }
+      },
       home: Builder(builder: (context) {
         ProgressDialog pd = ProgressDialog(context: context);
         return Scaffold(
@@ -326,11 +356,20 @@ class _MainAppState extends State<MainApp> {
               child: ListView(
                 children: <Widget>[
                   UserAccountsDrawerHeader(
-                      accountName: Text(_givenName),
-                      accountEmail: Text(_email),
-                      currentAccountPicture: const CircleAvatar(
-                        child: Icon(Icons.person),
-                      )),
+                    accountName: Text(_givenName),
+                    accountEmail: Text(_email),
+                    currentAccountPicture: const CircleAvatar(
+                      child: Icon(Icons.person),
+                    ),
+                    onDetailsPressed: () {
+                      final user = FirebaseAuth.instance.currentUser;
+                      if (user == null) {
+                        Navigator.pushNamed(context, '/sign-in');
+                      } else {
+                        Navigator.pushNamed(context, '/profile');
+                      }
+                    },
+                  ),
                   ListTile(
                     leading: const Icon(Icons.clear),
                     title: Text(S.of(context).clearAll),
@@ -458,6 +497,11 @@ class _MainAppState extends State<MainApp> {
                 ],
               ),
             ),
+            onDrawerChanged: (isOpened) {
+              if (isOpened) {
+                loadUserInfo();
+              }
+            },
             body: Column(
               children: <Widget>[
                 SearchParamWidget(

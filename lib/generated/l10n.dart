@@ -360,6 +360,16 @@ class S {
     );
   }
 
+  /// `Loading failed`
+  String get loadFailed {
+    return Intl.message(
+      'Loading failed',
+      name: 'loadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Loading`
   String get loading {
     return Intl.message(
@@ -370,11 +380,11 @@ class S {
     );
   }
 
-  /// `Loading failed`
-  String get loadFailed {
+  /// `Login`
+  String get login {
     return Intl.message(
-      'Loading failed',
-      name: 'loadFailed',
+      'Login',
+      name: 'login',
       desc: '',
       args: [],
     );
@@ -435,6 +445,16 @@ class S {
     return Intl.message(
       'Paste successfully',
       name: 'pasteSuccessfully',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile`
+  String get profile {
+    return Intl.message(
+      'Profile',
+      name: 'profile',
       desc: '',
       args: [],
     );

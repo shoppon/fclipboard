@@ -1,4 +1,6 @@
 PODS:
+  - desktop_webview_auth (0.0.1):
+    - FlutterMacOS
   - emoji_picker_flutter (0.0.1):
     - FlutterMacOS
   - Firebase/Auth (10.18.0):
@@ -85,6 +87,7 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
+  - desktop_webview_auth (from `Flutter/ephemeral/.symlinks/plugins/desktop_webview_auth/macos`)
   - emoji_picker_flutter (from `Flutter/ephemeral/.symlinks/plugins/emoji_picker_flutter/macos`)
   - firebase_auth (from `Flutter/ephemeral/.symlinks/plugins/firebase_auth/macos`)
   - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
@@ -113,6 +116,8 @@ SPEC REPOS:
     - sqlite3
 
 EXTERNAL SOURCES:
+  desktop_webview_auth:
+    :path: Flutter/ephemeral/.symlinks/plugins/desktop_webview_auth/macos
   emoji_picker_flutter:
     :path: Flutter/ephemeral/.symlinks/plugins/emoji_picker_flutter/macos
   firebase_auth:
@@ -139,6 +144,7 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
 SPEC CHECKSUMS:
+  desktop_webview_auth: 9bba53a29c9bc6a4ff621fd0ebfbb18856c4dada
   emoji_picker_flutter: 533634326b1c5de9a181ba14b9758e6dfe967a20
   Firebase: 414ad272f8d02dfbf12662a9d43f4bba9bec2a06
   firebase_auth: 7e6f4e07f913c109967660eec8b4236007d0624c
