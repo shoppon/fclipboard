@@ -1,21 +1,18 @@
+import 'package:fclipboard/cloud_sync.dart';
+import 'package:fclipboard/creating.dart';
+import 'package:fclipboard/export.dart';
 import 'package:fclipboard/login.dart';
 import 'package:fclipboard/profile.dart';
 import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
 
 import 'email_verify.dart';
 import 'firebase_options.dart';
-import 'package:fclipboard/adding_category.dart';
-import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/constants.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/entry_list.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/search.dart';
-import 'package:fclipboard/subscription_adding.dart';
-import 'package:fclipboard/subscription_creating.dart';
-import 'package:fclipboard/subscription_list.dart';
 import 'package:fclipboard/utils.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
@@ -26,13 +23,11 @@ import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'generated/l10n.dart';
-import 'paste.dart';
 
 var logger = Logger();
 bool shouldUseFirebaseEmulator = true;
@@ -187,169 +182,13 @@ class _MainAppState extends State<MainApp> {
         }
       },
       home: Builder(builder: (context) {
-        ProgressDialog pd = ProgressDialog(context: context);
         return Scaffold(
             appBar: AppBar(
               title: Text(S.of(context).appTitle),
               actions: <Widget>[
-                isDesktop()
-                    ? PopupMenuButton(
-                        icon: const Icon(Icons.import_export),
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            child: TextButton(
-                              onPressed: () async {
-                                final msg = S.of(context).loading;
-                                String? output =
-                                    await FilePicker.platform.saveFile(
-                                  dialogTitle: S.of(context).export,
-                                  fileName: 'fclipboard.yaml',
-                                );
-                                if (output == null) {
-                                  return;
-                                }
-                                pd.show(msg: msg);
-                                await DBHelper().exportToFile(output);
-                                if (mounted) {
-                                  Navigator.pop(context);
-                                  showToast(context,
-                                      S.of(context).exportSuccessfully, false);
-                                }
-                                pd.close();
-                              },
-                              child: Text(S.of(context).export),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            child: TextButton(
-                              onPressed: () async {
-                                final msg = S.of(context).loading;
-                                FilePickerResult? result = await FilePicker
-                                    .platform
-                                    .pickFiles(allowedExtensions: ['yaml']);
-                                if (result == null) {
-                                  return;
-                                }
-                                pd.show(msg: msg);
-                                try {
-                                  await DBHelper().importFromFile(
-                                      result.files.single.path!);
-                                  if (mounted) {
-                                    showToast(
-                                        context,
-                                        S.of(context).importSuccessfully,
-                                        false);
-                                  }
-                                } catch (e) {
-                                  logger.e('Failed to import.', error: e);
-                                  if (mounted) {
-                                    showToast(context,
-                                        S.of(context).importFailed, true);
-                                  }
-                                } finally {
-                                  if (mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                  pd.close();
-                                }
-                              },
-                              child: Text(S.of(context).import),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Container(),
-                PopupMenuButton(
-                  icon: const Icon(Icons.cloud),
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const SubscriptionListView()),
-                          ).then((value) => {});
-                        },
-                        child: Text(S.of(context).subscriptionList),
-                      ),
-                    ),
-                    PopupMenuItem(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const SubscriptionAddingPage()),
-                          ).then((value) => {});
-                        },
-                        child: Text(S.of(context).addSubscription),
-                      ),
-                    ),
-                    PopupMenuItem(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const SubscriptionCreatingPage()),
-                          ).then((value) => {});
-                        },
-                        child: Text(S.of(context).creatingSubscription),
-                      ),
-                    ),
-                  ],
-                ),
-                PopupMenuButton(
-                  icon: const Icon(Icons.add),
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const CategoryAddingPage()),
-                          );
-                        },
-                        child: Text(S.of(context).addCategory),
-                      ),
-                    ),
-                    PopupMenuItem(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    EntryAddingPage(entry: Entry.empty())),
-                          ).then((value) => {});
-                        },
-                        child: Text(S.of(context).addEntry),
-                      ),
-                    ),
-                    PopupMenuItem(
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const PastePage()),
-                          ).then((value) => {});
-                        },
-                        child: Text(S.of(context).paste),
-                      ),
-                    )
-                  ],
-                ),
+                isDesktop() ? const ExportButton() : Container(),
+                const CloudSyncMenu(),
+                const CreatingMenu(),
               ],
             ),
             drawer: Drawer(
