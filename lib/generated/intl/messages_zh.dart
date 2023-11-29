@@ -62,6 +62,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("确定"),
         "paste": MessageLookupByLibrary.simpleMessage("粘贴"),
         "pasteSuccessfully": MessageLookupByLibrary.simpleMessage("粘贴成功"),
+        "phoneInput": MessageLookupByLibrary.simpleMessage("请输入手机号"),
         "profile": MessageLookupByLibrary.simpleMessage("个人资料"),
         "pushing": MessageLookupByLibrary.simpleMessage("上传中..."),
         "required": MessageLookupByLibrary.simpleMessage("必填"),

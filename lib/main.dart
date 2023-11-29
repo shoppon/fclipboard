@@ -1,3 +1,5 @@
+import 'package:fclipboard/config.dart';
+
 import 'firebase_options.dart';
 import 'package:fclipboard/clear_data.dart';
 import 'package:fclipboard/cloud_sync.dart';
@@ -29,7 +31,7 @@ import 'package:window_manager/window_manager.dart';
 import 'generated/l10n.dart';
 
 var logger = Logger();
-bool shouldUseFirebaseEmulator = true;
+bool shouldUseFirebaseEmulator = false;
 
 late final FirebaseApp app;
 late final FirebaseAuth auth;
@@ -58,9 +60,7 @@ void main() async {
   if (shouldUseFirebaseEmulator) {
     await auth.useAuthEmulator('localhost', 9099);
   }
-  FirebaseUIAuth.configureProviders([
-    EmailAuthProvider(),
-  ]);
+  FirebaseUIAuth.configureProviders(getAuthProviders());
 
   runApp(const MainApp());
 }
@@ -159,7 +159,7 @@ class _MainAppState extends State<MainApp> {
         },
         '/profile': (context) {
           return const ProfilePage();
-        }
+        },
       },
       home: Builder(builder: (context) {
         return Scaffold(

@@ -14,6 +14,9 @@ class LoginPage extends StatelessWidget {
       ),
       body: SignInScreen(
         actions: [
+          VerifyPhoneAction((context, _) {
+            Navigator.pushNamed(context, '/phone');
+          }),
           AuthCancelledAction((context) {
             FirebaseUIAuth.signOut(context: context);
             Navigator.pushReplacementNamed(context, '/');

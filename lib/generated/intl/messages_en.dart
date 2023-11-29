@@ -75,6 +75,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "paste": MessageLookupByLibrary.simpleMessage("Paste"),
         "pasteSuccessfully":
             MessageLookupByLibrary.simpleMessage("Paste successfully"),
+        "phoneInput":
+            MessageLookupByLibrary.simpleMessage("Please input phone number"),
         "profile": MessageLookupByLibrary.simpleMessage("Profile"),
         "pushing": MessageLookupByLibrary.simpleMessage("Pusing..."),
         "required": MessageLookupByLibrary.simpleMessage("Required"),

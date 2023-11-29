@@ -450,6 +450,16 @@ class S {
     );
   }
 
+  /// `Please input phone number`
+  String get phoneInput {
+    return Intl.message(
+      'Please input phone number',
+      name: 'phoneInput',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Profile`
   String get profile {
     return Intl.message(
