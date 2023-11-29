@@ -1,4 +1,5 @@
 import 'package:fclipboard/constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -75,9 +76,8 @@ void showToast(BuildContext context, String content, bool negative) {
   );
 }
 
-Future<String> loadUserEmail() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString("fclipboard.email") ?? defaultEmail;
+String loadUserEmail() {
+  return FirebaseAuth.instance.currentUser?.email ?? defaultEmail;
 }
 
 Future<String> loadServerAddr() async {

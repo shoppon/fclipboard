@@ -1,9 +1,9 @@
-import 'email_verify.dart';
 import 'firebase_options.dart';
 import 'package:fclipboard/clear_data.dart';
 import 'package:fclipboard/cloud_sync.dart';
 import 'package:fclipboard/constants.dart';
 import 'package:fclipboard/creating.dart';
+import 'package:fclipboard/email_verify.dart';
 import 'package:fclipboard/entry_list.dart';
 import 'package:fclipboard/export.dart';
 import 'package:fclipboard/login.dart';

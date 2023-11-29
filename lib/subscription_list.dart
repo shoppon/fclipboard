@@ -33,7 +33,7 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
   }
 
   Future<void> _loadSubscriptions() async {
-    final email = await loadUserEmail();
+    final email = loadUserEmail();
     final apiInstance = DefaultApi(ApiClient(basePath: await loadServerAddr()));
     try {
       final listResp = await apiInstance.listSubscriptions(email);
@@ -76,7 +76,7 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
       ));
     }
     try {
-      final email = await loadUserEmail();
+      final email = loadUserEmail();
       await apiInstance.pushSubscription(email, subscription.id,
           subscriptionPushReq: SubscriptionPushReq(entries: entries));
       if (context.mounted) {
@@ -96,7 +96,7 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
     ProgressDialog pd = ProgressDialog(context: context);
     pd.show(msg: "Loading...");
     final apiInstance = DefaultApi(ApiClient(basePath: await loadServerAddr()));
-    final email = await loadUserEmail();
+    final email = loadUserEmail();
     try {
       final resp = await apiInstance.pullSubscription(email, subscription.id);
       // FIXME(xp): this operation may be very slow

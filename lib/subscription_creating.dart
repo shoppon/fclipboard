@@ -47,7 +47,7 @@ class _SubscriptionCreatingState extends State<SubscriptionCreatingPage> {
   Future<void> _createCategory(List<String> categories, String name) async {
     ProgressDialog pd = ProgressDialog(context: context);
     pd.show(msg: "Loading...");
-    final email = await loadUserEmail();
+    final email = loadUserEmail();
     final apiInstance = DefaultApi(ApiClient(basePath: await loadServerAddr()));
     final req = SubscriptionPostReq(
       subscription: SubscriptionPostReqSubscription(
