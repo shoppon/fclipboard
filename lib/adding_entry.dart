@@ -124,7 +124,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                       return null;
                     },
                     minLines: 5,
-                    maxLines: 5,
+                    maxLines: 20,
                     initialValue: widget.entry.subtitle,
                   ),
                   const SizedBox(height: 16.0),
