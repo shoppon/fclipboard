@@ -1,5 +1,4 @@
 import 'package:fclipboard/config.dart';
-
 import 'firebase_options.dart';
 import 'package:fclipboard/clear_data.dart';
 import 'package:fclipboard/cloud_sync.dart';
@@ -97,6 +96,7 @@ class _MainAppState extends State<MainApp> {
 
   String _givenName = "anonymous";
   String _email = defaultEmail;
+  Widget _photo = const Icon(Icons.person_4);
 
   @override
   void initState() {
@@ -122,6 +122,12 @@ class _MainAppState extends State<MainApp> {
       } else {
         _email = user.email ?? defaultEmail;
         _givenName = user.displayName ?? "anonymous";
+        final url = user.photoURL ?? "";
+        if (url.isNotEmpty) {
+          setState(() {
+            _photo = Image.network(url);
+          });
+        }
       }
     });
   }
@@ -177,9 +183,7 @@ class _MainAppState extends State<MainApp> {
                   UserAccountsDrawerHeader(
                     accountName: Text(_givenName),
                     accountEmail: Text(_email),
-                    currentAccountPicture: const CircleAvatar(
-                      child: Icon(Icons.person),
-                    ),
+                    currentAccountPicture: CircleAvatar(child: _photo),
                     onDetailsPressed: () {
                       final user = FirebaseAuth.instance.currentUser;
                       if (user == null) {
