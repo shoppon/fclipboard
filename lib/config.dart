@@ -11,16 +11,11 @@ List<AuthProvider> getAuthProviders() {
   if (kIsWeb) {
     return [
       EmailAuthProvider(),
-      GoogleProvider(
-        clientId: googleClientId,
-      ),
+      GoogleProvider(clientId: googleClientId),
     ];
   } else if (isMobile()) {
     return [
       EmailAuthProvider(),
-      GoogleProvider(
-        clientId: googleClientId,
-      ),
       AppleProvider(),
     ];
   } else if (isMacOS()) {
