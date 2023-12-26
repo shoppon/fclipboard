@@ -54,17 +54,26 @@ class _EntryListViewState extends State<EntryListView> {
   }
 
   void _filterEntries(String searchText) async {
-    await loadEntries();
-    widget.entryNotifier.value = Entry.empty();
-    _curSelectedIndex = -1;
-    _preSelectedIndex = -1;
-    setState(() {
-      final matches = _matcher.match(searchText);
-      entries.clear();
-      for (final match in matches) {
-        entries.add(match);
-      }
-    });
+    if (searchText.contains("#category:")) {
+      final category = searchText.split("#category:")[1].split(",")[0];
+      final es = await _dbHelper.entries(categories: [category]);
+      setState(() {
+        entries.clear();
+        entries.addAll(es);
+      });
+    } else {
+      await loadEntries();
+      widget.entryNotifier.value = Entry.empty();
+      _curSelectedIndex = -1;
+      _preSelectedIndex = -1;
+      setState(() {
+        final matches = _matcher.match(searchText);
+        entries.clear();
+        for (final match in matches) {
+          entries.add(match);
+        }
+      });
+    }
   }
 
   void _setSelectedIndex(int index) {

@@ -1,3 +1,4 @@
+import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +25,7 @@ class SearchParamWidget extends StatefulWidget {
 class _SearchParamWidgetState extends State<SearchParamWidget> {
   Entry _entry = Entry.empty();
   final _formKey = GlobalKey<FormState>();
+  final DBHelper _dbHelper = DBHelper();
 
   @override
   void initState() {
@@ -33,6 +35,11 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
         _entry = widget.entry.value;
       });
     });
+  }
+
+  Future<List<Category>> _loadCategories() async {
+    final categories = _dbHelper.categories();
+    return categories;
   }
 
   @override
@@ -49,6 +56,33 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
                 hintText: S.of(context).searchHint,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
+                ),
+                suffixIcon: FutureBuilder<List<Category>>(
+                  future: _loadCategories(),
+                  builder: (
+                    BuildContext context,
+                    AsyncSnapshot<List<Category>> snapshot,
+                  ) {
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return const Icon(Icons.error);
+                    }
+                    return PopupMenuButton(
+                      icon: const Icon(Icons.category_sharp),
+                      itemBuilder: (BuildContext context) {
+                        List<PopupMenuItem> items = [];
+                        for (var c in snapshot.data!) {
+                          items.add(PopupMenuItem(
+                            value: c.name,
+                            child: Text(c.name),
+                          ));
+                        }
+                        return items;
+                      },
+                      onSelected: (value) {
+                        widget.onChanged!("#category:$value");
+                      },
+                    );
+                  },
                 ),
               ),
             ),
