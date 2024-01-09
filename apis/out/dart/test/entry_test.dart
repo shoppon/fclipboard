@@ -16,9 +16,9 @@ void main() {
   // final instance = Entry();
 
   group('test Entry', () {
-    // The title of the entry
-    // String title
-    test('to test the property `title`', () async {
+    // The name of the entry
+    // String name
+    test('to test the property `name`', () async {
       // TODO
     });
 

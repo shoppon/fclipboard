@@ -11,14 +11,14 @@
 part of openapi.api;
 
 
-class DefaultApi {
-  DefaultApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
+class EntryApi {
+  EntryApi([ApiClient? apiClient]) : apiClient = apiClient ?? defaultApiClient;
 
   final ApiClient apiClient;
 
-  /// Create a subscription
+  /// Create an entry
   ///
-  /// Create a subscription
+  /// Create an entry
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -27,14 +27,14 @@ class DefaultApi {
   /// * [String] uid (required):
   ///   The user id
   ///
-  /// * [SubscriptionPostReq] subscriptionPostReq:
-  Future<Response> createSubscriptionWithHttpInfo(String uid, { SubscriptionPostReq? subscriptionPostReq, }) async {
+  /// * [EntryPostReq] entryPostReq:
+  Future<Response> createEntryWithHttpInfo(String uid, { EntryPostReq? entryPostReq, }) async {
     // ignore: prefer_const_declarations
-    final path = r'/v1/{uid}/subscriptions'
+    final path = r'/v1/{uid}/entries'
       .replaceAll('{uid}', uid);
 
     // ignore: prefer_final_locals
-    Object? postBody = subscriptionPostReq;
+    Object? postBody = entryPostReq;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
@@ -54,18 +54,18 @@ class DefaultApi {
     );
   }
 
-  /// Create a subscription
+  /// Create an entry
   ///
-  /// Create a subscription
+  /// Create an entry
   ///
   /// Parameters:
   ///
   /// * [String] uid (required):
   ///   The user id
   ///
-  /// * [SubscriptionPostReq] subscriptionPostReq:
-  Future<SubscriptionPostResp?> createSubscription(String uid, { SubscriptionPostReq? subscriptionPostReq, }) async {
-    final response = await createSubscriptionWithHttpInfo(uid,  subscriptionPostReq: subscriptionPostReq, );
+  /// * [EntryPostReq] entryPostReq:
+  Future<EntryPostResp?> createEntry(String uid, { EntryPostReq? entryPostReq, }) async {
+    final response = await createEntryWithHttpInfo(uid,  entryPostReq: entryPostReq, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -73,15 +73,15 @@ class DefaultApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SubscriptionPostResp',) as SubscriptionPostResp;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'EntryPostResp',) as EntryPostResp;
     
     }
     return null;
   }
 
-  /// List subscriptions
+  /// Delete an entry
   ///
-  /// List subscriptions
+  /// Delete an entry
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -89,9 +89,67 @@ class DefaultApi {
   ///
   /// * [String] uid (required):
   ///   The user id
-  Future<Response> listSubscriptionsWithHttpInfo(String uid,) async {
+  ///
+  /// * [String] eid (required):
+  ///   The entry id
+  Future<Response> deleteEntryWithHttpInfo(String uid, String eid,) async {
     // ignore: prefer_const_declarations
-    final path = r'/v1/{uid}/subscriptions'
+    final path = r'/v1/{uid}/entries/{eid}'
+      .replaceAll('{uid}', uid)
+      .replaceAll('{eid}', eid);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Delete an entry
+  ///
+  /// Delete an entry
+  ///
+  /// Parameters:
+  ///
+  /// * [String] uid (required):
+  ///   The user id
+  ///
+  /// * [String] eid (required):
+  ///   The entry id
+  Future<void> deleteEntry(String uid, String eid,) async {
+    final response = await deleteEntryWithHttpInfo(uid, eid,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
+  /// List entries
+  ///
+  /// List entries
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] uid (required):
+  ///   The user id
+  Future<Response> listEntriesWithHttpInfo(String uid,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/{uid}/entries'
       .replaceAll('{uid}', uid);
 
     // ignore: prefer_final_locals
@@ -115,16 +173,16 @@ class DefaultApi {
     );
   }
 
-  /// List subscriptions
+  /// List entries
   ///
-  /// List subscriptions
+  /// List entries
   ///
   /// Parameters:
   ///
   /// * [String] uid (required):
   ///   The user id
-  Future<SubscriptionListResp?> listSubscriptions(String uid,) async {
-    final response = await listSubscriptionsWithHttpInfo(uid,);
+  Future<EntryListResp?> listEntries(String uid,) async {
+    final response = await listEntriesWithHttpInfo(uid,);
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -132,15 +190,15 @@ class DefaultApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SubscriptionListResp',) as SubscriptionListResp;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'EntryListResp',) as EntryListResp;
     
     }
     return null;
   }
 
-  /// Pull a subscription
+  /// Update an entry
   ///
-  /// Pull a subscription
+  /// Update an entry
   ///
   /// Note: This method returns the HTTP [Response].
   ///
@@ -149,84 +207,18 @@ class DefaultApi {
   /// * [String] uid (required):
   ///   The user id
   ///
-  /// * [String] sid (required):
-  ///   The subscription id
-  Future<Response> pullSubscriptionWithHttpInfo(String uid, String sid,) async {
+  /// * [String] eid (required):
+  ///   The entry id
+  ///
+  /// * [EntryPatchReq] entryPatchReq:
+  Future<Response> updateEntryWithHttpInfo(String uid, String eid, { EntryPatchReq? entryPatchReq, }) async {
     // ignore: prefer_const_declarations
-    final path = r'/v1/{uid}/subscriptions/{sid}/pull'
+    final path = r'/v1/{uid}/entries/{eid}'
       .replaceAll('{uid}', uid)
-      .replaceAll('{sid}', sid);
+      .replaceAll('{eid}', eid);
 
     // ignore: prefer_final_locals
-    Object? postBody;
-
-    final queryParams = <QueryParam>[];
-    final headerParams = <String, String>{};
-    final formParams = <String, String>{};
-
-    const contentTypes = <String>[];
-
-
-    return apiClient.invokeAPI(
-      path,
-      'GET',
-      queryParams,
-      postBody,
-      headerParams,
-      formParams,
-      contentTypes.isEmpty ? null : contentTypes.first,
-    );
-  }
-
-  /// Pull a subscription
-  ///
-  /// Pull a subscription
-  ///
-  /// Parameters:
-  ///
-  /// * [String] uid (required):
-  ///   The user id
-  ///
-  /// * [String] sid (required):
-  ///   The subscription id
-  Future<SubscriptionPullResp?> pullSubscription(String uid, String sid,) async {
-    final response = await pullSubscriptionWithHttpInfo(uid, sid,);
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
-    }
-    // When a remote server returns no body with a status of 204, we shall not decode it.
-    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
-    // FormatException when trying to decode an empty string.
-    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SubscriptionPullResp',) as SubscriptionPullResp;
-    
-    }
-    return null;
-  }
-
-  /// Push a subscription
-  ///
-  /// Push a subscription
-  ///
-  /// Note: This method returns the HTTP [Response].
-  ///
-  /// Parameters:
-  ///
-  /// * [String] uid (required):
-  ///   The user id
-  ///
-  /// * [String] sid (required):
-  ///   The subscription id
-  ///
-  /// * [SubscriptionPushReq] subscriptionPushReq:
-  Future<Response> pushSubscriptionWithHttpInfo(String uid, String sid, { SubscriptionPushReq? subscriptionPushReq, }) async {
-    // ignore: prefer_const_declarations
-    final path = r'/v1/{uid}/subscriptions/{sid}/push'
-      .replaceAll('{uid}', uid)
-      .replaceAll('{sid}', sid);
-
-    // ignore: prefer_final_locals
-    Object? postBody = subscriptionPushReq;
+    Object? postBody = entryPatchReq;
 
     final queryParams = <QueryParam>[];
     final headerParams = <String, String>{};
@@ -237,7 +229,7 @@ class DefaultApi {
 
     return apiClient.invokeAPI(
       path,
-      'POST',
+      'PATCH',
       queryParams,
       postBody,
       headerParams,
@@ -246,21 +238,21 @@ class DefaultApi {
     );
   }
 
-  /// Push a subscription
+  /// Update an entry
   ///
-  /// Push a subscription
+  /// Update an entry
   ///
   /// Parameters:
   ///
   /// * [String] uid (required):
   ///   The user id
   ///
-  /// * [String] sid (required):
-  ///   The subscription id
+  /// * [String] eid (required):
+  ///   The entry id
   ///
-  /// * [SubscriptionPushReq] subscriptionPushReq:
-  Future<SubscriptionPushResp?> pushSubscription(String uid, String sid, { SubscriptionPushReq? subscriptionPushReq, }) async {
-    final response = await pushSubscriptionWithHttpInfo(uid, sid,  subscriptionPushReq: subscriptionPushReq, );
+  /// * [EntryPatchReq] entryPatchReq:
+  Future<EntryPatchResp?> updateEntry(String uid, String eid, { EntryPatchReq? entryPatchReq, }) async {
+    final response = await updateEntryWithHttpInfo(uid, eid,  entryPatchReq: entryPatchReq, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
@@ -268,7 +260,7 @@ class DefaultApi {
     // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
     // FormatException when trying to decode an empty string.
     if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
-      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'SubscriptionPushResp',) as SubscriptionPushResp;
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'EntryPatchResp',) as EntryPatchResp;
     
     }
     return null;

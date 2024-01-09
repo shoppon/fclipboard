@@ -12,16 +12,16 @@ import 'package:openapi/api.dart';
 import 'package:test/test.dart';
 
 
-/// tests for DefaultApi
+/// tests for SubscriptionApi
 void main() {
-  // final instance = DefaultApi();
+  // final instance = SubscriptionApi();
 
-  group('tests for DefaultApi', () {
+  group('tests for SubscriptionApi', () {
     // Create a subscription
     //
     // Create a subscription
     //
-    //Future<SubscriptionPostResp> createSubscription({ SubscriptionPostReq subscriptionPostReq }) async
+    //Future<SubscriptionPostResp> createSubscription(String uid, { SubscriptionPostReq subscriptionPostReq }) async
     test('test createSubscription', () async {
       // TODO
     });
@@ -30,7 +30,7 @@ void main() {
     //
     // List subscriptions
     //
-    //Future<List<Subscription>> listSubscriptions() async
+    //Future<SubscriptionListResp> listSubscriptions(String uid) async
     test('test listSubscriptions', () async {
       // TODO
     });
@@ -39,7 +39,7 @@ void main() {
     //
     // Pull a subscription
     //
-    //Future<SubscriptionPullResp> pullSubscription(String sid) async
+    //Future<SubscriptionPullResp> pullSubscription(String uid, String sid) async
     test('test pullSubscription', () async {
       // TODO
     });
@@ -48,7 +48,7 @@ void main() {
     //
     // Push a subscription
     //
-    //Future<Subscription> pushSubscription(String sid, { SubscriptionPushReq subscriptionPushReq }) async
+    //Future<SubscriptionPushResp> pushSubscription(String uid, String sid, { SubscriptionPushReq subscriptionPushReq }) async
     test('test pushSubscription', () async {
       // TODO
     });

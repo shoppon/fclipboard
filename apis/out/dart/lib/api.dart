@@ -28,10 +28,19 @@ part 'auth/oauth.dart';
 part 'auth/http_basic_auth.dart';
 part 'auth/http_bearer_auth.dart';
 
-part 'api/default_api.dart';
+part 'api/category_api.dart';
+part 'api/entry_api.dart';
+part 'api/subscription_api.dart';
 
+part 'model/category_post_req.dart';
+part 'model/category_post_req_category.dart';
 part 'model/entry.dart';
+part 'model/entry_list_resp.dart';
 part 'model/entry_parameters_inner.dart';
+part 'model/entry_patch_req.dart';
+part 'model/entry_patch_resp.dart';
+part 'model/entry_post_req.dart';
+part 'model/entry_post_resp.dart';
 part 'model/subscription.dart';
 part 'model/subscription_list_resp.dart';
 part 'model/subscription_post_req.dart';

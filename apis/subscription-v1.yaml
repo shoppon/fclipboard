@@ -26,6 +26,8 @@ paths:
                 $ref: "#/components/schemas/SubscriptionListResp"
         500:
           description: "Internal Server Error"
+      tags:
+        - subscription
     post:
       summary: "Create a subscription"
       description: "Create a subscription"
@@ -52,6 +54,8 @@ paths:
                 $ref: "#/components/schemas/SubscriptionPostResp"
         500:
           description: "Internal Server Error"
+      tags:
+        - subscription
   /v1/{uid}/subscriptions/{sid}/push:
     post:
       summary: "Push a subscription"
@@ -87,6 +91,8 @@ paths:
                 $ref: "#/components/schemas/SubscriptionPushResp"
         500:
           description: "Internal Server Error"
+      tags:
+        - subscription
   /v1/{uid}/subscriptions/{sid}/pull:
     get:
       summary: "Pull a subscription"
@@ -117,6 +123,149 @@ paths:
                 $ref: "#/components/schemas/SubscriptionPullResp"
         500:
           description: "Internal Server Error"
+      tags:
+        - subscription
+  /v1/{uid}/categories:
+    post:
+      summary: "Create a category"
+      description: "Create a category"
+      operationId: "createCategory"
+      parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryPostReq"
+      responses:
+        204:
+          description: "No Content"
+        500:
+          description: "Internal Server Error"
+      tags:
+        - category
+  /v1/{uid}/entries:
+    get:
+      summary: "List entries"
+      description: "List entries"
+      operationId: "listEntries"
+      parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntryListResp"
+        500:
+          description: "Internal Server Error"
+      tags:
+        - entry
+    post:
+      summary: "Create an entry"
+      description: "Create an entry"
+      operationId: "createEntry"
+      parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntryPostReq"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntryPostResp"
+        500:
+          description: "Internal Server Error"
+      tags:
+        - entry
+  /v1/{uid}/entries/{eid}:
+    patch:
+      summary: "Update an entry"
+      description: "Update an entry"
+      operationId: "updateEntry"
+      parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
+        - name: "eid"
+          in: "path"
+          description: "The entry id"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+            example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntryPatchReq"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntryPatchResp"
+        500:
+          description: "Internal Server Error"
+      tags:
+        - entry
+    delete:
+      summary: "Delete an entry"
+      description: "Delete an entry"
+      operationId: "deleteEntry"
+      parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
+        - name: "eid"
+          in: "path"
+          description: "The entry id"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+            example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      responses:
+        204:
+          description: "No Content"
+        500:
+          description: "Internal Server Error"
+      tags:
+        - entry
 components:
   schemas:
     Entry:
@@ -159,6 +308,54 @@ components:
                 type: "string"
                 description: "The description of the parameter"
                 example: "Foo Bar Baz"
+    EntryListResp:
+      type: "object"
+      properties:
+        entries:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Entry"
+    EntryPostReq:
+      type: "object"
+      properties:
+        entry:
+          $ref: "#/components/schemas/Entry"
+    EntryPostResp:
+      type: "object"
+      properties:
+        entry:
+          $ref: "#/components/schemas/Entry"
+    EntryPatchReq:
+      type: "object"
+      properties:
+        entry:
+          $ref: "#/components/schemas/Entry"
+    EntryPatchResp:
+      type: "object"
+      properties:
+        entry:
+          $ref: "#/components/schemas/Entry"
+    CategoryPostReq:
+      type: "object"
+      properties:
+        category:
+          type: "object"
+          properties:
+            name:
+              type: "string"
+              description: "The name of the category"
+              example: "news"
+            description:
+              type: "string"
+              description: "The description of the category"
+              example: "News"
+            is_private:
+              type: boolean
+              description: "Whether the category is private"
+              example: true
+            icon:
+              type: "string"
+              description: "The icon of the category"
     Subscription:
       type: "object"
       required:

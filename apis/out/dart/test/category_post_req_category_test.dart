@@ -11,31 +11,32 @@
 import 'package:openapi/api.dart';
 import 'package:test/test.dart';
 
-// tests for SubscriptionPostReqSubscription
+// tests for CategoryPostReqCategory
 void main() {
-  // final instance = SubscriptionPostReqSubscription();
+  // final instance = CategoryPostReqCategory();
 
-  group('test SubscriptionPostReqSubscription', () {
-    // The name of the subscription
+  group('test CategoryPostReqCategory', () {
+    // The name of the category
     // String name
     test('to test the property `name`', () async {
       // TODO
     });
 
-    // The description of the subscription
+    // The description of the category
     // String description
     test('to test the property `description`', () async {
       // TODO
     });
 
-    // List<String> categories (default value: const [])
-    test('to test the property `categories`', () async {
+    // Whether the category is private
+    // bool isPrivate
+    test('to test the property `isPrivate`', () async {
       // TODO
     });
 
-    // whether the subscription is public
-    // bool public
-    test('to test the property `public`', () async {
+    // The icon of the category
+    // String icon
+    test('to test the property `icon`', () async {
       // TODO
     });
 

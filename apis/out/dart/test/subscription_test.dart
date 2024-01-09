@@ -21,6 +21,34 @@ void main() {
       // TODO
     });
 
+    // The name of the subscription
+    // String name
+    test('to test the property `name`', () async {
+      // TODO
+    });
+
+    // The url of the subscription
+    // String url
+    test('to test the property `url`', () async {
+      // TODO
+    });
+
+    // whether the subscription is public
+    // bool public
+    test('to test the property `public`', () async {
+      // TODO
+    });
+
+    // List<String> categories (default value: const [])
+    test('to test the property `categories`', () async {
+      // TODO
+    });
+
+    // DateTime createdAt
+    test('to test the property `createdAt`', () async {
+      // TODO
+    });
+
 
   });
 

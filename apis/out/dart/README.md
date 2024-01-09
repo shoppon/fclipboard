@@ -40,15 +40,14 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:openapi/api.dart';
 
 
-final api_instance = DefaultApi();
+final api_instance = CategoryApi();
 final uid = shopppon@gmail.com; // String | The user id
-final subscriptionPostReq = SubscriptionPostReq(); // SubscriptionPostReq | 
+final categoryPostReq = CategoryPostReq(); // CategoryPostReq | 
 
 try {
-    final result = api_instance.createSubscription(uid, subscriptionPostReq);
-    print(result);
+    api_instance.createCategory(uid, categoryPostReq);
 } catch (e) {
-    print('Exception when calling DefaultApi->createSubscription: $e\n');
+    print('Exception when calling CategoryApi->createCategory: $e\n');
 }
 
 ```
@@ -59,16 +58,28 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*DefaultApi* | [**createSubscription**](doc//DefaultApi.md#createsubscription) | **POST** /v1/{uid}/subscriptions | Create a subscription
-*DefaultApi* | [**listSubscriptions**](doc//DefaultApi.md#listsubscriptions) | **GET** /v1/{uid}/subscriptions | List subscriptions
-*DefaultApi* | [**pullSubscription**](doc//DefaultApi.md#pullsubscription) | **GET** /v1/{uid}/subscriptions/{sid}/pull | Pull a subscription
-*DefaultApi* | [**pushSubscription**](doc//DefaultApi.md#pushsubscription) | **POST** /v1/{uid}/subscriptions/{sid}/push | Push a subscription
+*CategoryApi* | [**createCategory**](doc//CategoryApi.md#createcategory) | **POST** /v1/{uid}/categories | Create a category
+*EntryApi* | [**createEntry**](doc//EntryApi.md#createentry) | **POST** /v1/{uid}/entries | Create an entry
+*EntryApi* | [**deleteEntry**](doc//EntryApi.md#deleteentry) | **DELETE** /v1/{uid}/entries/{eid} | Delete an entry
+*EntryApi* | [**listEntries**](doc//EntryApi.md#listentries) | **GET** /v1/{uid}/entries | List entries
+*EntryApi* | [**updateEntry**](doc//EntryApi.md#updateentry) | **PATCH** /v1/{uid}/entries/{eid} | Update an entry
+*SubscriptionApi* | [**createSubscription**](doc//SubscriptionApi.md#createsubscription) | **POST** /v1/{uid}/subscriptions | Create a subscription
+*SubscriptionApi* | [**listSubscriptions**](doc//SubscriptionApi.md#listsubscriptions) | **GET** /v1/{uid}/subscriptions | List subscriptions
+*SubscriptionApi* | [**pullSubscription**](doc//SubscriptionApi.md#pullsubscription) | **GET** /v1/{uid}/subscriptions/{sid}/pull | Pull a subscription
+*SubscriptionApi* | [**pushSubscription**](doc//SubscriptionApi.md#pushsubscription) | **POST** /v1/{uid}/subscriptions/{sid}/push | Push a subscription
 
 
 ## Documentation For Models
 
+ - [CategoryPostReq](doc//CategoryPostReq.md)
+ - [CategoryPostReqCategory](doc//CategoryPostReqCategory.md)
  - [Entry](doc//Entry.md)
+ - [EntryListResp](doc//EntryListResp.md)
  - [EntryParametersInner](doc//EntryParametersInner.md)
+ - [EntryPatchReq](doc//EntryPatchReq.md)
+ - [EntryPatchResp](doc//EntryPatchResp.md)
+ - [EntryPostReq](doc//EntryPostReq.md)
+ - [EntryPostResp](doc//EntryPostResp.md)
  - [Subscription](doc//Subscription.md)
  - [SubscriptionListResp](doc//SubscriptionListResp.md)
  - [SubscriptionPostReq](doc//SubscriptionPostReq.md)
