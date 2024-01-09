@@ -1,8 +1,12 @@
+import 'dart:developer';
+
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart' as model;
+import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:openapi/api.dart';
 
 import 'generated/l10n.dart';
 
@@ -30,30 +34,23 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
     _fToast.init(context);
   }
 
-  void showToast(String content) {
-    Widget toast = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25.0),
-        color: Colors.greenAccent,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.check),
-          const SizedBox(
-            width: 12.0,
-          ),
-          Text(content),
-        ],
-      ),
-    );
-
-    _fToast.showToast(
-      child: toast,
-      gravity: ToastGravity.BOTTOM,
-      toastDuration: const Duration(seconds: 2),
-    );
+  Future<bool> createCategory() async {
+    try {
+      final email = loadUserEmail();
+      final apiInstance = CategoryApi(ApiClient(
+        basePath: await loadServerAddr(),
+      ));
+      final req = CategoryPostReq(
+          category: CategoryPostReqCategory(
+        icon: _icon,
+        name: _name,
+      ));
+      await apiInstance.createCategory(email, categoryPostReq: req);
+      return true;
+    } catch (e) {
+      log(e.toString());
+      return false;
+    }
   }
 
   @override
@@ -123,16 +120,27 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
                   ),
                   const SizedBox(height: 32.0),
                   ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (!_formKey.currentState!.validate()) {
                           return;
                         }
-                        final category =
-                            model.Category(name: _name, icon: _icon);
-                        _dbHelper.insertCategory(category);
-                        // toasts success
-                        showToast(S.of(context).addSuccessfully);
-                        Navigator.pop(context);
+                        final success = await createCategory();
+                        if (success) {
+                          final category =
+                              model.Category(name: _name, icon: _icon);
+                          _dbHelper.insertCategory(category);
+                          // toasts success
+                          if (context.mounted) {
+                            showToast(
+                                context, S.of(context).addSuccessfully, false);
+                            Navigator.pop(context);
+                          }
+                        } else {
+                          if (context.mounted) {
+                            showToast(context, S.of(context).addFailed, true);
+                            Navigator.pop(context);
+                          }
+                        }
                       },
                       child: Text(S.of(context).save)),
                 ],

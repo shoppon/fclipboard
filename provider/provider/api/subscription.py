@@ -1,15 +1,12 @@
 from typing import Optional
 
-from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel
 
+from provider.api import app
 from provider.clients import mongo
 from provider.objects.entry import Entry as EntryObject
 from provider.objects.subscription import Subscription as SubscriptionObject
-
-
-app = FastAPI()
 
 
 class Subscription(BaseModel):
@@ -22,23 +19,8 @@ class SubscriptionRequest(BaseModel):
     subscription: Subscription
 
 
-class Parameter(BaseModel):
-    name: str
-    description: Optional[str]
-    initial: Optional[str]
-    required: Optional[bool]
-
-
-class Entry(BaseModel):
-    name: str
-    content: str
-    category: str
-    counter: Optional[int]
-    parameters: Optional[list[Parameter]]
-
-
 class PushRequest(BaseModel):
-    entries: list[Entry]
+    pass
 
 
 @app.get("/v1/{uid}/subscriptions")

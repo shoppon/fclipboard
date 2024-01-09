@@ -16,11 +16,11 @@ class Param:
 
 @attrs.define
 class Entry:
-
     name: str = attrs.Factory(str)
     content: str = attrs.Factory(str)
     category: str = attrs.Factory(str)
     counter: int = attrs.Factory(int)
+    user: str = attrs.Factory(str)
     parameters: list[Param] = attrs.Factory(list)
     created_at: str = attrs.Factory(datetime.utcnow)
     subscriptions: list[str] = attrs.Factory(list)
@@ -48,3 +48,8 @@ class Entry:
             upsert=True
         )
         return update_op
+
+    def create(self):
+        created = mongo.get_collection('entry').insert_one(
+            attrs.asdict(self)).inserted_id
+        return created.binary.hex()

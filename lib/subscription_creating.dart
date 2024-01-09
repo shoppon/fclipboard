@@ -48,7 +48,7 @@ class _SubscriptionCreatingState extends State<SubscriptionCreatingPage> {
     ProgressDialog pd = ProgressDialog(context: context);
     pd.show(msg: "Loading...");
     final email = loadUserEmail();
-    final apiInstance = DefaultApi(ApiClient(basePath: await loadServerAddr()));
+    final apiInstance = SubscriptionApi(ApiClient(basePath: await loadServerAddr()));
     final req = SubscriptionPostReq(
       subscription: SubscriptionPostReqSubscription(
         categories: categories,

@@ -1,6 +1,9 @@
 import uvicorn
 
-from provider.api.subscription import app
+from provider.api import app
+from provider.api import category  # noqa
+from provider.api import entry  # noqa
+from provider.api import subscription  # noqa
 
 
 def main():
