@@ -126,6 +126,29 @@ paths:
       tags:
         - subscription
   /v1/{uid}/categories:
+    get:
+      summary: "List categories"
+      description: "List categories"
+      operationId: "listCategories"
+      parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryListResp"
+        500:
+          description: "Internal Server Error"
+      tags:
+        - category
     post:
       summary: "Create a category"
       description: "Create a category"
@@ -144,8 +167,12 @@ paths:
             schema:
               $ref: "#/components/schemas/CategoryPostReq"
       responses:
-        204:
-          description: "No Content"
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryPostResp"
         500:
           description: "Internal Server Error"
       tags:
@@ -372,6 +399,39 @@ components:
       properties:
         entry:
           $ref: "#/components/schemas/Entry"
+    Category:
+      type: "object"
+      properties:
+        uuid:
+          type: "string"
+          format: "uuid"
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        name:
+          type: "string"
+          description: "The name of the category"
+          example: "news"
+        description:
+          type: "string"
+          description: "The description of the category"
+          example: "News"
+        is_private:
+          type: boolean
+          description: "Whether the category is private"
+          example: true
+        icon:
+          type: "string"
+          description: "The icon of the category"
+        deleted:
+          type: boolean
+          description: "Whether the category is deleted"
+          example: false
+    CategoryListResp:
+      type: "object"
+      properties:
+        categories:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Category"
     CategoryPostReq:
       type: "object"
       properties:
@@ -393,6 +453,11 @@ components:
             icon:
               type: "string"
               description: "The icon of the category"
+    CategoryPostResp:
+      type: "object"
+      properties:
+        category:
+          $ref: "#/components/schemas/Category"
     Subscription:
       type: "object"
       required:

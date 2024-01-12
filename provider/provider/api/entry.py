@@ -10,7 +10,7 @@ from provider.objects.entry import Entry as EntryObject
 @app.post("/v1/{uid}/entries")
 def create_entry(uid: str, request: EntryPostReq):
     logger.info(f'User {uid} creating an entry: {request}.')
-    eo = EntryObject(**request.entry.model_dump_json())
+    eo = EntryObject(**request.entry.model_dump())
     eo.user = uid
     eo.create()
     logger.info(f'User {uid} created an entry.')

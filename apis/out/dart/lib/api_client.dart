@@ -182,10 +182,16 @@ class ApiClient {
           return valueString == 'true' || valueString == '1';
         case 'DateTime':
           return value is DateTime ? value : DateTime.tryParse(value);
+        case 'Category':
+          return Category.fromJson(value);
+        case 'CategoryListResp':
+          return CategoryListResp.fromJson(value);
         case 'CategoryPostReq':
           return CategoryPostReq.fromJson(value);
         case 'CategoryPostReqCategory':
           return CategoryPostReqCategory.fromJson(value);
+        case 'CategoryPostResp':
+          return CategoryPostResp.fromJson(value);
         case 'Entry':
           return Entry.fromJson(value);
         case 'EntryBody':

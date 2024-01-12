@@ -21,8 +21,17 @@ void main() {
     //
     // Create a category
     //
-    //Future createCategory(String uid, { CategoryPostReq categoryPostReq }) async
+    //Future<CategoryPostResp> createCategory(String uid, { CategoryPostReq categoryPostReq }) async
     test('test createCategory', () async {
+      // TODO
+    });
+
+    // List categories
+    //
+    // List categories
+    //
+    //Future<CategoryListResp> listCategories(String uid) async
+    test('test listCategories', () async {
       // TODO
     });
 

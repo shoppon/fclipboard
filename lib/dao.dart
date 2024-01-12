@@ -29,6 +29,7 @@ void createCategoryTable(Database db) {
   db.execute('''
     CREATE TABLE category(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT,
       name TEXT NOT NULL UNIQUE,
       icon TEXT NOT NULL,
       is_private BOOLEAN DEFAULT FALSE
@@ -88,6 +89,12 @@ void version3to4(Database db) {
   ''');
 }
 
+void version4to5(Database db) {
+  db.execute('''
+    ALTER TABLE category ADD COLUMN uuid TEXT
+  ''');
+}
+
 class DBHelper {
   Future<Database> get database async {
     return openDatabase(
@@ -102,12 +109,13 @@ class DBHelper {
           1: version1to2,
           2: version2to3,
           3: version3to4,
+          4: version4to5,
         };
         for (var i = oldVersion; i < newVersion; i++) {
           versions[i]!(db);
         }
       },
-      version: 4,
+      version: 5,
     );
   }
 
@@ -154,6 +162,7 @@ class DBHelper {
         name: maps[i]['name'],
         icon: maps[i]['icon'],
         id: maps[i]['id'],
+        uuid: maps[i]['uuid']?.toString() ?? '',
         isPrivate: maps[i]['is_private'] == 1,
       );
     });

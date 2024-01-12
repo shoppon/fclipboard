@@ -64,10 +64,77 @@ class CategoryApi {
   ///   The user id
   ///
   /// * [CategoryPostReq] categoryPostReq:
-  Future<void> createCategory(String uid, { CategoryPostReq? categoryPostReq, }) async {
+  Future<CategoryPostResp?> createCategory(String uid, { CategoryPostReq? categoryPostReq, }) async {
     final response = await createCategoryWithHttpInfo(uid,  categoryPostReq: categoryPostReq, );
     if (response.statusCode >= HttpStatus.badRequest) {
       throw ApiException(response.statusCode, await _decodeBodyBytes(response));
     }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CategoryPostResp',) as CategoryPostResp;
+    
+    }
+    return null;
+  }
+
+  /// List categories
+  ///
+  /// List categories
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] uid (required):
+  ///   The user id
+  Future<Response> listCategoriesWithHttpInfo(String uid,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/{uid}/categories'
+      .replaceAll('{uid}', uid);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// List categories
+  ///
+  /// List categories
+  ///
+  /// Parameters:
+  ///
+  /// * [String] uid (required):
+  ///   The user id
+  Future<CategoryListResp?> listCategories(String uid,) async {
+    final response = await listCategoriesWithHttpInfo(uid,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'CategoryListResp',) as CategoryListResp;
+    
+    }
+    return null;
   }
 }

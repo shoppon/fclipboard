@@ -1,11 +1,11 @@
 import 'package:collection/collection.dart';
-import 'package:fclipboard/model.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:openapi/api.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 import 'dao.dart';
+import 'model.dart' as m;
 import 'utils.dart';
 import 'generated/l10n.dart';
 
@@ -23,7 +23,7 @@ class _SubscriptionCreatingState extends State<SubscriptionCreatingPage> {
   final _dbHelper = DBHelper();
 
   List<bool> _selected = [];
-  List<Category> _categories = [];
+  List<m.Category> _categories = [];
 
   String _name = "";
 
@@ -39,7 +39,7 @@ class _SubscriptionCreatingState extends State<SubscriptionCreatingPage> {
     });
   }
 
-  Future<List<Category>> _loadCategories() async {
+  Future<List<m.Category>> _loadCategories() async {
     final categories = await _dbHelper.categories();
     return categories;
   }
@@ -48,7 +48,8 @@ class _SubscriptionCreatingState extends State<SubscriptionCreatingPage> {
     ProgressDialog pd = ProgressDialog(context: context);
     pd.show(msg: "Loading...");
     final email = loadUserEmail();
-    final apiInstance = SubscriptionApi(ApiClient(basePath: await loadServerAddr()));
+    final apiInstance =
+        SubscriptionApi(ApiClient(basePath: await loadServerAddr()));
     final req = SubscriptionPostReq(
       subscription: SubscriptionPostReqSubscription(
         categories: categories,
@@ -81,13 +82,13 @@ class _SubscriptionCreatingState extends State<SubscriptionCreatingPage> {
       body: FutureBuilder(
         future: _loadCategories(),
         builder:
-            (BuildContext context, AsyncSnapshot<List<Category>> snapshot) {
+            (BuildContext context, AsyncSnapshot<List<m.Category>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else {
-            List<Category> cats = snapshot.data!;
+            List<m.Category> cats = snapshot.data!;
             return Padding(
               padding: const EdgeInsets.all(18.0),
               child: Form(

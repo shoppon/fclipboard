@@ -45,7 +45,8 @@ final uid = shopppon@gmail.com; // String | The user id
 final categoryPostReq = CategoryPostReq(); // CategoryPostReq | 
 
 try {
-    api_instance.createCategory(uid, categoryPostReq);
+    final result = api_instance.createCategory(uid, categoryPostReq);
+    print(result);
 } catch (e) {
     print('Exception when calling CategoryApi->createCategory: $e\n');
 }
@@ -59,6 +60,7 @@ All URIs are relative to *http://localhost*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *CategoryApi* | [**createCategory**](doc//CategoryApi.md#createcategory) | **POST** /v1/{uid}/categories | Create a category
+*CategoryApi* | [**listCategories**](doc//CategoryApi.md#listcategories) | **GET** /v1/{uid}/categories | List categories
 *EntryApi* | [**createEntry**](doc//EntryApi.md#createentry) | **POST** /v1/{uid}/entries | Create an entry
 *EntryApi* | [**deleteEntry**](doc//EntryApi.md#deleteentry) | **DELETE** /v1/{uid}/entries/{eid} | Delete an entry
 *EntryApi* | [**listEntries**](doc//EntryApi.md#listentries) | **GET** /v1/{uid}/entries | List entries
@@ -71,8 +73,11 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [Category](doc//Category.md)
+ - [CategoryListResp](doc//CategoryListResp.md)
  - [CategoryPostReq](doc//CategoryPostReq.md)
  - [CategoryPostReqCategory](doc//CategoryPostReqCategory.md)
+ - [CategoryPostResp](doc//CategoryPostResp.md)
  - [Entry](doc//Entry.md)
  - [EntryBody](doc//EntryBody.md)
  - [EntryListResp](doc//EntryListResp.md)

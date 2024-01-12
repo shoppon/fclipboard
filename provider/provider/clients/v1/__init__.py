@@ -33,8 +33,11 @@ from provider.clients.v1.exceptions import ApiAttributeError
 from provider.clients.v1.exceptions import ApiException
 
 # import models into sdk package
+from provider.clients.v1.models.category import Category
+from provider.clients.v1.models.category_list_resp import CategoryListResp
 from provider.clients.v1.models.category_post_req import CategoryPostReq
 from provider.clients.v1.models.category_post_req_category import CategoryPostReqCategory
+from provider.clients.v1.models.category_post_resp import CategoryPostResp
 from provider.clients.v1.models.entry import Entry
 from provider.clients.v1.models.entry_body import EntryBody
 from provider.clients.v1.models.entry_list_resp import EntryListResp

@@ -11,51 +11,41 @@
 import 'package:openapi/api.dart';
 import 'package:test/test.dart';
 
-// tests for Entry
+// tests for Category
 void main() {
-  // final instance = Entry();
+  // final instance = Category();
 
-  group('test Entry', () {
-    // int id
-    test('to test the property `id`', () async {
-      // TODO
-    });
-
+  group('test Category', () {
     // String uuid
     test('to test the property `uuid`', () async {
       // TODO
     });
 
-    // The name of the entry
+    // The name of the category
     // String name
     test('to test the property `name`', () async {
       // TODO
     });
 
-    // The content of the entry
-    // String content
-    test('to test the property `content`', () async {
+    // The description of the category
+    // String description
+    test('to test the property `description`', () async {
       // TODO
     });
 
-    // The category of the entry
-    // String category
-    test('to test the property `category`', () async {
+    // Whether the category is private
+    // bool isPrivate
+    test('to test the property `isPrivate`', () async {
       // TODO
     });
 
-    // The counter of the entry
-    // int counter
-    test('to test the property `counter`', () async {
+    // The icon of the category
+    // String icon
+    test('to test the property `icon`', () async {
       // TODO
     });
 
-    // List<Parameter> parameters (default value: const [])
-    test('to test the property `parameters`', () async {
-      // TODO
-    });
-
-    // Whether the entry is deleted
+    // Whether the category is deleted
     // bool deleted
     test('to test the property `deleted`', () async {
       // TODO

@@ -32,8 +32,11 @@ part 'api/category_api.dart';
 part 'api/entry_api.dart';
 part 'api/subscription_api.dart';
 
+part 'model/category.dart';
+part 'model/category_list_resp.dart';
 part 'model/category_post_req.dart';
 part 'model/category_post_req_category.dart';
+part 'model/category_post_resp.dart';
 part 'model/entry.dart';
 part 'model/entry_body.dart';
 part 'model/entry_list_resp.dart';
