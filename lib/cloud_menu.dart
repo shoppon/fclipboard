@@ -64,7 +64,7 @@ class CloudMenu extends StatelessWidget {
           if (se.deleted!) {
             await _dbHelper.deleteEntry(le.title);
           } else {
-            //TODO(xp): update local
+            updateLocalEntry(le, se);
           }
         }
       }
@@ -85,9 +85,39 @@ class CloudMenu extends StatelessWidget {
           parameters:
               se.parameters.map((e) => m.Param.fromJson(e.toJson())).toList(),
         ));
+      } else {
+        updateLocalEntry(le, se);
       }
     }
     return true;
+  }
+
+  bool isParametersSame(m.Entry local, Entry server) {
+    if (local.parameters.length != server.parameters.length) {
+      return false;
+    }
+    for (var i = 0; i < local.parameters.length; i++) {
+      if (local.parameters[i].name != server.parameters[i].name ||
+          local.parameters[i].initial != server.parameters[i].initial ||
+          local.parameters[i].description != server.parameters[i].description ||
+          local.parameters[i].required != server.parameters[i].required_) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  Future<void> updateLocalEntry(m.Entry local, Entry server) async {
+    if (local.title == server.name! &&
+        local.subtitle == server.content! &&
+        isParametersSame(local, server)) {
+      return;
+    }
+    local.title = server.name!;
+    local.subtitle = server.content!;
+    local.parameters =
+        server.parameters.map((e) => m.Param.fromJson(e.toJson())).toList();
+    await _dbHelper.insertEntry(local);
   }
 
   Future<bool> syncCategories() async {
@@ -115,7 +145,11 @@ class CloudMenu extends StatelessWidget {
           if (sc.deleted!) {
             await _dbHelper.deleteCategory(lc.name);
           } else {
-            //TODO(xp): update local
+            if (lc.name != sc.name || lc.icon != sc.icon) {
+              lc.name = sc.name!;
+              lc.icon = sc.icon!;
+              await _dbHelper.insertCategory(lc);
+            }
           }
         }
       }
@@ -129,6 +163,12 @@ class CloudMenu extends StatelessWidget {
           uuid: sc.uuid!,
           isPrivate: sc.isPrivate!,
         ));
+      } else {
+        if (lc.name != sc.name || lc.icon != sc.icon) {
+          lc.name = sc.name!;
+          lc.icon = sc.icon!;
+          await _dbHelper.insertCategory(lc);
+        }
       }
     }
     return true;

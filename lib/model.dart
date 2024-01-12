@@ -13,9 +13,9 @@ class Category {
 
   String uuid;
   final int id;
-  final String name;
-  final String icon;
-  final bool isPrivate;
+  String name;
+  String icon;
+  bool isPrivate;
 
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{
@@ -88,11 +88,11 @@ class Entry {
   int categoryId;
   String uuid;
   final String categoryName;
-  final String title;
-  final String subtitle;
+  String title;
+  String subtitle;
   final String icon;
   final int counter;
-  final List<Param> parameters;
+  List<Param> parameters;
 
   Map<String, dynamic> toMap() {
     final map = {
