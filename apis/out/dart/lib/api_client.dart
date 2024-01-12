@@ -188,10 +188,10 @@ class ApiClient {
           return CategoryPostReqCategory.fromJson(value);
         case 'Entry':
           return Entry.fromJson(value);
+        case 'EntryBody':
+          return EntryBody.fromJson(value);
         case 'EntryListResp':
           return EntryListResp.fromJson(value);
-        case 'EntryParametersInner':
-          return EntryParametersInner.fromJson(value);
         case 'EntryPatchReq':
           return EntryPatchReq.fromJson(value);
         case 'EntryPatchResp':
@@ -200,6 +200,8 @@ class ApiClient {
           return EntryPostReq.fromJson(value);
         case 'EntryPostResp':
           return EntryPostResp.fromJson(value);
+        case 'Parameter':
+          return Parameter.fromJson(value);
         case 'Subscription':
           return Subscription.fromJson(value);
         case 'SubscriptionListResp':

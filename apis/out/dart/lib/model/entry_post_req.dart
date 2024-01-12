@@ -22,7 +22,7 @@ class EntryPostReq {
   /// source code must fall back to having a nullable type.
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
-  Entry? entry;
+  EntryBody? entry;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is EntryPostReq &&
@@ -65,7 +65,7 @@ class EntryPostReq {
       }());
 
       return EntryPostReq(
-        entry: Entry.fromJson(json[r'entry']),
+        entry: EntryBody.fromJson(json[r'entry']),
       );
     }
     return null;

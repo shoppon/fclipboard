@@ -1,7 +1,7 @@
 openapi: "3.0.2"
 info:
-  title: "Subscription API"
-  description: "The Subscription API allows you to subscribe to events that happen in the system."
+  title: "fclipboard provider API"
+  description: "The provider API allows you to subscribe to events that happen in the system."
   version: "1.0.0"
 paths:
   /v1/{uid}/subscriptions:
@@ -268,7 +268,61 @@ paths:
         - entry
 components:
   schemas:
+    Parameter:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          description: "The name of the parameter"
+          example: "foo"
+        initial:
+          type: "string"
+          description: "The initial value of the parameter"
+          example: "bar"
+        required:
+          type: "boolean"
+          description: "Whether the parameter is required"
+          example: true
+        description:
+          type: "string"
+          description: "The description of the parameter"
+          example: "Foo Bar Baz"
     Entry:
+      type: "object"
+      properties:
+        id:
+          type: integer
+          format: "int64"
+          example: 1
+        uuid:
+          type: "string"
+          format: "uuid"
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        name:
+          type: "string"
+          description: "The name of the entry"
+          example: "Foo Bar Baz"
+        content:
+          type: "string"
+          description: "The content of the entry"
+          example: "foo bar baz"
+        category:
+          type: "string"
+          description: "The category of the entry"
+          example: "news"
+        counter:
+          type: "integer"
+          description: "The counter of the entry"
+          example: 1
+        parameters:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Parameter"
+        deleted:
+          type: boolean
+          description: "Whether the entry is deleted"
+          example: false
+    EntryBody:
       type: "object"
       properties:
         name:
@@ -290,24 +344,7 @@ components:
         parameters:
           type: "array"
           items:
-            type: "object"
-            properties:
-              name:
-                type: "string"
-                description: "The name of the parameter"
-                example: "foo"
-              initial:
-                type: "string"
-                description: "The initial value of the parameter"
-                example: "bar"
-              required:
-                type: "boolean"
-                description: "Whether the parameter is required"
-                example: true
-              description:
-                type: "string"
-                description: "The description of the parameter"
-                example: "Foo Bar Baz"
+            $ref: "#/components/schemas/Parameter"
     EntryListResp:
       type: "object"
       properties:
@@ -319,7 +356,7 @@ components:
       type: "object"
       properties:
         entry:
-          $ref: "#/components/schemas/Entry"
+          $ref: "#/components/schemas/EntryBody"
     EntryPostResp:
       type: "object"
       properties:
@@ -329,7 +366,7 @@ components:
       type: "object"
       properties:
         entry:
-          $ref: "#/components/schemas/Entry"
+          $ref: "#/components/schemas/EntryBody"
     EntryPatchResp:
       type: "object"
       properties:

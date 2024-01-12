@@ -5,14 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "subscription",
+      "name": "provider-api",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/provider/api_debug.py",
       "console": "integratedTerminal",
       "justMyCode": false,
       "args": [
-        "${workspaceFolder}/provider/settings.toml"
+        "~/fclipboard/provider/settings.toml"
       ]
     }
   ]

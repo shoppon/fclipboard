@@ -156,6 +156,7 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                         }
                         final entry = Entry(
                           id: widget.entry.id,
+                          uuid: widget.entry.uuid,
                           title: _title,
                           subtitle: _content,
                           counter: 0,

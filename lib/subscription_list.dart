@@ -62,7 +62,7 @@ class _SubscriptionListViewState extends State<SubscriptionListView> {
     final List<Entry> entries = [];
     for (final db in dbs) {
       final params = db.parameters
-          .map((e) => EntryParametersInner(
+          .map((e) => Parameter(
                 name: e.name,
                 initial: e.initial,
                 required_: e.required,

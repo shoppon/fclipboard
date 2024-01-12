@@ -75,6 +75,7 @@ class Entry {
     required this.categoryId,
     required this.counter,
     this.id = 0,
+    this.uuid = '',
     this.icon = '',
     this.categoryName = '',
     this.parameters = const [],
@@ -82,6 +83,7 @@ class Entry {
 
   int id;
   int categoryId;
+  String uuid;
   final String categoryName;
   final String title;
   final String subtitle;
@@ -91,6 +93,7 @@ class Entry {
 
   Map<String, dynamic> toMap() {
     final map = {
+      'uuid': uuid,
       'title': title,
       'subtitle': subtitle,
       'counter': counter,
@@ -106,6 +109,7 @@ class Entry {
     return Entry(
       categoryId: 0,
       title: '',
+      uuid: '',
       subtitle: '',
       counter: 0,
       parameters: [],

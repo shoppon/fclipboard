@@ -1,4 +1,4 @@
-# openapi.model.EntryParametersInner
+# openapi.model.Parameter
 
 ## Load the model package
 ```dart

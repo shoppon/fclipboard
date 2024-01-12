@@ -11,11 +11,11 @@
 import 'package:openapi/api.dart';
 import 'package:test/test.dart';
 
-// tests for EntryParametersInner
+// tests for Parameter
 void main() {
-  // final instance = EntryParametersInner();
+  // final instance = Parameter();
 
-  group('test EntryParametersInner', () {
+  group('test Parameter', () {
     // The name of the parameter
     // String name
     test('to test the property `name`', () async {

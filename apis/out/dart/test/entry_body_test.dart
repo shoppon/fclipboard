@@ -11,16 +11,11 @@
 import 'package:openapi/api.dart';
 import 'package:test/test.dart';
 
-// tests for Entry
+// tests for EntryBody
 void main() {
-  // final instance = Entry();
+  // final instance = EntryBody();
 
-  group('test Entry', () {
-    // String id
-    test('to test the property `id`', () async {
-      // TODO
-    });
-
+  group('test EntryBody', () {
     // The name of the entry
     // String name
     test('to test the property `name`', () async {

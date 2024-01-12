@@ -16,7 +16,7 @@ void main() {
   // final instance = EntryPostReq();
 
   group('test EntryPostReq', () {
-    // Entry entry
+    // EntryBody entry
     test('to test the property `entry`', () async {
       // TODO
     });

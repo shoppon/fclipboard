@@ -10,9 +10,9 @@
 
 part of openapi.api;
 
-class EntryParametersInner {
-  /// Returns a new [EntryParametersInner] instance.
-  EntryParametersInner({
+class Parameter {
+  /// Returns a new [Parameter] instance.
+  Parameter({
     this.name,
     this.initial,
     this.required_,
@@ -56,7 +56,7 @@ class EntryParametersInner {
   String? description;
 
   @override
-  bool operator ==(Object other) => identical(this, other) || other is EntryParametersInner &&
+  bool operator ==(Object other) => identical(this, other) || other is Parameter &&
     other.name == name &&
     other.initial == initial &&
     other.required_ == required_ &&
@@ -71,7 +71,7 @@ class EntryParametersInner {
     (description == null ? 0 : description!.hashCode);
 
   @override
-  String toString() => 'EntryParametersInner[name=$name, initial=$initial, required_=$required_, description=$description]';
+  String toString() => 'Parameter[name=$name, initial=$initial, required_=$required_, description=$description]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -98,10 +98,10 @@ class EntryParametersInner {
     return json;
   }
 
-  /// Returns a new [EntryParametersInner] instance and imports its values from
+  /// Returns a new [Parameter] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static EntryParametersInner? fromJson(dynamic value) {
+  static Parameter? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -110,13 +110,13 @@ class EntryParametersInner {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "EntryParametersInner[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "EntryParametersInner[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "Parameter[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "Parameter[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return EntryParametersInner(
+      return Parameter(
         name: mapValueOfType<String>(json, r'name'),
         initial: mapValueOfType<String>(json, r'initial'),
         required_: mapValueOfType<bool>(json, r'required'),
@@ -126,11 +126,11 @@ class EntryParametersInner {
     return null;
   }
 
-  static List<EntryParametersInner> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <EntryParametersInner>[];
+  static List<Parameter> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <Parameter>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = EntryParametersInner.fromJson(row);
+        final value = Parameter.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -139,12 +139,12 @@ class EntryParametersInner {
     return result.toList(growable: growable);
   }
 
-  static Map<String, EntryParametersInner> mapFromJson(dynamic json) {
-    final map = <String, EntryParametersInner>{};
+  static Map<String, Parameter> mapFromJson(dynamic json) {
+    final map = <String, Parameter>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = EntryParametersInner.fromJson(entry.value);
+        final value = Parameter.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -153,14 +153,14 @@ class EntryParametersInner {
     return map;
   }
 
-  // maps a json object with a list of EntryParametersInner-objects as value to a dart map
-  static Map<String, List<EntryParametersInner>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<EntryParametersInner>>{};
+  // maps a json object with a list of Parameter-objects as value to a dart map
+  static Map<String, List<Parameter>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<Parameter>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = EntryParametersInner.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = Parameter.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

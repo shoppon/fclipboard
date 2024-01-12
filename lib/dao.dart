@@ -40,6 +40,7 @@ void createEntryTable(Database db) {
   db.execute('''
     CREATE TABLE entry(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT,
       title TEXT NOT NULL UNIQUE,
       subtitle TEXT NOT NULL,
       counter INTEGER NOT NULL,
@@ -80,6 +81,13 @@ void version2to3(Database db) {
   createParamTable(db);
 }
 
+void version3to4(Database db) {
+  // add uuid column for entry
+  db.execute('''
+    ALTER TABLE entry ADD COLUMN uuid TEXT
+  ''');
+}
+
 class DBHelper {
   Future<Database> get database async {
     return openDatabase(
@@ -93,12 +101,13 @@ class DBHelper {
         final versions = {
           1: version1to2,
           2: version2to3,
+          3: version3to4,
         };
         for (var i = oldVersion; i < newVersion; i++) {
           versions[i]!(db);
         }
       },
-      version: 3,
+      version: 4,
     );
   }
 
@@ -155,7 +164,7 @@ class DBHelper {
     final Database db = await database;
     List<Map<String, Object?>> results;
     var query = '''
-      SELECT entry.id, entry.title, entry.subtitle, entry.counter, entry.category_id, category.name as c_name, category.icon, param.id as p_id, param.name as p_name, param.initial, param.description, param.required
+      SELECT entry.id, entry.uuid, entry.title, entry.subtitle, entry.counter, entry.category_id, category.name as c_name, category.icon, param.id as p_id, param.name as p_name, param.initial, param.description, param.required
       FROM entry
       INNER JOIN category ON entry.category_id = category.id
       LEFT JOIN param ON entry.id = param.entry_id
@@ -190,6 +199,7 @@ class DBHelper {
       } else {
         entries.add(m.Entry(
           id: r['id'] as int,
+          uuid: r['uuid']?.toString() ?? '',
           title: r['title'].toString(),
           subtitle: r['subtitle'].toString(),
           counter: r['counter'] as int,
@@ -291,6 +301,7 @@ class DBHelper {
       if (category.isPrivate) {
         continue;
       }
+      sink.writeln('  - uuid: "${e.uuid}"');
       sink.writeln('  - title: "${e.title}"');
       // subtitle may contain special characters and has multiple lines
       sink.writeln('    subtitle: |-');
@@ -354,6 +365,7 @@ class DBHelper {
       }
       final entry = m.Entry(
         id: existing == null ? 0 : existing.id,
+        uuid: existing == null ? '' : existing.uuid,
         title: e['title'],
         subtitle: e['subtitle'],
         counter: e['counter'],

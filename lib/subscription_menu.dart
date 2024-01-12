@@ -6,8 +6,8 @@ import 'package:fclipboard/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class CloudSyncMenu extends StatelessWidget {
-  const CloudSyncMenu({Key? key}) : super(key: key);
+class SubscriptionMenu extends StatelessWidget {
+  const SubscriptionMenu({Key? key}) : super(key: key);
 
   bool checkLoginState(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;

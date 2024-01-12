@@ -32,6 +32,7 @@ Entry _$EntryFromJson(Map<String, dynamic> json) => Entry(
       categoryId: json['categoryId'] as int,
       counter: json['counter'] as int,
       id: json['id'] as int? ?? 0,
+      uuid: json['uuid'] as String? ?? '',
       icon: json['icon'] as String? ?? '',
       categoryName: json['categoryName'] as String? ?? '',
       parameters: (json['parameters'] as List<dynamic>?)
@@ -43,6 +44,7 @@ Entry _$EntryFromJson(Map<String, dynamic> json) => Entry(
 Map<String, dynamic> _$EntryToJson(Entry instance) => <String, dynamic>{
       'id': instance.id,
       'categoryId': instance.categoryId,
+      'uuid': instance.uuid,
       'categoryName': instance.categoryName,
       'title': instance.title,
       'subtitle': instance.subtitle,

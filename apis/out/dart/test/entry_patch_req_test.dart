@@ -16,7 +16,7 @@ void main() {
   // final instance = EntryPatchReq();
 
   group('test EntryPatchReq', () {
-    // Entry entry
+    // EntryBody entry
     test('to test the property `entry`', () async {
       // TODO
     });

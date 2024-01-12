@@ -1,7 +1,8 @@
+import 'package:fclipboard/cloud_menu.dart';
 import 'package:fclipboard/config.dart';
 import 'firebase_options.dart';
 import 'package:fclipboard/clear_data.dart';
-import 'package:fclipboard/cloud_sync.dart';
+import 'package:fclipboard/subscription_menu.dart';
 import 'package:fclipboard/constants.dart';
 import 'package:fclipboard/creating.dart';
 import 'package:fclipboard/email_verify.dart';
@@ -172,8 +173,9 @@ class _MainAppState extends State<MainApp> {
             appBar: AppBar(
               title: Text(S.of(context).appTitle),
               actions: <Widget>[
+                CloudMenu(),
                 isDesktop() ? const ExportButton() : Container(),
-                const CloudSyncMenu(),
+                const SubscriptionMenu(),
                 const CreatingMenu(),
               ],
             ),

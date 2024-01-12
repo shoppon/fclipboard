@@ -10,34 +10,15 @@
 
 part of openapi.api;
 
-class Entry {
-  /// Returns a new [Entry] instance.
-  Entry({
-    this.id,
-    this.uuid,
+class EntryBody {
+  /// Returns a new [EntryBody] instance.
+  EntryBody({
     this.name,
     this.content,
     this.category,
     this.counter,
     this.parameters = const [],
-    this.deleted,
   });
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  int? id;
-
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  String? uuid;
 
   /// The name of the entry
   ///
@@ -77,53 +58,28 @@ class Entry {
 
   List<Parameter> parameters;
 
-  /// Whether the entry is deleted
-  ///
-  /// Please note: This property should have been non-nullable! Since the specification file
-  /// does not include a default value (using the "default:" property), however, the generated
-  /// source code must fall back to having a nullable type.
-  /// Consider adding a "default:" property in the specification file to hide this note.
-  ///
-  bool? deleted;
-
   @override
-  bool operator ==(Object other) => identical(this, other) || other is Entry &&
-    other.id == id &&
-    other.uuid == uuid &&
+  bool operator ==(Object other) => identical(this, other) || other is EntryBody &&
     other.name == name &&
     other.content == content &&
     other.category == category &&
     other.counter == counter &&
-    _deepEquality.equals(other.parameters, parameters) &&
-    other.deleted == deleted;
+    _deepEquality.equals(other.parameters, parameters);
 
   @override
   int get hashCode =>
     // ignore: unnecessary_parenthesis
-    (id == null ? 0 : id!.hashCode) +
-    (uuid == null ? 0 : uuid!.hashCode) +
     (name == null ? 0 : name!.hashCode) +
     (content == null ? 0 : content!.hashCode) +
     (category == null ? 0 : category!.hashCode) +
     (counter == null ? 0 : counter!.hashCode) +
-    (parameters.hashCode) +
-    (deleted == null ? 0 : deleted!.hashCode);
+    (parameters.hashCode);
 
   @override
-  String toString() => 'Entry[id=$id, uuid=$uuid, name=$name, content=$content, category=$category, counter=$counter, parameters=$parameters, deleted=$deleted]';
+  String toString() => 'EntryBody[name=$name, content=$content, category=$category, counter=$counter, parameters=$parameters]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
-    if (this.id != null) {
-      json[r'id'] = this.id;
-    } else {
-      json[r'id'] = null;
-    }
-    if (this.uuid != null) {
-      json[r'uuid'] = this.uuid;
-    } else {
-      json[r'uuid'] = null;
-    }
     if (this.name != null) {
       json[r'name'] = this.name;
     } else {
@@ -145,18 +101,13 @@ class Entry {
       json[r'counter'] = null;
     }
       json[r'parameters'] = this.parameters;
-    if (this.deleted != null) {
-      json[r'deleted'] = this.deleted;
-    } else {
-      json[r'deleted'] = null;
-    }
     return json;
   }
 
-  /// Returns a new [Entry] instance and imports its values from
+  /// Returns a new [EntryBody] instance and imports its values from
   /// [value] if it's a [Map], null otherwise.
   // ignore: prefer_constructors_over_static_methods
-  static Entry? fromJson(dynamic value) {
+  static EntryBody? fromJson(dynamic value) {
     if (value is Map) {
       final json = value.cast<String, dynamic>();
 
@@ -165,31 +116,28 @@ class Entry {
       // Note 2: this code is stripped in release mode!
       assert(() {
         requiredKeys.forEach((key) {
-          assert(json.containsKey(key), 'Required key "Entry[$key]" is missing from JSON.');
-          assert(json[key] != null, 'Required key "Entry[$key]" has a null value in JSON.');
+          assert(json.containsKey(key), 'Required key "EntryBody[$key]" is missing from JSON.');
+          assert(json[key] != null, 'Required key "EntryBody[$key]" has a null value in JSON.');
         });
         return true;
       }());
 
-      return Entry(
-        id: mapValueOfType<int>(json, r'id'),
-        uuid: mapValueOfType<String>(json, r'uuid'),
+      return EntryBody(
         name: mapValueOfType<String>(json, r'name'),
         content: mapValueOfType<String>(json, r'content'),
         category: mapValueOfType<String>(json, r'category'),
         counter: mapValueOfType<int>(json, r'counter'),
         parameters: Parameter.listFromJson(json[r'parameters']),
-        deleted: mapValueOfType<bool>(json, r'deleted'),
       );
     }
     return null;
   }
 
-  static List<Entry> listFromJson(dynamic json, {bool growable = false,}) {
-    final result = <Entry>[];
+  static List<EntryBody> listFromJson(dynamic json, {bool growable = false,}) {
+    final result = <EntryBody>[];
     if (json is List && json.isNotEmpty) {
       for (final row in json) {
-        final value = Entry.fromJson(row);
+        final value = EntryBody.fromJson(row);
         if (value != null) {
           result.add(value);
         }
@@ -198,12 +146,12 @@ class Entry {
     return result.toList(growable: growable);
   }
 
-  static Map<String, Entry> mapFromJson(dynamic json) {
-    final map = <String, Entry>{};
+  static Map<String, EntryBody> mapFromJson(dynamic json) {
+    final map = <String, EntryBody>{};
     if (json is Map && json.isNotEmpty) {
       json = json.cast<String, dynamic>(); // ignore: parameter_assignments
       for (final entry in json.entries) {
-        final value = Entry.fromJson(entry.value);
+        final value = EntryBody.fromJson(entry.value);
         if (value != null) {
           map[entry.key] = value;
         }
@@ -212,14 +160,14 @@ class Entry {
     return map;
   }
 
-  // maps a json object with a list of Entry-objects as value to a dart map
-  static Map<String, List<Entry>> mapListFromJson(dynamic json, {bool growable = false,}) {
-    final map = <String, List<Entry>>{};
+  // maps a json object with a list of EntryBody-objects as value to a dart map
+  static Map<String, List<EntryBody>> mapListFromJson(dynamic json, {bool growable = false,}) {
+    final map = <String, List<EntryBody>>{};
     if (json is Map && json.isNotEmpty) {
       // ignore: parameter_assignments
       json = json.cast<String, dynamic>();
       for (final entry in json.entries) {
-        map[entry.key] = Entry.listFromJson(entry.value, growable: growable,);
+        map[entry.key] = EntryBody.listFromJson(entry.value, growable: growable,);
       }
     }
     return map;

@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import uuid4
 
 import attrs
 from pymongo import UpdateOne
@@ -16,11 +17,13 @@ class Param:
 
 @attrs.define
 class Entry:
+    uuid: str = attrs.Factory(lambda: str(uuid4()))
     name: str = attrs.Factory(str)
     content: str = attrs.Factory(str)
     category: str = attrs.Factory(str)
     counter: int = attrs.Factory(int)
     user: str = attrs.Factory(str)
+    deleted: bool = attrs.Factory(lambda: False)
     parameters: list[Param] = attrs.Factory(list)
     created_at: str = attrs.Factory(datetime.utcnow)
     subscriptions: list[str] = attrs.Factory(list)
@@ -36,6 +39,12 @@ class Entry:
                     "$eq": sid
                 }
             }
+        }))
+
+    @staticmethod
+    def get_all_by_uid(uid):
+        return list(mongo.get_collection('entry').find({
+            "user": uid
         }))
 
     def build(self):
