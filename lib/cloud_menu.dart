@@ -178,6 +178,9 @@ class CloudMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: () async {
+        if (!checkLoginState(context)) {
+          return;
+        }
         ProgressDialog pd = ProgressDialog(context: context);
         pd.show(msg: S.of(context).loading);
         try {

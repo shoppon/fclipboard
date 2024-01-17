@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'generated/l10n.dart';
+
 bool isDesktop() {
   if (kIsWeb) {
     return false;
@@ -83,4 +85,15 @@ String loadUserEmail() {
 Future<String> loadServerAddr() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   return prefs.getString("fclipboard.serverAddr") ?? baseURL;
+}
+
+bool checkLoginState(BuildContext context) {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    showToast(context, S.of(context).loginTooltip, true);
+    return false;
+  } else if (!user.emailVerified) {
+    return false;
+  }
+  return true;
 }
