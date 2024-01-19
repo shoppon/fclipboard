@@ -28,8 +28,23 @@ class Entry:
     created_at: str = attrs.Factory(datetime.utcnow)
     subscriptions: list[str] = attrs.Factory(list)
 
-    def get(self, sid):
-        return mongo.get_collection('entry').find_one({'sid': sid})
+    @staticmethod
+    def get(uid, eid):
+        ret = mongo.get_collection('entry').find_one(
+            {'user': uid, 'uuid': eid})
+        if ret:
+            ret.pop('_id')
+            return Entry(**ret)
+        return None
+
+    @staticmethod
+    def get_by_name(uid, name):
+        ret = mongo.get_collection('entry').find_one(
+            {'user': uid, 'name': name})
+        if ret:
+            ret.pop('_id')
+            return Entry(**ret)
+        return None
 
     @staticmethod
     def get_all(sid):
@@ -62,3 +77,19 @@ class Entry:
         created = mongo.get_collection('entry').insert_one(
             attrs.asdict(self)).inserted_id
         return created.binary.hex()
+
+    def delete(self):
+        self.update({
+            'deleted': True
+        })
+
+    def update(self, new_entry):
+        mongo.get_collection('entry').update_one(
+            {
+                'uuid': self.uuid
+            },
+            {
+                '$set': new_entry
+            }
+        )
+        return self.get(self.user, self.uuid)

@@ -1,0 +1,21 @@
+@uid=shopppon@gmail.com
+
+POST /v1/{uid}/entries HTTP/1.1
+Host: 127.0.0.1:8000
+Content-Type: application/json
+
+{
+    "entry": {
+        "name": "foo",
+        "content": "bar",
+        "category": "fuzzy",
+        "parameters": [
+            {
+                "name": "param",
+                "initial": "init",
+                "required": true,
+                "description": "xxx"
+            }
+        ]
+    }
+}

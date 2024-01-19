@@ -1,0 +1,20 @@
+@uid=shopppon@gmail.com
+@eid=foo
+
+PATCH  /v1/{uid}/entries/{{eid} HTTP/1.1
+Host: 127.0.0.1:8000
+Content-Type: application/json
+
+{
+    "entry": {
+        "name": "foo1",
+        "content": "bar1",
+        "parameters": [
+            {
+                "name": "param1",
+                "initial": "init1",
+                "description": "xxx1"
+            }
+        ]
+    }
+}

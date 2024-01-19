@@ -19,6 +19,7 @@
   "creatingSubscription": "Creating Subscription",
   "delete": "Delete",
   "deleteAllSuccess": "All entries deleted successfully",
+  "deleteFailed": "Delete failed",
   "deleteSuccess": "Delete successfully",
   "description": "Description",
   "editServerAddr": "Edit Server Address",

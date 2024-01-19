@@ -41,6 +41,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "creatingSubscription": MessageLookupByLibrary.simpleMessage("创建订阅"),
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
         "deleteAllSuccess": MessageLookupByLibrary.simpleMessage("已删除所有条目"),
+        "deleteFailed": MessageLookupByLibrary.simpleMessage("删除失败"),
         "deleteSuccess": MessageLookupByLibrary.simpleMessage("删除成功"),
         "description": MessageLookupByLibrary.simpleMessage("描述"),
         "editServerAddr": MessageLookupByLibrary.simpleMessage("设置服务端地址"),

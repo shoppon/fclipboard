@@ -48,6 +48,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deleteAllSuccess": MessageLookupByLibrary.simpleMessage(
             "All entries deleted successfully"),
+        "deleteFailed": MessageLookupByLibrary.simpleMessage("Delete failed"),
         "deleteSuccess":
             MessageLookupByLibrary.simpleMessage("Delete successfully"),
         "description": MessageLookupByLibrary.simpleMessage("Description"),

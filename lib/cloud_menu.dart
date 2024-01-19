@@ -44,27 +44,18 @@ class CloudMenu extends StatelessWidget {
       count++;
       pd.update(value: count * 100 ~/ total, msg: le.title);
       if (le.uuid.isEmpty) {
-        final resp = await api.createEntry(email,
-            entryPostReq: EntryPostReq(
-              entry: EntryBody(
-                name: le.title,
-                content: le.subtitle,
-                category: le.categoryName,
-                counter: le.counter,
-                parameters: le.parameters
-                    .map((e) => Parameter.fromJson(e.toJson())!)
-                    .toList(),
-              ),
-            ));
-        le.uuid = resp!.entry!.uuid!;
-        await _dbHelper.insertEntry(le);
+        EntryPostResp? resp = await uploadEntry(api, email, le);
+        await updateLocalEntry(le, resp!.entry!);
       } else {
         final se = serverEntires.firstWhereOrNull((e) => e.uuid == le.uuid);
-        if (se != null) {
+        if (se == null) {
+          EntryPostResp? resp = await uploadEntry(api, email, le);
+          await updateLocalEntry(le, resp!.entry!);
+        } else {
           if (se.deleted!) {
             await _dbHelper.deleteEntry(le.title);
           } else {
-            updateLocalEntry(le, se);
+            await updateLocalEntry(le, se);
           }
         }
       }
@@ -74,22 +65,43 @@ class CloudMenu extends StatelessWidget {
       pd.update(value: count * 100 ~/ total, msg: se.name);
       final le = localEntries.firstWhereOrNull((e) => e.title == se.name);
       if (le == null) {
-        await _dbHelper.insertEntry(m.Entry(
-          title: se.name!,
-          subtitle: se.content!,
-          categoryId: localCategories
-              .firstWhereOrNull((c) => c.name == se.category!)!
-              .id,
-          counter: se.counter!,
-          uuid: se.uuid!,
-          parameters:
-              se.parameters.map((e) => m.Param.fromJson(e.toJson())).toList(),
-        ));
+        await createLocalEntry(se, localCategories);
       } else {
-        updateLocalEntry(le, se);
+        await updateLocalEntry(le, se);
       }
     }
     return true;
+  }
+
+  Future<void> createLocalEntry(
+      Entry se, List<m.Category> localCategories) async {
+    await _dbHelper.insertEntry(m.Entry(
+      title: se.name!,
+      subtitle: se.content!,
+      categoryId:
+          localCategories.firstWhereOrNull((c) => c.name == se.category!)!.id,
+      counter: se.counter!,
+      uuid: se.uuid!,
+      parameters:
+          se.parameters.map((e) => m.Param.fromJson(e.toJson())).toList(),
+    ));
+  }
+
+  Future<EntryPostResp?> uploadEntry(
+      EntryApi api, String email, m.Entry le) async {
+    final resp = await api.createEntry(email,
+        entryPostReq: EntryPostReq(
+          entry: EntryBody(
+            name: le.title,
+            content: le.subtitle,
+            category: le.categoryName,
+            counter: le.counter,
+            parameters: le.parameters
+                .map((e) => Parameter.fromJson(e.toJson())!)
+                .toList(),
+          ),
+        ));
+    return resp;
   }
 
   bool isParametersSame(m.Entry local, Entry server) {
@@ -108,11 +120,13 @@ class CloudMenu extends StatelessWidget {
   }
 
   Future<void> updateLocalEntry(m.Entry local, Entry server) async {
-    if (local.title == server.name! &&
+    if (local.uuid == server.uuid! &&
+        local.title == server.name! &&
         local.subtitle == server.content! &&
         isParametersSame(local, server)) {
       return;
     }
+    local.uuid = server.uuid!;
     local.title = server.name!;
     local.subtitle = server.content!;
     local.parameters =

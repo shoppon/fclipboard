@@ -19,6 +19,7 @@
   "creatingSubscription": "创建订阅",
   "delete": "删除",
   "deleteAllSuccess": "已删除所有条目",
+  "deleteFailed": "删除失败",
   "deleteSuccess": "删除成功",
   "description": "描述",
   "editServerAddr": "设置服务端地址",

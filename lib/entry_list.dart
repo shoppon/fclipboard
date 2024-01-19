@@ -4,12 +4,14 @@ import 'dart:math';
 import 'package:fclipboard/adding_entry.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/matcher.dart';
-import 'package:fclipboard/model.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:openapi/api.dart';
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 import 'generated/l10n.dart';
+import 'model.dart' as m;
 
 class EntryListView extends StatefulWidget {
   EntryListView({
@@ -20,14 +22,14 @@ class EntryListView extends StatefulWidget {
 
   final _entryFocusNode = FocusNode();
   final ValueNotifier<String> filterNotifier;
-  final ValueNotifier<Entry?> entryNotifier;
+  final ValueNotifier<m.Entry?> entryNotifier;
 
   @override
   State<EntryListView> createState() => _EntryListViewState();
 }
 
 class _EntryListViewState extends State<EntryListView> {
-  List<Entry> entries = [];
+  List<m.Entry> entries = [];
 
   int _preSelectedIndex = -1;
   int _curSelectedIndex = -1;
@@ -63,7 +65,7 @@ class _EntryListViewState extends State<EntryListView> {
       });
     } else {
       await loadEntries();
-      widget.entryNotifier.value = Entry.empty();
+      widget.entryNotifier.value = m.Entry.empty();
       _curSelectedIndex = -1;
       _preSelectedIndex = -1;
       setState(() {
@@ -176,22 +178,45 @@ class _EntryListViewState extends State<EntryListView> {
                   },
                   child: Text(S.of(context).cancel)),
               TextButton(
-                onPressed: () {
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  ProgressDialog pd = ProgressDialog(context: context);
+                  pd.show(msg: S.of(context).loading);
+                  final selected = entries[index];
+                  // delete server entry
+                  if (!await _deleteServerEntry(selected.uuid)) {
+                    if (context.mounted) {
+                      pd.close();
+                      showToast(context, S.of(context).deleteFailed, true);
+                    }
+                    return;
+                  }
+
                   // delete entry
-                  _dbHelper.deleteEntry(entries[index].title).then((value) {
+                  await _dbHelper.deleteEntry(selected.title).then((value) {
                     setState(() {
                       entries.removeAt(index);
                     });
-                    showToast(context,
-                        S.of(context).deleteSuccess, false);
+                    pd.close();
+                    showToast(context, S.of(context).deleteSuccess, false);
                   });
-                  Navigator.of(context).pop();
                 },
                 child: Text(S.of(context).ok),
               )
             ],
           );
         });
+  }
+
+  Future<bool> _deleteServerEntry(String eid) async {
+    try {
+      final api = EntryApi(ApiClient(basePath: await loadServerAddr()));
+      final email = loadUserEmail();
+      await api.deleteEntry(email, eid);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   _getColor(i) {
@@ -210,18 +235,13 @@ class _EntryListViewState extends State<EntryListView> {
     int? selectedValue = await showMenu(
       context: context,
       position: position,
-      items: <PopupMenuEntry<int>[
-        PopupMenuItem(
-            value: 0,
-            child: Text(S.of(context).update)),
-        PopupMenuItem(
-            value: 1,
-            child: Text(S.of(context).delete)),
-        PopupMenuItem(
-            value: 2,
-            child: Text(S.of(context).share)),
+      items: <PopupMenuEntry<int>>[
+        PopupMenuItem(value: 0, child: Text(S.of(context).update)),
+        PopupMenuItem(value: 1, child: Text(S.of(context).delete)),
+        PopupMenuItem(value: 2, child: Text(S.of(context).share)),
       ],
     );
+    // update
     if (selectedValue == 0 && context.mounted) {
       Navigator.push(
         context,
@@ -229,9 +249,11 @@ class _EntryListViewState extends State<EntryListView> {
             builder: (context) => EntryAddingPage(entry: entries[index])),
       ).then((value) => loadEntries());
     }
+    // delete
     if (selectedValue == 1 && context.mounted) {
       _deleteListItem(context, index);
     }
+    // share
     if (selectedValue == 2) {
       final entry = entries[index];
       final decoded = base64Encode(utf8.encode(jsonEncode(entry.toJson())));
@@ -266,9 +288,9 @@ class _EntryListViewState extends State<EntryListView> {
                     onTap: () {
                       _selectItem(i);
                     },
-                    onLongPress: () async {
-                       _selectItem(i);
-                       _showOperateMenu(context, i);
+                    onLongPress: () {
+                      _selectItem(i);
+                      _showOperateMenu(context, i);
                     },
                   ),
                 ),

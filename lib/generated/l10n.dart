@@ -240,6 +240,16 @@ class S {
     );
   }
 
+  /// `Delete failed`
+  String get deleteFailed {
+    return Intl.message(
+      'Delete failed',
+      name: 'deleteFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Delete successfully`
   String get deleteSuccess {
     return Intl.message(
