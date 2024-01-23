@@ -35,6 +35,15 @@ void main() {
       // TODO
     });
 
+    // Get an entry
+    //
+    // Get an entry
+    //
+    //Future<EntryGetResp> getEntry(String uid, String eid) async
+    test('test getEntry', () async {
+      // TODO
+    });
+
     // List entries
     //
     // List entries

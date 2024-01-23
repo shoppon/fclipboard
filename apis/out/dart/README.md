@@ -63,6 +63,7 @@ Class | Method | HTTP request | Description
 *CategoryApi* | [**listCategories**](doc//CategoryApi.md#listcategories) | **GET** /v1/{uid}/categories | List categories
 *EntryApi* | [**createEntry**](doc//EntryApi.md#createentry) | **POST** /v1/{uid}/entries | Create an entry
 *EntryApi* | [**deleteEntry**](doc//EntryApi.md#deleteentry) | **DELETE** /v1/{uid}/entries/{eid} | Delete an entry
+*EntryApi* | [**getEntry**](doc//EntryApi.md#getentry) | **GET** /v1/{uid}/entries/{eid} | Get an entry
 *EntryApi* | [**listEntries**](doc//EntryApi.md#listentries) | **GET** /v1/{uid}/entries | List entries
 *EntryApi* | [**updateEntry**](doc//EntryApi.md#updateentry) | **PATCH** /v1/{uid}/entries/{eid} | Update an entry
 *SubscriptionApi* | [**createSubscription**](doc//SubscriptionApi.md#createsubscription) | **POST** /v1/{uid}/subscriptions | Create a subscription
@@ -80,6 +81,7 @@ Class | Method | HTTP request | Description
  - [CategoryPostResp](doc//CategoryPostResp.md)
  - [Entry](doc//Entry.md)
  - [EntryBody](doc//EntryBody.md)
+ - [EntryGetResp](doc//EntryGetResp.md)
  - [EntryListResp](doc//EntryListResp.md)
  - [EntryPatchReq](doc//EntryPatchReq.md)
  - [EntryPatchResp](doc//EntryPatchResp.md)

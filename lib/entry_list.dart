@@ -179,15 +179,17 @@ class _EntryListViewState extends State<EntryListView> {
                   child: Text(S.of(context).cancel)),
               TextButton(
                 onPressed: () async {
-                  Navigator.of(context).pop();
                   ProgressDialog pd = ProgressDialog(context: context);
                   pd.show(msg: S.of(context).loading);
                   final selected = entries[index];
                   // delete server entry
                   if (!await _deleteServerEntry(selected.uuid)) {
                     if (context.mounted) {
-                      pd.close();
-                      showToast(context, S.of(context).deleteFailed, true);
+                      setState(() {
+                        pd.close();
+                        showToast(context, S.of(context).deleteFailed, true);
+                        Navigator.of(context).pop();
+                      });
                     }
                     return;
                   }
@@ -196,9 +198,10 @@ class _EntryListViewState extends State<EntryListView> {
                   await _dbHelper.deleteEntry(selected.title).then((value) {
                     setState(() {
                       entries.removeAt(index);
+                      pd.close();
+                      showToast(context, S.of(context).deleteSuccess, false);
+                      Navigator.of(context).pop();
                     });
-                    pd.close();
-                    showToast(context, S.of(context).deleteSuccess, false);
                   });
                 },
                 child: Text(S.of(context).ok),

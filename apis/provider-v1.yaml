@@ -230,6 +230,37 @@ paths:
       tags:
         - entry
   /v1/{uid}/entries/{eid}:
+    get:
+      summary: "Get an entry"
+      description: "Get an entry"
+      operationId: "getEntry"
+      parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
+        - name: "eid"
+          in: "path"
+          description: "The entry id"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+            example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntryGetResp"
+        500:
+          description: "Internal Server Error"
+      tags:
+        - entry
     patch:
       summary: "Update an entry"
       description: "Update an entry"
@@ -341,6 +372,10 @@ components:
           type: "integer"
           description: "The counter of the entry"
           example: 1
+        version:
+          type: integer
+          format: "int64"
+          example: 1
         parameters:
           type: "array"
           items:
@@ -368,6 +403,10 @@ components:
           type: "integer"
           description: "The counter of the entry"
           example: 1
+        version:
+          type: integer
+          format: "int64"
+          example: 0
         parameters:
           type: "array"
           items:
@@ -379,6 +418,11 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Entry"
+    EntryGetResp:
+      type: "object"
+      properties:
+        entry:
+          $ref: "#/components/schemas/Entry"
     EntryPostReq:
       type: "object"
       properties:

@@ -40,6 +40,7 @@ from provider.clients.v1.models.category_post_req_category import CategoryPostRe
 from provider.clients.v1.models.category_post_resp import CategoryPostResp
 from provider.clients.v1.models.entry import Entry
 from provider.clients.v1.models.entry_body import EntryBody
+from provider.clients.v1.models.entry_get_resp import EntryGetResp
 from provider.clients.v1.models.entry_list_resp import EntryListResp
 from provider.clients.v1.models.entry_patch_req import EntryPatchReq
 from provider.clients.v1.models.entry_patch_resp import EntryPatchResp

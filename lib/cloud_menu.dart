@@ -63,6 +63,10 @@ class CloudMenu extends StatelessWidget {
     for (final se in serverEntires) {
       count++;
       pd.update(value: count * 100 ~/ total, msg: se.name);
+      if (se.deleted!) {
+        continue;
+      }
+
       final le = localEntries.firstWhereOrNull((e) => e.title == se.name);
       if (le == null) {
         await createLocalEntry(se, localCategories);
@@ -81,6 +85,7 @@ class CloudMenu extends StatelessWidget {
       categoryId:
           localCategories.firstWhereOrNull((c) => c.name == se.category!)!.id,
       counter: se.counter!,
+      version: se.version!,
       uuid: se.uuid!,
       parameters:
           se.parameters.map((e) => m.Param.fromJson(e.toJson())).toList(),
@@ -96,6 +101,7 @@ class CloudMenu extends StatelessWidget {
             content: le.subtitle,
             category: le.categoryName,
             counter: le.counter,
+            version: le.version,
             parameters: le.parameters
                 .map((e) => Parameter.fromJson(e.toJson())!)
                 .toList(),
@@ -129,6 +135,7 @@ class CloudMenu extends StatelessWidget {
     local.uuid = server.uuid!;
     local.title = server.name!;
     local.subtitle = server.content!;
+    local.version = server.version!;
     local.parameters =
         server.parameters.map((e) => m.Param.fromJson(e.toJson())).toList();
     await _dbHelper.insertEntry(local);

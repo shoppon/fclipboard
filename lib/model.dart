@@ -77,6 +77,7 @@ class Entry {
     required this.subtitle,
     required this.categoryId,
     required this.counter,
+    this.version = 0,
     this.id = 0,
     this.uuid = '',
     this.icon = '',
@@ -92,6 +93,7 @@ class Entry {
   String subtitle;
   final String icon;
   final int counter;
+  int version;
   List<Param> parameters;
 
   Map<String, dynamic> toMap() {
@@ -100,6 +102,7 @@ class Entry {
       'title': title,
       'subtitle': subtitle,
       'counter': counter,
+      'version': version,
       'category_id': categoryId,
     };
     if (id != 0) {
@@ -115,6 +118,7 @@ class Entry {
       uuid: '',
       subtitle: '',
       counter: 0,
+      version: 0,
       parameters: [],
     );
   }

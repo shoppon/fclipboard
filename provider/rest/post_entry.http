@@ -9,6 +9,7 @@ Content-Type: application/json
         "name": "foo",
         "content": "bar",
         "category": "fuzzy",
+        "version": 0,
         "parameters": [
             {
                 "name": "param",

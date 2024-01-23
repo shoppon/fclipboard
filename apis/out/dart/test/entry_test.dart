@@ -50,6 +50,11 @@ void main() {
       // TODO
     });
 
+    // int version
+    test('to test the property `version`', () async {
+      // TODO
+    });
+
     // List<Parameter> parameters (default value: const [])
     test('to test the property `parameters`', () async {
       // TODO

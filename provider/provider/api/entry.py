@@ -24,6 +24,7 @@ def create_entry(uid: str, request: EntryPostReq):
                                      content=eo.content,
                                      category=eo.category,
                                      counter=eo.counter,
+                                     version=eo.version,
                                      user=eo.user,
                                      parameters=eo.parameters,
                                      created_at=eo.created_at,
@@ -60,6 +61,13 @@ def update_entry(uid: str, eid: str, request: EntryPatchReq):
     if not eo:
         return Response(status_code=404)
 
+    # check version, not allow to update an entry with old version
+    if request.entry.version != eo.version:
+        return Response(status_code=409)
+
+    # increment version
+    request.entry.version += 1
+
     updated = eo.update(request.entry)
     logger.info(f'User {uid} updated an entry {eid}.')
     return EntryPatchResp(entry=Entry(uuid=updated.uuid,
@@ -67,6 +75,7 @@ def update_entry(uid: str, eid: str, request: EntryPatchReq):
                                       content=updated.content,
                                       category=updated.category,
                                       counter=updated.counter,
+                                      version=updated.version,
                                       user=updated.user,
                                       parameters=updated.parameters,
                                       created_at=updated.created_at,

@@ -3,6 +3,9 @@ import 'package:fclipboard/generated/l10n.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
+
+import 'package:openapi/api.dart' as s;
 
 class EntryAddingPage extends StatefulWidget {
   const EntryAddingPage({Key? key, required this.entry}) : super(key: key);
@@ -52,6 +55,41 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
         _categories.add(c);
       }
     });
+  }
+
+  Future<s.Entry?> _getServerEntry(String eid) async {
+    final api = s.EntryApi(s.ApiClient(basePath: await loadServerAddr()));
+    final email = loadUserEmail();
+    try {
+      final resp = await api.getEntry(email, eid);
+      return resp!.entry!;
+    } on s.ApiException catch (e) {
+      if (e.code == 404) {
+        return null;
+      } else {
+        rethrow;
+      }
+    }
+  }
+
+  Future<bool> _updateServerEntry(Entry entry) async {
+    final api = s.EntryApi(s.ApiClient(basePath: await loadServerAddr()));
+    final email = loadUserEmail();
+    try {
+      final req = s.EntryPatchReq(
+          entry: s.EntryBody(
+              name: entry.title,
+              content: entry.subtitle,
+              counter: entry.counter,
+              version: entry.version,
+              parameters: entry.parameters
+                  .map((e) => s.Parameter.fromJson(e.toJson())!)
+                  .toList()));
+      await api.updateEntry(email, entry.uuid, entryPatchReq: req);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   @override
@@ -150,24 +188,75 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                       child: Text(S.of(context).addParameter)),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (!_formKey.currentState!.validate()) {
                           return;
                         }
+                        ProgressDialog pd = ProgressDialog(context: context);
+                        pd.show(msg: S.of(context).loading);
+
+                        // build entry
                         final entry = Entry(
                           id: widget.entry.id,
                           uuid: widget.entry.uuid,
                           title: _title,
                           subtitle: _content,
-                          counter: 0,
+                          counter: widget.entry.counter,
                           categoryId: _category.id,
                           parameters: widget.entry.parameters,
                         );
-                        _dbHelper.insertEntry(entry);
-                        // toasts success
-                        showToast(
-                            context, S.of(context).addSuccessfully, false);
-                        Navigator.pop(context);
+
+                        try {
+                          final se = await _getServerEntry(widget.entry.uuid);
+                          if (se == null) {
+                            await _updateServerEntry(entry);
+                            await _dbHelper.insertEntry(entry);
+                          } else {
+                            if (se.version != widget.entry.version) {
+                              if (context.mounted) {
+                                showToast(
+                                  context,
+                                  S.of(context).addFailed,
+                                  true,
+                                );
+                              }
+                              throw Exception('conflict');
+                            } else {
+                              // must update server entry first to avoid conflict
+                              final success = await _updateServerEntry(entry);
+                              if (!success) {
+                                if (context.mounted) {
+                                  showToast(
+                                    context,
+                                    S.of(context).addFailed,
+                                    true,
+                                  );
+                                }
+                                throw Exception('update failed');
+                              }
+                              await _dbHelper.insertEntry(entry);
+                            }
+                          }
+
+                          // toasts success
+                          if (context.mounted) {
+                            showToast(
+                              context,
+                              S.of(context).addSuccessfully,
+                              false,
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            showToast(
+                              context,
+                              S.of(context).addFailed,
+                              true,
+                            );
+                          }
+                        } finally {
+                          pd.close();
+                        }
                       },
                       child: Text(S.of(context).save)),
                 ],

@@ -19,6 +19,7 @@ class Entry {
     this.content,
     this.category,
     this.counter,
+    this.version,
     this.parameters = const [],
     this.deleted,
   });
@@ -75,6 +76,14 @@ class Entry {
   ///
   int? counter;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? version;
+
   List<Parameter> parameters;
 
   /// Whether the entry is deleted
@@ -94,6 +103,7 @@ class Entry {
     other.content == content &&
     other.category == category &&
     other.counter == counter &&
+    other.version == version &&
     _deepEquality.equals(other.parameters, parameters) &&
     other.deleted == deleted;
 
@@ -106,11 +116,12 @@ class Entry {
     (content == null ? 0 : content!.hashCode) +
     (category == null ? 0 : category!.hashCode) +
     (counter == null ? 0 : counter!.hashCode) +
+    (version == null ? 0 : version!.hashCode) +
     (parameters.hashCode) +
     (deleted == null ? 0 : deleted!.hashCode);
 
   @override
-  String toString() => 'Entry[id=$id, uuid=$uuid, name=$name, content=$content, category=$category, counter=$counter, parameters=$parameters, deleted=$deleted]';
+  String toString() => 'Entry[id=$id, uuid=$uuid, name=$name, content=$content, category=$category, counter=$counter, version=$version, parameters=$parameters, deleted=$deleted]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -143,6 +154,11 @@ class Entry {
       json[r'counter'] = this.counter;
     } else {
       json[r'counter'] = null;
+    }
+    if (this.version != null) {
+      json[r'version'] = this.version;
+    } else {
+      json[r'version'] = null;
     }
       json[r'parameters'] = this.parameters;
     if (this.deleted != null) {
@@ -178,6 +194,7 @@ class Entry {
         content: mapValueOfType<String>(json, r'content'),
         category: mapValueOfType<String>(json, r'category'),
         counter: mapValueOfType<int>(json, r'counter'),
+        version: mapValueOfType<int>(json, r'version'),
         parameters: Parameter.listFromJson(json[r'parameters']),
         deleted: mapValueOfType<bool>(json, r'deleted'),
       );

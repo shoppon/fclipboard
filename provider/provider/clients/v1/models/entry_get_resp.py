@@ -17,23 +17,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, Field, StrictInt, StrictStr
+from pydantic import BaseModel
 from typing import Any, ClassVar, Dict, List, Optional
-from provider.clients.v1.models.parameter import Parameter
+from provider.clients.v1.models.entry import Entry
 from typing import Optional, Set
 from typing_extensions import Self
 
-class EntryBody(BaseModel):
+class EntryGetResp(BaseModel):
     """
-    EntryBody
+    EntryGetResp
     """ # noqa: E501
-    name: Optional[StrictStr] = Field(default=None, description="The name of the entry")
-    content: Optional[StrictStr] = Field(default=None, description="The content of the entry")
-    category: Optional[StrictStr] = Field(default=None, description="The category of the entry")
-    counter: Optional[StrictInt] = Field(default=None, description="The counter of the entry")
-    version: Optional[StrictInt] = None
-    parameters: Optional[List[Parameter]] = None
-    __properties: ClassVar[List[str]] = ["name", "content", "category", "counter", "version", "parameters"]
+    entry: Optional[Entry] = None
+    __properties: ClassVar[List[str]] = ["entry"]
 
     model_config = {
         "populate_by_name": True,
@@ -53,7 +48,7 @@ class EntryBody(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of EntryBody from a JSON string"""
+        """Create an instance of EntryGetResp from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,18 +69,14 @@ class EntryBody(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in parameters (list)
-        _items = []
-        if self.parameters:
-            for _item in self.parameters:
-                if _item:
-                    _items.append(_item.to_dict())
-            _dict['parameters'] = _items
+        # override the default output from pydantic by calling `to_dict()` of entry
+        if self.entry:
+            _dict['entry'] = self.entry.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of EntryBody from a dict"""
+        """Create an instance of EntryGetResp from a dict"""
         if obj is None:
             return None
 
@@ -93,12 +84,7 @@ class EntryBody(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": obj.get("name"),
-            "content": obj.get("content"),
-            "category": obj.get("category"),
-            "counter": obj.get("counter"),
-            "version": obj.get("version"),
-            "parameters": [Parameter.from_dict(_item) for _item in obj["parameters"]] if obj.get("parameters") is not None else None
+            "entry": Entry.from_dict(obj["entry"]) if obj.get("entry") is not None else None
         })
         return _obj
 

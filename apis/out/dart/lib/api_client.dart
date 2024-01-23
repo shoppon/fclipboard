@@ -196,6 +196,8 @@ class ApiClient {
           return Entry.fromJson(value);
         case 'EntryBody':
           return EntryBody.fromJson(value);
+        case 'EntryGetResp':
+          return EntryGetResp.fromJson(value);
         case 'EntryListResp':
           return EntryListResp.fromJson(value);
         case 'EntryPatchReq':

@@ -22,6 +22,7 @@ class Entry:
     content: str = attrs.Factory(str)
     category: str = attrs.Factory(str)
     counter: int = attrs.Factory(int)
+    version: int = attrs.Factory(int)
     user: str = attrs.Factory(str)
     deleted: bool = attrs.Factory(lambda: False)
     parameters: list[Param] = attrs.Factory(list)

@@ -137,6 +137,72 @@ class EntryApi {
     }
   }
 
+  /// Get an entry
+  ///
+  /// Get an entry
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] uid (required):
+  ///   The user id
+  ///
+  /// * [String] eid (required):
+  ///   The entry id
+  Future<Response> getEntryWithHttpInfo(String uid, String eid,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/{uid}/entries/{eid}'
+      .replaceAll('{uid}', uid)
+      .replaceAll('{eid}', eid);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'GET',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Get an entry
+  ///
+  /// Get an entry
+  ///
+  /// Parameters:
+  ///
+  /// * [String] uid (required):
+  ///   The user id
+  ///
+  /// * [String] eid (required):
+  ///   The entry id
+  Future<EntryGetResp?> getEntry(String uid, String eid,) async {
+    final response = await getEntryWithHttpInfo(uid, eid,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+    // When a remote server returns no body with a status of 204, we shall not decode it.
+    // At the time of writing this, `dart:convert` will throw an "Unexpected end of input"
+    // FormatException when trying to decode an empty string.
+    if (response.body.isNotEmpty && response.statusCode != HttpStatus.noContent) {
+      return await apiClient.deserializeAsync(await _decodeBodyBytes(response), 'EntryGetResp',) as EntryGetResp;
+    
+    }
+    return null;
+  }
+
   /// List entries
   ///
   /// List entries

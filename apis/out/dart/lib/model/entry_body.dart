@@ -17,6 +17,7 @@ class EntryBody {
     this.content,
     this.category,
     this.counter,
+    this.version,
     this.parameters = const [],
   });
 
@@ -56,6 +57,14 @@ class EntryBody {
   ///
   int? counter;
 
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  int? version;
+
   List<Parameter> parameters;
 
   @override
@@ -64,6 +73,7 @@ class EntryBody {
     other.content == content &&
     other.category == category &&
     other.counter == counter &&
+    other.version == version &&
     _deepEquality.equals(other.parameters, parameters);
 
   @override
@@ -73,10 +83,11 @@ class EntryBody {
     (content == null ? 0 : content!.hashCode) +
     (category == null ? 0 : category!.hashCode) +
     (counter == null ? 0 : counter!.hashCode) +
+    (version == null ? 0 : version!.hashCode) +
     (parameters.hashCode);
 
   @override
-  String toString() => 'EntryBody[name=$name, content=$content, category=$category, counter=$counter, parameters=$parameters]';
+  String toString() => 'EntryBody[name=$name, content=$content, category=$category, counter=$counter, version=$version, parameters=$parameters]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -99,6 +110,11 @@ class EntryBody {
       json[r'counter'] = this.counter;
     } else {
       json[r'counter'] = null;
+    }
+    if (this.version != null) {
+      json[r'version'] = this.version;
+    } else {
+      json[r'version'] = null;
     }
       json[r'parameters'] = this.parameters;
     return json;
@@ -127,6 +143,7 @@ class EntryBody {
         content: mapValueOfType<String>(json, r'content'),
         category: mapValueOfType<String>(json, r'category'),
         counter: mapValueOfType<int>(json, r'counter'),
+        version: mapValueOfType<int>(json, r'version'),
         parameters: Parameter.listFromJson(json[r'parameters']),
       );
     }

@@ -9,6 +9,7 @@ Content-Type: application/json
     "entry": {
         "name": "foo1",
         "content": "bar1",
+        "version": 1,
         "parameters": [
             {
                 "name": "param1",

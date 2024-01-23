@@ -33,9 +33,10 @@ class Entry(BaseModel):
     content: Optional[StrictStr] = Field(default=None, description="The content of the entry")
     category: Optional[StrictStr] = Field(default=None, description="The category of the entry")
     counter: Optional[StrictInt] = Field(default=None, description="The counter of the entry")
+    version: Optional[StrictInt] = None
     parameters: Optional[List[Parameter]] = None
     deleted: Optional[StrictBool] = Field(default=None, description="Whether the entry is deleted")
-    __properties: ClassVar[List[str]] = ["id", "uuid", "name", "content", "category", "counter", "parameters", "deleted"]
+    __properties: ClassVar[List[str]] = ["id", "uuid", "name", "content", "category", "counter", "version", "parameters", "deleted"]
 
     model_config = {
         "populate_by_name": True,
@@ -101,6 +102,7 @@ class Entry(BaseModel):
             "content": obj.get("content"),
             "category": obj.get("category"),
             "counter": obj.get("counter"),
+            "version": obj.get("version"),
             "parameters": [Parameter.from_dict(_item) for _item in obj["parameters"]] if obj.get("parameters") is not None else None,
             "deleted": obj.get("deleted")
         })

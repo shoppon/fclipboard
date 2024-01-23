@@ -12,6 +12,7 @@ doc/CategoryPostResp.md
 doc/Entry.md
 doc/EntryApi.md
 doc/EntryBody.md
+doc/EntryGetResp.md
 doc/EntryListResp.md
 doc/EntryPatchReq.md
 doc/EntryPatchResp.md
@@ -47,6 +48,7 @@ lib/model/category_post_req_category.dart
 lib/model/category_post_resp.dart
 lib/model/entry.dart
 lib/model/entry_body.dart
+lib/model/entry_get_resp.dart
 lib/model/entry_list_resp.dart
 lib/model/entry_patch_req.dart
 lib/model/entry_patch_resp.dart
@@ -70,6 +72,7 @@ test/category_post_resp_test.dart
 test/category_test.dart
 test/entry_api_test.dart
 test/entry_body_test.dart
+test/entry_get_resp_test.dart
 test/entry_list_resp_test.dart
 test/entry_patch_req_test.dart
 test/entry_patch_resp_test.dart
