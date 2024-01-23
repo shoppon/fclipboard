@@ -3,6 +3,7 @@ from loguru import logger
 
 from provider.api import app
 from provider.clients.v1.models import Entry
+from provider.clients.v1.models import EntryGetResp
 from provider.clients.v1.models import EntryPatchReq
 from provider.clients.v1.models import EntryPatchResp
 from provider.clients.v1.models import EntryPostReq
@@ -41,6 +42,25 @@ def list_entry(uid: str):
     return {'entries': entries}
 
 
+@app.get("/v1/{uid}/entries/{eid}")
+def get_entry(uid: str, eid: str):
+    logger.info(f'User {uid} getting an entry {eid}.')
+    eo = EntryObject.get(uid, eid)
+    if not eo:
+        return Response(status_code=404)
+    logger.info(f'User {uid} got an entry {eid}.')
+    return EntryGetResp(entry=Entry(uuid=eo.uuid,
+                                    name=eo.name,
+                                    content=eo.content,
+                                    category=eo.category,
+                                    counter=eo.counter,
+                                    version=eo.version,
+                                    user=eo.user,
+                                    parameters=eo.parameters,
+                                    created_at=eo.created_at,
+                                    deleted=eo.deleted))
+
+
 @app.delete("/v1/{uid}/entries/{eid}")
 def delete_entry(uid: str, eid: str):
     logger.info(f'User {uid} deleting an entry {eid}.')
@@ -68,7 +88,7 @@ def update_entry(uid: str, eid: str, request: EntryPatchReq):
     # increment version
     request.entry.version += 1
 
-    updated = eo.update(request.entry)
+    updated = eo.update(request.entry.model_dump())
     logger.info(f'User {uid} updated an entry {eid}.')
     return EntryPatchResp(entry=Entry(uuid=updated.uuid,
                                       name=updated.name,

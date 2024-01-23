@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
+import 'cloud_utils.dart';
 import 'generated/l10n.dart';
 import 'model.dart' as m;
 
@@ -108,37 +109,6 @@ class CloudMenu extends StatelessWidget {
           ),
         ));
     return resp;
-  }
-
-  bool isParametersSame(m.Entry local, Entry server) {
-    if (local.parameters.length != server.parameters.length) {
-      return false;
-    }
-    for (var i = 0; i < local.parameters.length; i++) {
-      if (local.parameters[i].name != server.parameters[i].name ||
-          local.parameters[i].initial != server.parameters[i].initial ||
-          local.parameters[i].description != server.parameters[i].description ||
-          local.parameters[i].required != server.parameters[i].required_) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  Future<void> updateLocalEntry(m.Entry local, Entry server) async {
-    if (local.uuid == server.uuid! &&
-        local.title == server.name! &&
-        local.subtitle == server.content! &&
-        isParametersSame(local, server)) {
-      return;
-    }
-    local.uuid = server.uuid!;
-    local.title = server.name!;
-    local.subtitle = server.content!;
-    local.version = server.version!;
-    local.parameters =
-        server.parameters.map((e) => m.Param.fromJson(e.toJson())).toList();
-    await _dbHelper.insertEntry(local);
   }
 
   Future<bool> syncCategories() async {
