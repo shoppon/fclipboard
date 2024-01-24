@@ -60,6 +60,7 @@ All URIs are relative to *http://localhost*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *CategoryApi* | [**createCategory**](doc//CategoryApi.md#createcategory) | **POST** /v1/{uid}/categories | Create a category
+*CategoryApi* | [**deleteCategory**](doc//CategoryApi.md#deletecategory) | **DELETE** /v1/{uid}/categories/{cid} | Delete a category
 *CategoryApi* | [**listCategories**](doc//CategoryApi.md#listcategories) | **GET** /v1/{uid}/categories | List categories
 *EntryApi* | [**createEntry**](doc//EntryApi.md#createentry) | **POST** /v1/{uid}/entries | Create an entry
 *EntryApi* | [**deleteEntry**](doc//EntryApi.md#deleteentry) | **DELETE** /v1/{uid}/entries/{eid} | Delete an entry

@@ -5,7 +5,6 @@ import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart' as model;
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:openapi/api.dart';
 
 import 'generated/l10n.dart';
@@ -25,13 +24,9 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
 
   final DBHelper _dbHelper = DBHelper();
 
-  final FToast _fToast = FToast();
-
   @override
   void initState() {
     super.initState();
-
-    _fToast.init(context);
   }
 
   Future<bool> createCategory() async {

@@ -222,12 +222,6 @@ class _EntryListViewState extends State<EntryListView> {
     }
   }
 
-  _getColor(i) {
-    return _curSelectedIndex == i
-        ? const Color.fromARGB(255, 199, 226, 248)
-        : null;
-  }
-
   void _showOperateMenu(BuildContext context, int index) async {
     final RelativeRect position = RelativeRect.fromLTRB(
       _tapPosition.dx,
@@ -276,7 +270,7 @@ class _EntryListViewState extends State<EntryListView> {
                   _tapPosition = details.globalPosition;
                 },
                 child: Container(
-                  color: _getColor(i),
+                  color: getColor(_curSelectedIndex, i),
                   child: ListTile(
                     leading: InkWell(
                       child: Text(

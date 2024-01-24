@@ -1,3 +1,4 @@
+from fastapi.responses import Response
 from loguru import logger
 
 from provider.api import app
@@ -34,3 +35,16 @@ def list_category(uid: str):
     return CategoryListResp(
         categories=[Category(**item)
                     for item in categories])
+
+
+@app.delete("/v1/{uid}/categories/{cid}")
+def delete_category(uid: str, cid: str):
+    logger.info(f'User {uid} deleting a category {cid}.')
+    co = CategoryObject.get(uid, cid)
+    if not co:
+        return Response(status_code=404)
+
+    co.delete()
+    logger.info(f'User {uid} deleted a category {cid}.')
+    # return 204
+    return Response(status_code=204)

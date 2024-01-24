@@ -97,3 +97,7 @@ bool checkLoginState(BuildContext context) {
   }
   return true;
 }
+
+Color? getColor(int selected, index) {
+  return selected == index ? const Color.fromARGB(255, 199, 226, 248) : null;
+}

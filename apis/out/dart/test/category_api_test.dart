@@ -26,6 +26,15 @@ void main() {
       // TODO
     });
 
+    // Delete a category
+    //
+    // Delete a category
+    //
+    //Future deleteCategory(String uid, String cid) async
+    test('test deleteCategory', () async {
+      // TODO
+    });
+
     // List categories
     //
     // List categories

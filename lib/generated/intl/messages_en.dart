@@ -58,6 +58,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "export": MessageLookupByLibrary.simpleMessage("Export"),
         "exportSuccessfully":
             MessageLookupByLibrary.simpleMessage("Export successfully"),
+        "failed": MessageLookupByLibrary.simpleMessage("Failed"),
         "import": MessageLookupByLibrary.simpleMessage("Import"),
         "importFailed": MessageLookupByLibrary.simpleMessage("Import failed"),
         "importSuccessfully":
@@ -87,6 +88,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "settingSuccess":
             MessageLookupByLibrary.simpleMessage("Setting successfully"),
         "share": MessageLookupByLibrary.simpleMessage("Share"),
+        "statistics": MessageLookupByLibrary.simpleMessage("Statistics"),
         "subscribe": MessageLookupByLibrary.simpleMessage("Subscribe"),
         "subscribeFailed":
             MessageLookupByLibrary.simpleMessage("Subscribe failed"),
@@ -94,6 +96,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Subscribe successfully"),
         "subscriptionList":
             MessageLookupByLibrary.simpleMessage("Subscription List"),
+        "successfully": MessageLookupByLibrary.simpleMessage("Successfully"),
         "title": MessageLookupByLibrary.simpleMessage("Title"),
         "titleCannotBeEmpty":
             MessageLookupByLibrary.simpleMessage("Title cannot be empty"),

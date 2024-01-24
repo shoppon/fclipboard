@@ -79,6 +79,64 @@ class CategoryApi {
     return null;
   }
 
+  /// Delete a category
+  ///
+  /// Delete a category
+  ///
+  /// Note: This method returns the HTTP [Response].
+  ///
+  /// Parameters:
+  ///
+  /// * [String] uid (required):
+  ///   The user id
+  ///
+  /// * [String] cid (required):
+  ///   The category id
+  Future<Response> deleteCategoryWithHttpInfo(String uid, String cid,) async {
+    // ignore: prefer_const_declarations
+    final path = r'/v1/{uid}/categories/{cid}'
+      .replaceAll('{uid}', uid)
+      .replaceAll('{cid}', cid);
+
+    // ignore: prefer_final_locals
+    Object? postBody;
+
+    final queryParams = <QueryParam>[];
+    final headerParams = <String, String>{};
+    final formParams = <String, String>{};
+
+    const contentTypes = <String>[];
+
+
+    return apiClient.invokeAPI(
+      path,
+      'DELETE',
+      queryParams,
+      postBody,
+      headerParams,
+      formParams,
+      contentTypes.isEmpty ? null : contentTypes.first,
+    );
+  }
+
+  /// Delete a category
+  ///
+  /// Delete a category
+  ///
+  /// Parameters:
+  ///
+  /// * [String] uid (required):
+  ///   The user id
+  ///
+  /// * [String] cid (required):
+  ///   The category id
+  Future<void> deleteCategory(String uid, String cid,) async {
+    final response = await deleteCategoryWithHttpInfo(uid, cid,);
+    if (response.statusCode >= HttpStatus.badRequest) {
+      throw ApiException(response.statusCode, await _decodeBodyBytes(response));
+    }
+  }
+
   /// List categories
   ///
   /// List categories

@@ -111,6 +111,15 @@ class CloudMenu extends StatelessWidget {
     return resp;
   }
 
+  Future<void> createLocalCategory(Category sc) async {
+    await _dbHelper.insertCategory(m.Category(
+      name: sc.name!,
+      icon: sc.icon!,
+      uuid: sc.uuid!,
+      isPrivate: sc.isPrivate!,
+    ));
+  }
+
   Future<bool> syncCategories() async {
     final localCategories = await _dbHelper.categories();
     final serverCategories = await getServerCategories();
@@ -136,30 +145,21 @@ class CloudMenu extends StatelessWidget {
           if (sc.deleted!) {
             await _dbHelper.deleteCategory(lc.name);
           } else {
-            if (lc.name != sc.name || lc.icon != sc.icon) {
-              lc.name = sc.name!;
-              lc.icon = sc.icon!;
-              await _dbHelper.insertCategory(lc);
-            }
+            updateLocalCategory(lc, sc);
           }
         }
       }
     }
     for (final sc in serverCategories) {
+      if (sc.deleted!) {
+        continue;
+      }
+
       final lc = localCategories.firstWhereOrNull((c) => c.name == sc.name);
       if (lc == null) {
-        await _dbHelper.insertCategory(m.Category(
-          name: sc.name!,
-          icon: sc.icon!,
-          uuid: sc.uuid!,
-          isPrivate: sc.isPrivate!,
-        ));
+        await createLocalCategory(sc);
       } else {
-        if (lc.name != sc.name || lc.icon != sc.icon) {
-          lc.name = sc.name!;
-          lc.icon = sc.icon!;
-          await _dbHelper.insertCategory(lc);
-        }
+        await updateLocalCategory(lc, sc);
       }
     }
     return true;

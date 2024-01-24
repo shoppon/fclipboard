@@ -27,3 +27,28 @@ class Category:
         return list(mongo.get_collection('category').find({
             "user": uid
         }))
+
+    @staticmethod
+    def get(uid, cid):
+        ret = mongo.get_collection('category').find_one(
+            {'user': uid, 'uuid': cid})
+        if ret:
+            ret.pop('_id')
+            return Category(**ret)
+        return None
+
+    def delete(self):
+        self.update({
+            'deleted': True
+        })
+
+    def update(self, new_category):
+        mongo.get_collection('category').update_one(
+            {
+                'uuid': self.uuid
+            },
+            {
+                '$set': new_category
+            }
+        )
+        return self.get(self.user, self.uuid)

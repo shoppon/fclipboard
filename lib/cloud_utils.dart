@@ -47,7 +47,9 @@ Future<Entry> updateServerEntry(m.Entry entry) async {
           parameters: entry.parameters
               .map((e) => Parameter.fromJson(e.toJson())!)
               .toList()));
-  final resp = await api.updateEntry(email, entry.uuid, entryPatchReq: req);
+  final resp = await api
+      .updateEntry(email, entry.uuid, entryPatchReq: req)
+      .timeout(const Duration(seconds: 3));
   return resp!.entry!;
 }
 
@@ -55,7 +57,8 @@ Future<Entry?> getServerEntry(String eid) async {
   final api = EntryApi(ApiClient(basePath: await loadServerAddr()));
   final email = loadUserEmail();
   try {
-    final resp = await api.getEntry(email, eid);
+    final resp =
+        await api.getEntry(email, eid).timeout(const Duration(seconds: 3));
     return resp!.entry!;
   } on ApiException catch (e) {
     if (e.code == 404) {
@@ -63,5 +66,25 @@ Future<Entry?> getServerEntry(String eid) async {
     } else {
       rethrow;
     }
+  }
+}
+
+Future<void> updateLocalCategory(m.Category local, Category server) async {
+  if (local.uuid == server.uuid! && local.name == server.name!) {
+    return;
+  }
+  local.uuid = server.uuid!;
+  local.name = server.name!;
+  await DBHelper().insertCategory(local);
+}
+
+Future<bool> deleteServerCategory(String cid) async {
+  final api = CategoryApi(ApiClient(basePath: await loadServerAddr()));
+  final email = loadUserEmail();
+  try {
+    await api.deleteCategory(email, cid).timeout(const Duration(seconds: 3));
+    return true;
+  } catch (e) {
+    return false;
   }
 }

@@ -310,6 +310,16 @@ class S {
     );
   }
 
+  /// `Failed`
+  String get failed {
+    return Intl.message(
+      'Failed',
+      name: 'failed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Import`
   String get import {
     return Intl.message(
@@ -550,6 +560,16 @@ class S {
     );
   }
 
+  /// `Statistics`
+  String get statistics {
+    return Intl.message(
+      'Statistics',
+      name: 'statistics',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Subscribe`
   String get subscribe {
     return Intl.message(
@@ -585,6 +605,16 @@ class S {
     return Intl.message(
       'Subscription List',
       name: 'subscriptionList',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Successfully`
+  String get successfully {
+    return Intl.message(
+      'Successfully',
+      name: 'successfully',
       desc: '',
       args: [],
     );
