@@ -1,13 +1,14 @@
-import 'package:fclipboard/cloud_menu.dart';
+import 'package:fclipboard/menu_cloud.dart';
 import 'package:fclipboard/config.dart';
+import 'package:fclipboard/menu_statistics.dart';
 import 'firebase_options.dart';
 import 'package:fclipboard/clear_data.dart';
 import 'package:fclipboard/subscription_menu.dart';
 import 'package:fclipboard/constants.dart';
-import 'package:fclipboard/creating.dart';
+import 'package:fclipboard/menu_creating.dart';
 import 'package:fclipboard/email_verify.dart';
 import 'package:fclipboard/entry_list.dart';
-import 'package:fclipboard/export.dart';
+import 'package:fclipboard/menu_export.dart';
 import 'package:fclipboard/login.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/profile.dart';
@@ -173,6 +174,7 @@ class _MainAppState extends State<MainApp> {
             appBar: AppBar(
               title: Text(S.of(context).appTitle),
               actions: <Widget>[
+                const StatisticsMenu(),
                 CloudMenu(),
                 isDesktop() ? const ExportButton() : Container(),
                 const SubscriptionMenu(),

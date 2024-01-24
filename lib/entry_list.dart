@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:fclipboard/adding_entry.dart';
+import 'package:fclipboard/entry_adding.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/matcher.dart';
 import 'package:fclipboard/utils.dart';

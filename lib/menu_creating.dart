@@ -1,5 +1,5 @@
-import 'package:fclipboard/adding_category.dart';
-import 'package:fclipboard/adding_entry.dart';
+import 'package:fclipboard/category_adding.dart';
+import 'package:fclipboard/entry_adding.dart';
 import 'package:fclipboard/generated/l10n.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/paste.dart';
