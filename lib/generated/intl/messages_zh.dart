@@ -79,6 +79,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "subscribeSuccessfully": MessageLookupByLibrary.simpleMessage("订阅成功"),
         "subscriptionList": MessageLookupByLibrary.simpleMessage("订阅列表"),
         "successfully": MessageLookupByLibrary.simpleMessage("成功"),
+        "syncAppleBooks": MessageLookupByLibrary.simpleMessage("同步Apple Books"),
+        "syncCloud": MessageLookupByLibrary.simpleMessage("同步云端"),
         "title": MessageLookupByLibrary.simpleMessage("标题"),
         "titleCannotBeEmpty": MessageLookupByLibrary.simpleMessage("标题不能为空"),
         "update": MessageLookupByLibrary.simpleMessage("修改"),

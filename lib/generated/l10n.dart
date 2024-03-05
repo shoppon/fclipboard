@@ -620,6 +620,26 @@ class S {
     );
   }
 
+  /// `Sync Apple Books`
+  String get syncAppleBooks {
+    return Intl.message(
+      'Sync Apple Books',
+      name: 'syncAppleBooks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sync Cloud`
+  String get syncCloud {
+    return Intl.message(
+      'Sync Cloud',
+      name: 'syncCloud',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Title`
   String get title {
     return Intl.message(

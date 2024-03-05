@@ -1,4 +1,4 @@
-import 'package:fclipboard/menu_cloud.dart';
+import 'package:fclipboard/menu_sync.dart';
 import 'package:fclipboard/config.dart';
 import 'package:fclipboard/menu_statistics.dart';
 import 'firebase_options.dart';

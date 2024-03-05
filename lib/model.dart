@@ -127,3 +127,79 @@ class Entry {
 
   Map<String, dynamic> toJson() => _$EntryToJson(this);
 }
+
+@JsonSerializable(explicitToJson: true)
+class Book {
+  int id;
+  String uuid;
+  String title;
+  String author;
+
+  Book({
+    this.id = 0,
+    this.uuid = '',
+    this.title = '',
+    this.author = '',
+  });
+
+  Map<String, dynamic> toMap() {
+    final Map<String, dynamic> map = {
+      'uuid': uuid,
+      'title': title,
+      'author': author,
+    };
+    if (id != 0) {
+      map['id'] = id;
+    }
+    return map;
+  }
+
+  factory Book.fromJson(Map<String, dynamic> json) => _$BookFromJson(json);
+
+  Map<String, dynamic> toJson() => _$BookToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class Annotation {
+  int id;
+  String uuid;
+  String bookId;
+  String location;
+  String selected;
+  String highlight;
+  int color;
+  double createdAt;
+  Book? book;
+
+  Annotation({
+    this.id = 0,
+    this.uuid = '',
+    this.bookId = '',
+    this.location = '',
+    this.selected = '',
+    this.highlight = '',
+    this.color = 0,
+    this.createdAt = 0.0,
+  });
+
+  Map<String, dynamic> toMap() {
+    final map = {
+      'uuid': uuid,
+      'book_id': bookId,
+      'location': location,
+      'selected': selected,
+      'highlight': highlight,
+      'color': color,
+      'created_at': createdAt,
+    };
+    if (id != 0) {
+      map['id'] = id;
+    }
+    return map;
+  }
+
+  factory Annotation.fromJson(Map<String, dynamic> json) =>
+      _$AnnotationFromJson(json);
+
+  Map<String, dynamic> toJson() => _$AnnotationToJson(this);
+}

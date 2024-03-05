@@ -66,6 +66,33 @@ void createParamTable(db) {
   ''');
 }
 
+void createBookTable(db) {
+  db.execute('''
+    CREATE TABLE book(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT NOT NULL UNIQUE,
+      title TEXT,
+      author TEXT
+    )
+  ''');
+}
+
+void createAnnotationTable(db) {
+  db.execute('''
+    CREATE TABLE annotation(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT NOT NULL UNIQUE,
+      book_id INTEGER NOT NULL,
+      location TEXT NOT NULL,
+      selected TEXT NOT NULL,
+      highlight TEXT NOT NULL,
+      color INTEGER,
+      created_at REAL,
+      FOREIGN KEY (book_id) REFERENCES book(id)
+    )
+  ''');
+}
+
 void version1to2(Database db) {
   // make title column UNIQUE
   db.execute('''
@@ -103,6 +130,11 @@ void version5to6(Database db) {
   ''');
 }
 
+void version6to7(Database db) {
+  createBookTable(db);
+  createAnnotationTable(db);
+}
+
 class DBHelper {
   Future<Database> get database async {
     return openDatabase(
@@ -111,6 +143,8 @@ class DBHelper {
         createCategoryTable(db);
         createEntryTable(db);
         createParamTable(db);
+        createBookTable(db);
+        createAnnotationTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) {
         final versions = {
@@ -119,12 +153,13 @@ class DBHelper {
           3: version3to4,
           4: version4to5,
           5: version5to6,
+          6: version6to7,
         };
         for (var i = oldVersion; i < newVersion; i++) {
           versions[i]!(db);
         }
       },
-      version: 6,
+      version: 7,
     );
   }
 
@@ -416,5 +451,36 @@ class DBHelper {
     }
     // insert entry
     await insertEntry(entry);
+  }
+
+  Future<void> batchInsertBooks(List<m.Book> books) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      final batch = txn.batch();
+      for (var book in books) {
+        batch.insert(
+          'book',
+          book.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+
+      await batch.commit();
+    });
+  }
+
+  Future<void> batchInsertAnnotations(List<m.Annotation> annotations) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      final batch = txn.batch();
+      for (var annotation in annotations) {
+        batch.insert(
+          'annotation',
+          annotation.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit();
+    });
   }
 }

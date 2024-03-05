@@ -57,6 +57,8 @@
   "subscribeSuccessfully": "订阅成功",
   "subscriptionList": "订阅列表",
   "successfully": "成功",
+  "syncAppleBooks": "同步Apple Books",
+  "syncCloud": "同步云端",
   "title": "标题",
   "titleCannotBeEmpty": "标题不能为空",
   "update": "修改",

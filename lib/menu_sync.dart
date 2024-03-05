@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:collection/collection.dart';
+import 'package:fclipboard/apple_books.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
@@ -79,13 +80,15 @@ class CloudMenu extends StatelessWidget {
   }
 
   Future<void> createLocalEntry(
-      Entry se, List<m.Category> localCategories) async {
+    Entry se,
+    List<m.Category> localCategories,
+  ) async {
     await _dbHelper.insertEntry(m.Entry(
       title: se.name!,
       subtitle: se.content!,
       categoryId:
           localCategories.firstWhereOrNull((c) => c.name == se.category!)!.id,
-      counter: se.counter!,
+      counter: se.counter ?? 0,
       version: se.version!,
       uuid: se.uuid!,
       parameters:
@@ -116,7 +119,7 @@ class CloudMenu extends StatelessWidget {
       name: sc.name!,
       icon: sc.icon!,
       uuid: sc.uuid!,
-      isPrivate: sc.isPrivate!,
+      isPrivate: sc.isPrivate ?? false,
     ));
   }
 
@@ -167,23 +170,57 @@ class CloudMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () async {
-        if (!checkLoginState(context)) {
-          return;
-        }
-        ProgressDialog pd = ProgressDialog(context: context);
-        pd.show(msg: S.of(context).loading);
-        try {
-          await syncCategories();
-          await syncEntries(pd);
-        } catch (e) {
-          log(e.toString());
-        } finally {
-          pd.close();
-        }
-      },
+    return PopupMenuButton(
       icon: const Icon(Icons.sync),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          onTap: () async {
+            if (!checkLoginState(context)) {
+              return;
+            }
+            ProgressDialog pd = ProgressDialog(context: context);
+            pd.show(msg: S.of(context).loading);
+            try {
+              await syncCategories();
+              await syncEntries(pd);
+              if (context.mounted) {
+                showToast(context, S.of(context).successfully, false);
+              }
+            } catch (e, stackTrace) {
+              log(e.toString(), stackTrace: stackTrace);
+              if (context.mounted) {
+                showToast(context, S.of(context).failed, true);
+              }
+            } finally {
+              pd.close();
+            }
+          },
+          child: Text(S.of(context).syncCloud),
+        ),
+        PopupMenuItem(
+          onTap: () async {
+            if (!checkLoginState(context)) {
+              return;
+            }
+            ProgressDialog pd = ProgressDialog(context: context);
+            pd.show(msg: S.of(context).loading);
+            try {
+              await importAppleBooks();
+              if (context.mounted) {
+                showToast(context, S.of(context).successfully, false);
+              }
+            } catch (e, stackTrace) {
+              log(e.toString(), stackTrace: stackTrace);
+              if (context.mounted) {
+                showToast(context, S.of(context).failed, true);
+              }
+            } finally {
+              pd.close();
+            }
+          },
+          child: Text(S.of(context).syncAppleBooks),
+        ),
+      ],
     );
   }
 }

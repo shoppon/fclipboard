@@ -97,6 +97,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "subscriptionList":
             MessageLookupByLibrary.simpleMessage("Subscription List"),
         "successfully": MessageLookupByLibrary.simpleMessage("Successfully"),
+        "syncAppleBooks":
+            MessageLookupByLibrary.simpleMessage("Sync Apple Books"),
+        "syncCloud": MessageLookupByLibrary.simpleMessage("Sync Cloud"),
         "title": MessageLookupByLibrary.simpleMessage("Title"),
         "titleCannotBeEmpty":
             MessageLookupByLibrary.simpleMessage("Title cannot be empty"),
