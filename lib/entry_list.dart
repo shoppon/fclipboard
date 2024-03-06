@@ -35,7 +35,7 @@ class _EntryListViewState extends State<EntryListView> {
   int _curSelectedIndex = -1;
 
   final _dbHelper = DBHelper();
-  final _matcher = Matcher(10);
+  final _matcher = Matcher<m.Entry>(10);
 
   Offset _tapPosition = Offset.zero;
 
@@ -69,7 +69,10 @@ class _EntryListViewState extends State<EntryListView> {
       _curSelectedIndex = -1;
       _preSelectedIndex = -1;
       setState(() {
-        final matches = _matcher.match(searchText);
+        final matches = _matcher.match(
+          searchText,
+          (e) => [e.title, e.subtitle],
+        );
         entries.clear();
         for (final match in matches) {
           entries.add(match);

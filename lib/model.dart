@@ -154,6 +154,14 @@ class Book {
     return map;
   }
 
+  static Book empty() {
+    return Book(
+      uuid: '',
+      title: '',
+      author: '',
+    );
+  }
+
   factory Book.fromJson(Map<String, dynamic> json) => _$BookFromJson(json);
 
   Map<String, dynamic> toJson() => _$BookToJson(this);
@@ -169,7 +177,7 @@ class Annotation {
   String highlight;
   int color;
   double createdAt;
-  Book? book;
+  Book book = Book.empty();
 
   Annotation({
     this.id = 0,

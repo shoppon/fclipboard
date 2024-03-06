@@ -78,9 +78,7 @@ Annotation _$AnnotationFromJson(Map<String, dynamic> json) => Annotation(
       highlight: json['highlight'] as String? ?? '',
       color: json['color'] as int? ?? 0,
       createdAt: (json['createdAt'] as num?)?.toDouble() ?? 0.0,
-    )..book = json['book'] == null
-        ? null
-        : Book.fromJson(json['book'] as Map<String, dynamic>);
+    )..book = Book.fromJson(json['book'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$AnnotationToJson(Annotation instance) =>
     <String, dynamic>{
@@ -92,5 +90,5 @@ Map<String, dynamic> _$AnnotationToJson(Annotation instance) =>
       'highlight': instance.highlight,
       'color': instance.color,
       'createdAt': instance.createdAt,
-      'book': instance.book?.toJson(),
+      'book': instance.book.toJson(),
     };

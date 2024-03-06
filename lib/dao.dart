@@ -88,7 +88,7 @@ void createAnnotationTable(db) {
       highlight TEXT NOT NULL,
       color INTEGER,
       created_at REAL,
-      FOREIGN KEY (book_id) REFERENCES book(id)
+      FOREIGN KEY (book_id) REFERENCES book(uuid)
     )
   ''');
 }
@@ -482,5 +482,39 @@ class DBHelper {
       }
       await batch.commit();
     });
+  }
+
+  Future<List<m.Annotation>> annotations() async {
+    final db = await database;
+    var query = '''
+      SELECT
+        *
+      FROM
+        annotation
+      LEFT JOIN book
+        ON annotation.book_id = book.uuid
+      WHERE
+        color != 0 and selected != '' and book.title != ''
+      ''';
+    final maps = await db.rawQuery(query);
+    List<m.Annotation> annotations = [];
+    for (var e in maps) {
+      var anno = m.Annotation(
+        uuid: e['uuid'].toString(),
+        bookId: e['book_id'].toString(),
+        location: e['location'].toString(),
+        selected: e['selected'].toString(),
+        highlight: e['highlight'].toString(),
+        color: e['color'] as int,
+        createdAt: e['created_at'] as double,
+      );
+      anno.book = m.Book(
+        uuid: e['book_uuid'].toString(),
+        title: e['title'].toString(),
+        author: e['author'].toString(),
+      );
+      annotations.add(anno);
+    }
+    return annotations;
   }
 }

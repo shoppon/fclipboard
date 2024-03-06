@@ -1,3 +1,4 @@
+import 'package:fclipboard/annotation_list.dart';
 import 'package:fclipboard/menu_sync.dart';
 import 'package:fclipboard/config.dart';
 import 'package:fclipboard/menu_statistics.dart';
@@ -7,7 +8,6 @@ import 'package:fclipboard/subscription_menu.dart';
 import 'package:fclipboard/constants.dart';
 import 'package:fclipboard/menu_creating.dart';
 import 'package:fclipboard/email_verify.dart';
-import 'package:fclipboard/entry_list.dart';
 import 'package:fclipboard/menu_export.dart';
 import 'package:fclipboard/login.dart';
 import 'package:fclipboard/model.dart';
@@ -218,10 +218,14 @@ class _MainAppState extends State<MainApp> {
                   focusNode: _searchFocusNode,
                 ),
                 Expanded(
-                    child: EntryListView(
-                  filterNotifier: filterNotifier,
-                  entryNotifier: entryNotifier,
-                ))
+                  // child: EntryListView(
+                  //   filterNotifier: filterNotifier,
+                  //   entryNotifier: entryNotifier,
+                  // ),
+                  child: AnnotationListView(
+                    filterNotifier: filterNotifier,
+                  ),
+                )
               ],
             ));
       }),
