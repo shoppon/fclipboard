@@ -2,6 +2,8 @@ import 'package:fclipboard/annotation_list.dart';
 import 'package:fclipboard/menu_sync.dart';
 import 'package:fclipboard/config.dart';
 import 'package:fclipboard/menu_statistics.dart';
+import 'package:fclipboard/mode_switch.dart';
+import 'entry_list.dart';
 import 'firebase_options.dart';
 import 'package:fclipboard/clear_data.dart';
 import 'package:fclipboard/subscription_menu.dart';
@@ -100,6 +102,8 @@ class _MainAppState extends State<MainApp> {
   String _email = defaultEmail;
   Widget _photo = const Icon(Icons.person_4);
 
+  Key _refreshKey = UniqueKey();
+
   @override
   void initState() {
     super.initState();
@@ -197,8 +201,9 @@ class _MainAppState extends State<MainApp> {
                       }
                     },
                   ),
-                  const ClearDataButton(),
+                  const ModeSwitch(),
                   const ServerConfiguration(),
+                  const ClearDataButton(),
                   const VersionLine(),
                 ],
               ),
@@ -207,8 +212,12 @@ class _MainAppState extends State<MainApp> {
               if (isOpened) {
                 loadUserInfo();
               }
+              setState(() {
+                _refreshKey = UniqueKey();
+              });
             },
             body: Column(
+              key: _refreshKey,
               children: <Widget>[
                 SearchParamWidget(
                   entry: entryNotifier,
@@ -218,14 +227,27 @@ class _MainAppState extends State<MainApp> {
                   focusNode: _searchFocusNode,
                 ),
                 Expanded(
-                  // child: EntryListView(
-                  //   filterNotifier: filterNotifier,
-                  //   entryNotifier: entryNotifier,
-                  // ),
-                  child: AnnotationListView(
-                    filterNotifier: filterNotifier,
+                  child: FutureBuilder(
+                    future: getMode(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return snapshot.data == 1
+                            ? AnnotationListView(
+                                filterNotifier: filterNotifier,
+                              )
+                            : EntryListView(
+                                filterNotifier: filterNotifier,
+                                entryNotifier: entryNotifier,
+                              );
+                      } else {
+                        return EntryListView(
+                          entryNotifier: entryNotifier,
+                          filterNotifier: filterNotifier,
+                        );
+                      }
+                    },
                   ),
-                )
+                ),
               ],
             ));
       }),

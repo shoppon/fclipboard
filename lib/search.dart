@@ -1,5 +1,6 @@
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart';
+import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -26,6 +27,7 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
   Entry _entry = Entry.empty();
   final _formKey = GlobalKey<FormState>();
   final DBHelper _dbHelper = DBHelper();
+  bool _showParamsInput = true;
 
   @override
   void initState() {
@@ -34,6 +36,15 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
       setState(() {
         _entry = widget.entry.value;
       });
+    });
+
+    _getMode();
+  }
+
+  void _getMode() async {
+    final mode = await getMode();
+    setState(() {
+      _showParamsInput = mode == 2;
     });
   }
 
@@ -45,116 +56,122 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              focusNode: widget.focusNode,
-              onChanged: widget.onChanged,
-              decoration: InputDecoration(
-                hintText: S.of(context).searchHint,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                suffixIcon: FutureBuilder<List<Category>>(
-                  future: _loadCategories(),
-                  builder: (
-                    BuildContext context,
-                    AsyncSnapshot<List<Category>> snapshot,
-                  ) {
-                    if (!snapshot.hasData || snapshot.data == null) {
-                      return const Icon(Icons.error);
-                    }
-                    return PopupMenuButton(
-                      icon: const Icon(Icons.category_sharp),
-                      itemBuilder: (BuildContext context) {
-                        List<PopupMenuItem> items = [];
-                        for (var c in snapshot.data!) {
-                          items.add(PopupMenuItem(
-                            value: c.name,
-                            child: Text(c.name),
-                          ));
-                        }
-                        return items;
-                      },
-                      onSelected: (value) {
-                        widget.onChanged!("#category:$value");
-                      },
-                    );
-                  },
-                ),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            focusNode: widget.focusNode,
+            onChanged: widget.onChanged,
+            decoration: InputDecoration(
+              hintText: S.of(context).searchHint,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              suffixIcon: FutureBuilder<List<Category>>(
+                future: _loadCategories(),
+                builder: (
+                  BuildContext context,
+                  AsyncSnapshot<List<Category>> snapshot,
+                ) {
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    return const Icon(Icons.error);
+                  }
+                  return PopupMenuButton(
+                    icon: const Icon(Icons.category_sharp),
+                    itemBuilder: (BuildContext context) {
+                      List<PopupMenuItem> items = [];
+                      for (var c in snapshot.data!) {
+                        items.add(PopupMenuItem(
+                          value: c.name,
+                          child: Text(c.name),
+                        ));
+                      }
+                      return items;
+                    },
+                    onSelected: (value) {
+                      widget.onChanged!("#category:$value");
+                    },
+                  );
+                },
               ),
             ),
           ),
-          Container(
-              height: 96,
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                border: Border.all(color: Theme.of(context).dividerColor),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              margin: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
-              child: Form(
-                key: _formKey,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Visibility(
-                      visible: _entry.parameters.isEmpty,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(S.of(context).noParameters),
-                        ),
+        ),
+        // parameters input
+        Visibility(
+          visible: _showParamsInput,
+          child: Container(
+            height: 96,
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              border: Border.all(color: Theme.of(context).dividerColor),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
+            child: Form(
+              key: _formKey,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Visibility(
+                    visible: _entry.parameters.isEmpty,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(S.of(context).noParameters),
                       ),
                     ),
-                    ..._entry.parameters.map((param) => Expanded(
-                            child: Row(
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                    decoration: InputDecoration(
-                                        labelText: param.description.isEmpty
-                                            ? (param.required
-                                                ? '* ${param.name}'
-                                                : param.name)
-                                            : (param.required
-                                                ? '* ${param.description}'
-                                                : param.description)),
-                                    initialValue: param.initial,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return S.of(context).required;
+                  ),
+                  ..._entry.parameters.map((param) => Expanded(
+                          child: Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextFormField(
+                                  decoration: InputDecoration(
+                                      labelText: param.description.isEmpty
+                                          ? (param.required
+                                              ? '* ${param.name}'
+                                              : param.name)
+                                          : (param.required
+                                              ? '* ${param.description}'
+                                              : param.description)),
+                                  initialValue: param.initial,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return S.of(context).required;
+                                    }
+                                    param.current = value;
+                                    return null;
+                                  },
+                                  onEditingComplete: () {
+                                    if (!_formKey.currentState!.validate()) {
+                                      return;
+                                    }
+                                    var subtitle = _entry.subtitle;
+                                    final params = _entry.parameters;
+                                    for (var p in params) {
+                                      if (p.current.isNotEmpty) {
+                                        subtitle = subtitle.replaceAll(
+                                            p.name, p.current);
                                       }
-                                      param.current = value;
-                                      return null;
-                                    },
-                                    onEditingComplete: () {
-                                      if (!_formKey.currentState!.validate()) {
-                                        return;
-                                      }
-                                      var subtitle = _entry.subtitle;
-                                      final params = _entry.parameters;
-                                      for (var p in params) {
-                                        if (p.current.isNotEmpty) {
-                                          subtitle = subtitle.replaceAll(
-                                              p.name, p.current);
-                                        }
-                                      }
-                                      Clipboard.setData(
-                                          ClipboardData(text: subtitle));
-                                    }),
-                              ),
-                            )
-                          ],
-                        )))
-                  ],
-                ),
-              )),
-        ]);
+                                    }
+                                    Clipboard.setData(
+                                        ClipboardData(text: subtitle));
+                                  }),
+                            ),
+                          )
+                        ],
+                      )))
+                ],
+              ),
+            ),
+          ),
+        )
+      ],
+    );
   }
 }

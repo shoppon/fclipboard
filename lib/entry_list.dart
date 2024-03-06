@@ -8,6 +8,7 @@ import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:openapi/api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
 import 'generated/l10n.dart';
@@ -51,11 +52,16 @@ class _EntryListViewState extends State<EntryListView> {
   @override
   void dispose() {
     RawKeyboard.instance.removeListener(_handleKeyEvent);
-    widget.filterNotifier.dispose();
     super.dispose();
   }
 
   void _filterEntries(String searchText) async {
+    final prefs = await SharedPreferences.getInstance();
+    final mode = prefs.getInt('fclipboard.mode');
+    if (mode != 2) {
+      return;
+    }
+
     if (searchText.contains("#category:")) {
       final category = searchText.split("#category:")[1].split(",")[0];
       final es = await _dbHelper.entries(categories: [category]);

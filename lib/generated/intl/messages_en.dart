@@ -71,6 +71,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "login": MessageLookupByLibrary.simpleMessage("Login"),
         "loginTooltip":
             MessageLookupByLibrary.simpleMessage("Please retry after login"),
+        "modeAnnotation": MessageLookupByLibrary.simpleMessage("Annotation"),
+        "modeMemory": MessageLookupByLibrary.simpleMessage("Memory"),
+        "modeSwitch": MessageLookupByLibrary.simpleMessage("Select Mode"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "noParameters": MessageLookupByLibrary.simpleMessage("No parameters"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),

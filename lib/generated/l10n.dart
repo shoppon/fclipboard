@@ -420,6 +420,36 @@ class S {
     );
   }
 
+  /// `Annotation`
+  String get modeAnnotation {
+    return Intl.message(
+      'Annotation',
+      name: 'modeAnnotation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memory`
+  String get modeMemory {
+    return Intl.message(
+      'Memory',
+      name: 'modeMemory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select Mode`
+  String get modeSwitch {
+    return Intl.message(
+      'Select Mode',
+      name: 'modeSwitch',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Name`
   String get name {
     return Intl.message(

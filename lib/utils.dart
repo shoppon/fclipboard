@@ -101,3 +101,9 @@ bool checkLoginState(BuildContext context) {
 Color? getColor(int selected, index) {
   return selected == index ? const Color.fromARGB(255, 199, 226, 248) : null;
 }
+
+Future<int> getMode() async {
+  final prefs = await SharedPreferences.getInstance();
+  final mode = prefs.getInt('fclipboard.mode');
+  return mode ?? 1;
+}
