@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:fclipboard/entry_adding.dart';
 import 'package:fclipboard/dao.dart';

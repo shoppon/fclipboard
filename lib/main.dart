@@ -179,10 +179,22 @@ class _MainAppState extends State<MainApp> {
               title: Text(S.of(context).appTitle),
               actions: <Widget>[
                 const StatisticsMenu(),
-                CloudMenu(),
+                CloudMenu(
+                  onChanged: () {
+                    setState(() {
+                      _refreshKey = UniqueKey();
+                    });
+                  },
+                ),
                 isDesktop() ? const ExportButton() : Container(),
                 const SubscriptionMenu(),
-                const CreatingMenu(),
+                CreatingMenu(
+                  onBack: () {
+                    setState(() {
+                      _refreshKey = UniqueKey();
+                    });
+                  },
+                ),
               ],
             ),
             drawer: Drawer(

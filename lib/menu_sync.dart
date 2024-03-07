@@ -13,9 +13,10 @@ import 'generated/l10n.dart';
 import 'model.dart' as m;
 
 class CloudMenu extends StatelessWidget {
-  CloudMenu({Key? key}) : super(key: key);
+  CloudMenu({Key? key, required this.onChanged}) : super(key: key);
 
   final _dbHelper = DBHelper();
+  final void Function() onChanged;
 
   Future<List<Entry>> getServerEntries() async {
     final api = EntryApi(ApiClient(basePath: await loadServerAddr()));
@@ -186,6 +187,7 @@ class CloudMenu extends StatelessWidget {
               if (context.mounted) {
                 showToast(context, S.of(context).successfully, false);
               }
+              onChanged();
             } catch (e, stackTrace) {
               log(e.toString(), stackTrace: stackTrace);
               if (context.mounted) {

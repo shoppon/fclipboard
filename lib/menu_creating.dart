@@ -6,7 +6,9 @@ import 'package:fclipboard/paste.dart';
 import 'package:flutter/material.dart';
 
 class CreatingMenu extends StatelessWidget {
-  const CreatingMenu({Key? key}) : super(key: key);
+  const CreatingMenu({Key? key, required this.onBack}) : super(key: key);
+
+  final void Function() onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +31,7 @@ class CreatingMenu extends StatelessWidget {
               context,
               MaterialPageRoute(
                   builder: (context) => EntryAddingPage(entry: Entry.empty())),
-            ).then((value) => {});
+            ).then((value) => {onBack()});
           },
           child: Text(S.of(context).addEntry),
         ),
@@ -38,7 +40,7 @@ class CreatingMenu extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const PastePage()),
-            ).then((value) => {});
+            ).then((value) => {onBack()});
           },
           child: Text(S.of(context).paste),
         )
