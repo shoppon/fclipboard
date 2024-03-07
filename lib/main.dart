@@ -6,7 +6,7 @@ import 'package:fclipboard/mode_switch.dart';
 import 'entry_list.dart';
 import 'firebase_options.dart';
 import 'package:fclipboard/clear_data.dart';
-import 'package:fclipboard/subscription_menu.dart';
+import 'package:fclipboard/menu_subscription.dart';
 import 'package:fclipboard/constants.dart';
 import 'package:fclipboard/menu_creating.dart';
 import 'package:fclipboard/email_verify.dart';

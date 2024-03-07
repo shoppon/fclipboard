@@ -31,6 +31,7 @@ class EntryListView extends StatefulWidget {
 
 class _EntryListViewState extends State<EntryListView> {
   List<m.Entry> entries = [];
+  List<m.Entry> allEntries = [];
 
   int _preSelectedIndex = -1;
   int _curSelectedIndex = -1;
@@ -46,6 +47,13 @@ class _EntryListViewState extends State<EntryListView> {
     RawKeyboard.instance.addListener(_handleKeyEvent);
     widget.filterNotifier.addListener(() {
       _filterEntries(widget.filterNotifier.value);
+    });
+
+    _dbHelper.entries().then((value) {
+      setState(() {
+        allEntries = value;
+        allEntries.sort((a, b) => b.counter.compareTo(a.counter));
+      });
     });
   }
 
@@ -70,7 +78,7 @@ class _EntryListViewState extends State<EntryListView> {
         entries.addAll(es);
       });
     } else {
-      await loadEntries();
+      resetEntries();
       widget.entryNotifier.value = m.Entry.empty();
       _curSelectedIndex = -1;
       _preSelectedIndex = -1;
@@ -141,14 +149,8 @@ class _EntryListViewState extends State<EntryListView> {
     }
   }
 
-  Future<void> loadEntries() async {
-    final entries = await _dbHelper.entries();
-    _matcher.reset(entries);
-    setState(() {
-      // get most used 10 entries
-      entries.sort((a, b) => b.counter.compareTo(a.counter));
-      this.entries = entries.sublist(0, min(10, entries.length));
-    });
+  void resetEntries() {
+    _matcher.reset(allEntries);
   }
 
   String _getTrailingText(int index) {
@@ -253,7 +255,7 @@ class _EntryListViewState extends State<EntryListView> {
         context,
         MaterialPageRoute(
             builder: (context) => EntryAddingPage(entry: entries[index])),
-      ).then((value) => loadEntries());
+      ).then((value) => resetEntries());
     }
     // delete
     if (selectedValue == 1 && context.mounted) {

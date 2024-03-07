@@ -14,43 +14,33 @@ class CreatingMenu extends StatelessWidget {
       icon: const Icon(Icons.add),
       itemBuilder: (context) => [
         PopupMenuItem(
-          child: TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const CategoryAddingPage()),
-              );
-            },
-            child: Text(S.of(context).addCategory),
-          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const CategoryAddingPage()),
+            );
+          },
+          child: Text(S.of(context).addCategory),
         ),
         PopupMenuItem(
-          child: TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        EntryAddingPage(entry: Entry.empty())),
-              ).then((value) => {});
-            },
-            child: Text(S.of(context).addEntry),
-          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => EntryAddingPage(entry: Entry.empty())),
+            ).then((value) => {});
+          },
+          child: Text(S.of(context).addEntry),
         ),
         PopupMenuItem(
-          child: TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const PastePage()),
-              ).then((value) => {});
-            },
-            child: Text(S.of(context).paste),
-          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PastePage()),
+            ).then((value) => {});
+          },
+          child: Text(S.of(context).paste),
         )
       ],
     );
