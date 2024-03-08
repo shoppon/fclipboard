@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,15 +13,22 @@ const String annotationDir =
 
 Future<List<Book>> readBooks() async {
   final libraryDir = await getLibraryDirectory();
-  final bookPath =
-      path.join(libraryDir.path.split("/").take(3).join("/"), bookDir);
+  final bookPath = path.join(
+    libraryDir.path.split("/").take(3).join("/"),
+    bookDir,
+  );
+
   List<FileSystemEntity> files = Directory(bookPath).listSync();
   if (files.isEmpty) {
     return [];
   }
 
   final sqliteFile = files.firstWhere((e) => e.path.endsWith('.sqlite'));
-  Database db = await openDatabase(sqliteFile.path);
+  Database db = await openDatabase(
+    sqliteFile.path,
+    readOnly: true,
+    singleInstance: false,
+  );
   final List<Map<String, dynamic>> books =
       await db.rawQuery('SELECT * FROM ZBKLIBRARYASSET');
   await db.close();
@@ -36,15 +42,23 @@ Future<List<Book>> readBooks() async {
 }
 
 Future<List<Annotation>> readAnnotations() async {
-  final homeDir = Platform.environment['HOME'];
-  final annotationPath = path.join(homeDir!, annotationDir);
+  final libraryDir = await getLibraryDirectory();
+  final annotationPath = path.join(
+    libraryDir.path.split("/").take(3).join("/"),
+    annotationDir,
+  );
+
   List<FileSystemEntity> files = Directory(annotationPath).listSync();
   if (files.isEmpty) {
     return [];
   }
 
   final sqliteFile = files.firstWhere((e) => e.path.endsWith('.sqlite'));
-  Database db = await openDatabase(sqliteFile.path);
+  Database db = await openDatabase(
+    sqliteFile.path,
+    readOnly: true,
+    singleInstance: false,
+  );
   final List<Map<String, dynamic>> notes =
       await db.rawQuery('SELECT * FROM ZAEANNOTATION');
   await db.close();
