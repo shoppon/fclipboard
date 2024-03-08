@@ -39,7 +39,9 @@ class _AnnotationListViewState extends State<AnnotationListView> {
     });
 
     widget.filterNotifier.addListener(() {
-      _filterAnnotations(widget.filterNotifier.value);
+      if (mounted) {
+        _filterAnnotations(widget.filterNotifier.value);
+      }
     });
   }
 

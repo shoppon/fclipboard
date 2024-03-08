@@ -4,6 +4,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 const String bookDir =
@@ -12,8 +13,9 @@ const String annotationDir =
     'Library/Containers/com.apple.iBooksX/Data/Documents/AEAnnotation/';
 
 Future<List<Book>> readBooks() async {
-  final homeDir = Platform.environment['HOME'];
-  final bookPath = path.join(homeDir!, bookDir);
+  final libraryDir = await getLibraryDirectory();
+  final bookPath =
+      path.join(libraryDir.path.split("/").take(3).join("/"), bookDir);
   List<FileSystemEntity> files = Directory(bookPath).listSync();
   if (files.isEmpty) {
     return [];
