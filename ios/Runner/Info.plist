@@ -50,6 +50,6 @@
 		<key>NSFileProtectionKey</key>
 		<string>NSFileProtectionCompleteUntilFirstUserAuthentication</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<true />
+		<string>My app does not use image permissions, and is actually used by three libraries.</string>
 	</dict>
 </plist>
