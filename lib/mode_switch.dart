@@ -57,7 +57,7 @@ class _ModeSwitchState extends State<ModeSwitch> {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setInt('fclipboard.mode', value as int);
                   }),
-              Text(S.of(context).modeMemory),
+              Text(S.of(context).modeNotes),
             ],
           )
         ],

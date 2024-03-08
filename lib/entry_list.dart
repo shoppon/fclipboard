@@ -49,10 +49,12 @@ class _EntryListViewState extends State<EntryListView> {
     });
 
     _dbHelper.entries().then((value) {
-      setState(() {
-        allEntries = value;
-        allEntries.sort((a, b) => b.counter.compareTo(a.counter));
-      });
+      if (mounted) {
+        setState(() {
+          allEntries = value;
+          allEntries.sort((a, b) => b.counter.compareTo(a.counter));
+        });
+      }
     });
   }
 
@@ -65,7 +67,7 @@ class _EntryListViewState extends State<EntryListView> {
   void _filterEntries(String searchText) async {
     final prefs = await SharedPreferences.getInstance();
     final mode = prefs.getInt('fclipboard.mode');
-    if (mode != 2) {
+    if (mode != 2 || !mounted) {
       return;
     }
 

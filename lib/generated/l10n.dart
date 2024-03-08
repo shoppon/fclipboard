@@ -420,21 +420,21 @@ class S {
     );
   }
 
-  /// `Annotation`
+  /// `Annotations`
   String get modeAnnotation {
     return Intl.message(
-      'Annotation',
+      'Annotations',
       name: 'modeAnnotation',
       desc: '',
       args: [],
     );
   }
 
-  /// `Memory`
-  String get modeMemory {
+  /// `Notes`
+  String get modeNotes {
     return Intl.message(
-      'Memory',
-      name: 'modeMemory',
+      'Notes',
+      name: 'modeNotes',
       desc: '',
       args: [],
     );
@@ -520,10 +520,10 @@ class S {
     );
   }
 
-  /// `Pusing...`
+  /// `Pushing...`
   String get pushing {
     return Intl.message(
-      'Pusing...',
+      'Pushing...',
       name: 'pushing',
       desc: '',
       args: [],

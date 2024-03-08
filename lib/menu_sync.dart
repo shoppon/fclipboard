@@ -199,29 +199,31 @@ class CloudMenu extends StatelessWidget {
           },
           child: Text(S.of(context).syncCloud),
         ),
-        PopupMenuItem(
-          onTap: () async {
-            if (!checkLoginState(context)) {
-              return;
-            }
-            ProgressDialog pd = ProgressDialog(context: context);
-            pd.show(msg: S.of(context).loading);
-            try {
-              await importAppleBooks();
-              if (context.mounted) {
-                showToast(context, S.of(context).successfully, false);
+        if (isMacOS())
+          PopupMenuItem(
+            onTap: () async {
+              if (!checkLoginState(context)) {
+                return;
               }
-            } catch (e, stackTrace) {
-              log(e.toString(), stackTrace: stackTrace);
-              if (context.mounted) {
-                showToast(context, S.of(context).failed, true);
+              ProgressDialog pd = ProgressDialog(context: context);
+              pd.show(msg: S.of(context).loading);
+              try {
+                await importAppleBooks();
+                onChanged();
+                if (context.mounted) {
+                  showToast(context, S.of(context).successfully, false);
+                }
+              } catch (e, stackTrace) {
+                log(e.toString(), stackTrace: stackTrace);
+                if (context.mounted) {
+                  showToast(context, S.of(context).failed, true);
+                }
+              } finally {
+                pd.close();
               }
-            } finally {
-              pd.close();
-            }
-          },
-          child: Text(S.of(context).syncAppleBooks),
-        ),
+            },
+            child: Text(S.of(context).syncAppleBooks),
+          ),
       ],
     );
   }

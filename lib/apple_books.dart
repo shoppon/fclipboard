@@ -54,6 +54,7 @@ Future<List<Annotation>> readAnnotations() async {
       selected: notes[i]['ZANNOTATIONSELECTEDTEXT'] ?? '',
       highlight: notes[i]['ZANNOTATIONNOTE'] ?? '',
       color: notes[i]['ZANNOTATIONSTYLE'] ?? 0,
+      deleted: notes[i]['ZANNOTATIONDELETED'] ?? 1,
       createdAt: notes[i]['ZANNOTATIONCREATIONDATE'] ?? 0.0,
     );
   });

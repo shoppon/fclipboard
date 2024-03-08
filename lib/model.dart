@@ -175,6 +175,7 @@ class Annotation {
   String location;
   String selected;
   String highlight;
+  int deleted;
   int color;
   double createdAt;
   Book book = Book.empty();
@@ -188,6 +189,7 @@ class Annotation {
     this.highlight = '',
     this.color = 0,
     this.createdAt = 0.0,
+    this.deleted = 0,
   });
 
   Map<String, dynamic> toMap() {
@@ -198,6 +200,7 @@ class Annotation {
       'selected': selected,
       'highlight': highlight,
       'color': color,
+      'deleted': deleted,
       'created_at': createdAt,
     };
     if (id != 0) {

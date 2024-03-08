@@ -87,6 +87,7 @@ void createAnnotationTable(db) {
       selected TEXT NOT NULL,
       highlight TEXT NOT NULL,
       color INTEGER,
+      deleted INTEGER,
       created_at REAL,
       FOREIGN KEY (book_id) REFERENCES book(uuid)
     )
@@ -327,9 +328,6 @@ class DBHelper {
   }
 
   Future<void> deleteAll() async {
-    final Database db = await database;
-    await db.delete('category');
-    await db.delete('entry');
     // drop databases
     await deleteDatabase(await getDatabasePath());
   }
@@ -494,7 +492,7 @@ class DBHelper {
       LEFT JOIN book
         ON annotation.book_id = book.uuid
       WHERE
-        color != 0 and selected != '' and book.title != ''
+        color != 0 and selected != '' and book.title != '' and deleted = 0
       ''';
     final maps = await db.rawQuery(query);
     List<m.Annotation> annotations = [];

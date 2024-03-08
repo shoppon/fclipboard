@@ -33,9 +33,11 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
   void initState() {
     super.initState();
     widget.entry.addListener(() {
-      setState(() {
-        _entry = widget.entry.value;
-      });
+      if (mounted) {
+        setState(() {
+          _entry = widget.entry.value;
+        });
+      }
     });
 
     _getMode();

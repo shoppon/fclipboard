@@ -71,8 +71,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "login": MessageLookupByLibrary.simpleMessage("Login"),
         "loginTooltip":
             MessageLookupByLibrary.simpleMessage("Please retry after login"),
-        "modeAnnotation": MessageLookupByLibrary.simpleMessage("Annotation"),
-        "modeMemory": MessageLookupByLibrary.simpleMessage("Memory"),
+        "modeAnnotation": MessageLookupByLibrary.simpleMessage("Annotations"),
+        "modeNotes": MessageLookupByLibrary.simpleMessage("Notes"),
         "modeSwitch": MessageLookupByLibrary.simpleMessage("Select Mode"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "noParameters": MessageLookupByLibrary.simpleMessage("No parameters"),
@@ -83,7 +83,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "phoneInput":
             MessageLookupByLibrary.simpleMessage("Please input phone number"),
         "profile": MessageLookupByLibrary.simpleMessage("Profile"),
-        "pushing": MessageLookupByLibrary.simpleMessage("Pusing..."),
+        "pushing": MessageLookupByLibrary.simpleMessage("Pushing..."),
         "required": MessageLookupByLibrary.simpleMessage("Required"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "searchHint": MessageLookupByLibrary.simpleMessage("Search"),
