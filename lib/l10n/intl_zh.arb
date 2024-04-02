@@ -17,6 +17,7 @@
   "content": "内容",
   "contentCannotBeEmpty": "内容不能为空",
   "creatingSubscription": "创建订阅",
+  "debugMode": "调试模式",
   "delete": "删除",
   "deleteAllSuccess": "已删除所有条目",
   "deleteFailed": "删除失败",

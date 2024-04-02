@@ -45,6 +45,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Content cannot be empty"),
         "creatingSubscription":
             MessageLookupByLibrary.simpleMessage("Creating Subscription"),
+        "debugMode": MessageLookupByLibrary.simpleMessage("Debug Mode"),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deleteAllSuccess": MessageLookupByLibrary.simpleMessage(
             "All entries deleted successfully"),

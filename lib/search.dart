@@ -44,7 +44,7 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
   }
 
   void _getMode() async {
-    final mode = await getMode();
+    final mode = await loadConfig('fclipboard.mode');
     setState(() {
       _showParamsInput = mode == 2;
     });

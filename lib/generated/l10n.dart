@@ -220,6 +220,16 @@ class S {
     );
   }
 
+  /// `Debug Mode`
+  String get debugMode {
+    return Intl.message(
+      'Debug Mode',
+      name: 'debugMode',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Delete`
   String get delete {
     return Intl.message(

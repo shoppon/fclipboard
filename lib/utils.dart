@@ -102,8 +102,13 @@ Color? getColor(int selected, index) {
   return selected == index ? const Color.fromARGB(255, 199, 226, 248) : null;
 }
 
-Future<int> getMode() async {
+Future<int> loadConfig(String name) async {
   final prefs = await SharedPreferences.getInstance();
-  final mode = prefs.getInt('fclipboard.mode');
+  final mode = prefs.getInt(name);
   return mode ?? 1;
+}
+
+Future<bool> saveConfig(String name, int value) async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.setInt(name, value);
 }

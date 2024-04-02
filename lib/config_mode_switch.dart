@@ -1,6 +1,5 @@
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'generated/l10n.dart';
 
@@ -21,7 +20,7 @@ class _ModeSwitchState extends State<ModeSwitch> {
   }
 
   void _getMode() async {
-    final mode = await getMode();
+    final mode = await loadConfig('fclipboard.mode');
     setState(() {
       _mode = mode;
     });
@@ -37,26 +36,26 @@ class _ModeSwitchState extends State<ModeSwitch> {
           Row(
             children: [
               Radio(
-                  value: 1,
-                  groupValue: _mode,
-                  onChanged: (value) async {
-                    setState(() {
-                      _mode = value as int;
-                    });
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setInt('fclipboard.mode', value as int);
-                  }),
+                value: 1,
+                groupValue: _mode,
+                onChanged: (value) async {
+                  setState(() {
+                    _mode = value as int;
+                  });
+                  await saveConfig('fclipboard.mode', value as int);
+                },
+              ),
               Text(S.of(context).modeAnnotation),
               Radio(
-                  value: 2,
-                  groupValue: _mode,
-                  onChanged: (value) async {
-                    setState(() {
-                      _mode = value as int;
-                    });
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setInt('fclipboard.mode', value as int);
-                  }),
+                value: 2,
+                groupValue: _mode,
+                onChanged: (value) async {
+                  setState(() {
+                    _mode = value as int;
+                  });
+                  await saveConfig('fclipboard.mode', value as int);
+                },
+              ),
               Text(S.of(context).modeNotes),
             ],
           )

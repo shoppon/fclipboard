@@ -1,8 +1,9 @@
 import 'package:fclipboard/annotation_list.dart';
+import 'package:fclipboard/config_debug_mode.dart';
 import 'package:fclipboard/menu_sync.dart';
 import 'package:fclipboard/config.dart';
 import 'package:fclipboard/menu_statistics.dart';
-import 'package:fclipboard/mode_switch.dart';
+import 'package:fclipboard/config_mode_switch.dart';
 import 'entry_list.dart';
 import 'firebase_options.dart';
 import 'package:fclipboard/clear_data.dart';
@@ -214,6 +215,7 @@ class _MainAppState extends State<MainApp> {
                     },
                   ),
                   const ModeSwitch(),
+                  const DebugModeSwitch(),
                   const ServerConfiguration(),
                   const ClearDataButton(),
                   const VersionLine(),
@@ -240,7 +242,7 @@ class _MainAppState extends State<MainApp> {
                 ),
                 Expanded(
                   child: FutureBuilder(
-                    future: getMode(),
+                    future: loadConfig('fclipboard.mode'),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return snapshot.data == 1

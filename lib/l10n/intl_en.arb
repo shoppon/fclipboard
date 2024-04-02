@@ -17,6 +17,7 @@
   "content": "Content",
   "contentCannotBeEmpty": "Content cannot be empty",
   "creatingSubscription": "Creating Subscription",
+  "debugMode": "Debug Mode",
   "delete": "Delete",
   "deleteAllSuccess": "All entries deleted successfully",
   "deleteFailed": "Delete failed",

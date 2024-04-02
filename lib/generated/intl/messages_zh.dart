@@ -39,6 +39,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "content": MessageLookupByLibrary.simpleMessage("内容"),
         "contentCannotBeEmpty": MessageLookupByLibrary.simpleMessage("内容不能为空"),
         "creatingSubscription": MessageLookupByLibrary.simpleMessage("创建订阅"),
+        "debugMode": MessageLookupByLibrary.simpleMessage("调试模式"),
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
         "deleteAllSuccess": MessageLookupByLibrary.simpleMessage("已删除所有条目"),
         "deleteFailed": MessageLookupByLibrary.simpleMessage("删除失败"),
