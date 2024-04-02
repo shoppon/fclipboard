@@ -352,6 +352,32 @@ paths:
           description: "Internal Server Error"
       tags:
         - entry
+  /v1/{uid}/logs:
+    post:
+      summary: "upload a log"
+      description: "upload a log"
+      operationId: "uploadLog"
+      parameters:
+        - name: "uid"
+          in: "path"
+          description: "The user id"
+          required: true
+          schema:
+            type: "string"
+            example: "shopppon@gmail.com"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogPostReq"
+              required: true
+      responses:
+        204:
+          description: "No Content"
+        500:
+          description: "Internal Server Error"
+      tags:
+        - log
 components:
   schemas:
     Parameter:
@@ -619,3 +645,33 @@ components:
           type: "array"
           items:
             $ref: "#/components/schemas/Entry"
+    Log:
+      type: "object"
+      properties:
+        action:
+          type: "string"
+          description: "The action of the log"
+          example: "export"
+        content:
+          type: "string"
+          description: "The content of the log"
+          example: "foo bar baz"
+        stack:
+          type: "string"
+          description: "The stack of the log"
+          example: "foo bar baz"
+        platform:
+          type: "string"
+          description: "The platform of the log"
+          example: "web"
+      required:
+        - action
+        - content
+        - platform
+    LogPostReq:
+      type: "object"
+      properties:
+        log:
+          $ref: "#/components/schemas/Log"
+      required:
+        - log

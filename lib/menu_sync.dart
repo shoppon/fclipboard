@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:collection/collection.dart';
 import 'package:fclipboard/apple_books.dart';
 import 'package:fclipboard/dao.dart';
+import 'package:fclipboard/log_utils.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
@@ -193,6 +194,8 @@ class CloudMenu extends StatelessWidget {
               if (context.mounted) {
                 showToast(context, S.of(context).failed, true);
               }
+              await uploadLog(
+                  'sync_cloud', e.toString(), stackTrace.toString());
             } finally {
               pd.close();
             }
@@ -218,6 +221,8 @@ class CloudMenu extends StatelessWidget {
                 if (context.mounted) {
                   showToast(context, S.of(context).failed, true);
                 }
+                await uploadLog(
+                    'sync_apple_books', e.toString(), stackTrace.toString());
               } finally {
                 pd.close();
               }

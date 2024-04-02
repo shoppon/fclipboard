@@ -67,6 +67,7 @@ Class | Method | HTTP request | Description
 *EntryApi* | [**getEntry**](doc//EntryApi.md#getentry) | **GET** /v1/{uid}/entries/{eid} | Get an entry
 *EntryApi* | [**listEntries**](doc//EntryApi.md#listentries) | **GET** /v1/{uid}/entries | List entries
 *EntryApi* | [**updateEntry**](doc//EntryApi.md#updateentry) | **PATCH** /v1/{uid}/entries/{eid} | Update an entry
+*LogApi* | [**uploadLog**](doc//LogApi.md#uploadlog) | **POST** /v1/{uid}/logs | upload a log
 *SubscriptionApi* | [**createSubscription**](doc//SubscriptionApi.md#createsubscription) | **POST** /v1/{uid}/subscriptions | Create a subscription
 *SubscriptionApi* | [**listSubscriptions**](doc//SubscriptionApi.md#listsubscriptions) | **GET** /v1/{uid}/subscriptions | List subscriptions
 *SubscriptionApi* | [**pullSubscription**](doc//SubscriptionApi.md#pullsubscription) | **GET** /v1/{uid}/subscriptions/{sid}/pull | Pull a subscription
@@ -88,6 +89,8 @@ Class | Method | HTTP request | Description
  - [EntryPatchResp](doc//EntryPatchResp.md)
  - [EntryPostReq](doc//EntryPostReq.md)
  - [EntryPostResp](doc//EntryPostResp.md)
+ - [Log](doc//Log.md)
+ - [LogPostReq](doc//LogPostReq.md)
  - [Parameter](doc//Parameter.md)
  - [Subscription](doc//Subscription.md)
  - [SubscriptionListResp](doc//SubscriptionListResp.md)

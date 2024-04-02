@@ -208,6 +208,10 @@ class ApiClient {
           return EntryPostReq.fromJson(value);
         case 'EntryPostResp':
           return EntryPostResp.fromJson(value);
+        case 'Log':
+          return Log.fromJson(value);
+        case 'LogPostReq':
+          return LogPostReq.fromJson(value);
         case 'Parameter':
           return Parameter.fromJson(value);
         case 'Subscription':

@@ -30,6 +30,7 @@ part 'auth/http_bearer_auth.dart';
 
 part 'api/category_api.dart';
 part 'api/entry_api.dart';
+part 'api/log_api.dart';
 part 'api/subscription_api.dart';
 
 part 'model/category.dart';
@@ -45,6 +46,8 @@ part 'model/entry_patch_req.dart';
 part 'model/entry_patch_resp.dart';
 part 'model/entry_post_req.dart';
 part 'model/entry_post_resp.dart';
+part 'model/log.dart';
+part 'model/log_post_req.dart';
 part 'model/parameter.dart';
 part 'model/subscription.dart';
 part 'model/subscription_list_resp.dart';
