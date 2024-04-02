@@ -27,6 +27,8 @@ from provider.clients.v1.models.entry_patch_req import EntryPatchReq
 from provider.clients.v1.models.entry_patch_resp import EntryPatchResp
 from provider.clients.v1.models.entry_post_req import EntryPostReq
 from provider.clients.v1.models.entry_post_resp import EntryPostResp
+from provider.clients.v1.models.log import Log
+from provider.clients.v1.models.log_post_req import LogPostReq
 from provider.clients.v1.models.parameter import Parameter
 from provider.clients.v1.models.subscription import Subscription
 from provider.clients.v1.models.subscription_list_resp import SubscriptionListResp

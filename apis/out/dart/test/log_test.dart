@@ -16,9 +16,21 @@ void main() {
   // final instance = Log();
 
   group('test Log', () {
+    // The action of the log
+    // String action
+    test('to test the property `action`', () async {
+      // TODO
+    });
+
     // The content of the log
     // String content
     test('to test the property `content`', () async {
+      // TODO
+    });
+
+    // The stack of the log
+    // String stack
+    test('to test the property `stack`', () async {
       // TODO
     });
 
