@@ -1,6 +1,7 @@
 attrs
 dynaconf
 fastapi
+firebase-admin
 fuzzywuzzy
 kubernetes
 loguru

@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:fclipboard/annotation_list.dart';
 import 'package:fclipboard/config_debug_mode.dart';
 import 'package:fclipboard/menu_sync.dart';
 import 'package:fclipboard/config.dart';
 import 'package:fclipboard/menu_statistics.dart';
 import 'package:fclipboard/config_mode_switch.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'entry_list.dart';
 import 'firebase_options.dart';
 import 'package:fclipboard/clear_data.dart';
@@ -65,6 +68,21 @@ void main() async {
     await auth.useAuthEmulator('localhost', 9099);
   }
   FirebaseUIAuth.configureProviders(getAuthProviders());
+
+  await FirebaseMessaging.instance.setAutoInitEnabled(true);
+
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+  log('User granted permission: ${settings.authorizationStatus}');
 
   runApp(const MainApp());
 }
