@@ -239,6 +239,7 @@ class _MainAppState extends State<MainApp> {
                     filterNotifier.value = value;
                   },
                   focusNode: _searchFocusNode,
+                  filters: const ["tag", "content"],
                 ),
                 Expanded(
                   child: FutureBuilder(

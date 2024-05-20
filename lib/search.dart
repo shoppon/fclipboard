@@ -12,12 +12,14 @@ class SearchParamWidget extends StatefulWidget {
     required this.onChanged,
     required this.entry,
     required this.focusNode,
+    required this.filters,
   }) : super();
 
   final ValueNotifier<Entry> entry;
 
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
+  final List<String> filters;
 
   @override
   State<SearchParamWidget> createState() => _SearchParamWidgetState();
@@ -28,6 +30,10 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
   final _formKey = GlobalKey<FormState>();
   final DBHelper _dbHelper = DBHelper();
   bool _showParamsInput = true;
+
+  final TextEditingController _controller = TextEditingController();
+  String _prefix = '';
+  String _filter = '';
 
   @override
   void initState() {
@@ -63,41 +69,50 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextField(
+            controller: _controller,
             focusNode: widget.focusNode,
             onChanged: widget.onChanged,
+            onSubmitted: (value) {
+              setState(() {
+                if (_filter.isNotEmpty) {
+                  _prefix = "$_prefix$value ";
+                  _controller.text = '';
+                  _filter = '';
+                }
+              });
+            },
             decoration: InputDecoration(
-              hintText: S.of(context).searchHint,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              suffixIcon: FutureBuilder<List<Category>>(
-                future: _loadCategories(),
-                builder: (
-                  BuildContext context,
-                  AsyncSnapshot<List<Category>> snapshot,
-                ) {
-                  if (!snapshot.hasData || snapshot.data == null) {
-                    return const Icon(Icons.error);
-                  }
-                  return PopupMenuButton(
-                    icon: const Icon(Icons.category_sharp),
-                    itemBuilder: (BuildContext context) {
-                      List<PopupMenuItem> items = [];
-                      for (var c in snapshot.data!) {
-                        items.add(PopupMenuItem(
-                          value: c.name,
-                          child: Text(c.name),
-                        ));
-                      }
-                      return items;
-                    },
-                    onSelected: (value) {
-                      widget.onChanged!("#category:$value");
-                    },
-                  );
-                },
-              ),
-            ),
+                hintText: S.of(context).searchHint,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                prefixIcon: PopupMenuButton(
+                  icon: const Icon(Icons.search),
+                  itemBuilder: (context) {
+                    // return filters
+                    return widget.filters
+                        .map((e) => PopupMenuItem(
+                              child: Text(e),
+                              onTap: () {
+                                setState(() {
+                                  _prefix = "$_prefix  $e: ";
+                                  _filter = e;
+                                });
+                              },
+                            ))
+                        .toList();
+                  },
+                ),
+                prefix: Text(_prefix),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear_rounded),
+                  onPressed: () {
+                    setState(() {
+                      _prefix = '';
+                      _controller.text = '';
+                    });
+                  },
+                )),
           ),
         ),
         // parameters input
