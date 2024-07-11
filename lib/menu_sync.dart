@@ -85,17 +85,29 @@ class CloudMenu extends StatelessWidget {
     Entry se,
     List<m.Category> localCategories,
   ) async {
+    final lc = findCategoryId(se, localCategories);
+    if (lc == -1) {
+      log('Failed to find category ${se.category}');
+      return;
+    }
     await _dbHelper.insertEntry(m.Entry(
       title: se.name!,
       subtitle: se.content!,
-      categoryId:
-          localCategories.firstWhereOrNull((c) => c.name == se.category!)!.id,
+      categoryId: lc,
       counter: se.counter ?? 0,
       version: se.version!,
       uuid: se.uuid!,
       parameters:
           se.parameters.map((e) => m.Param.fromJson(e.toJson())).toList(),
     ));
+  }
+
+  int findCategoryId(Entry se, List<m.Category> localCategories) {
+    final lc = localCategories.firstWhereOrNull((c) => c.name == se.category);
+    if (lc == null) {
+      return -1;
+    }
+    return lc.id;
   }
 
   Future<EntryPostResp?> uploadEntry(
