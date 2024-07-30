@@ -5,6 +5,7 @@ import 'package:fclipboard/apple_books.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/log_utils.dart';
 import 'package:fclipboard/utils.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:openapi/api.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
@@ -221,9 +222,15 @@ class CloudMenu extends StatelessWidget {
                 return;
               }
               ProgressDialog pd = ProgressDialog(context: context);
-              pd.show(msg: S.of(context).loading);
+              final msg = S.of(context).loading;
               try {
-                await importAppleBooks();
+                FilePickerResult? result = await FilePicker.platform
+                    .pickFiles(allowedExtensions: ['sqlite']);
+                if (result == null) {
+                  return;
+                }
+                pd.show(msg: msg);
+                await importAppleBooks(result.files);
                 onChanged();
                 if (context.mounted) {
                   showToast(context, S.of(context).successfully, false);

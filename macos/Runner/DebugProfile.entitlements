@@ -22,7 +22,5 @@
 	<true/>
 	<key>com.apple.security.network.server</key>
 	<true/>
-	<key>com.apple.security.temporary-exception.files.home-relative-path.read-only</key>
-	<string>/Library/Containers/com.apple.iBooksX/</string>
 </dict>
 </plist>

@@ -493,6 +493,8 @@ class DBHelper {
         ON annotation.book_id = book.uuid
       WHERE
         color != 0 and selected != '' and book.title != '' and deleted = 0
+      ORDER BY
+        created_at DESC
       ''';
     final maps = await db.rawQuery(query);
     List<m.Annotation> annotations = [];

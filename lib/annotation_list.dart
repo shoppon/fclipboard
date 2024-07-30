@@ -158,7 +158,7 @@ class AnnotationItem extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                annotation.highlight,
+                annotation.highlight.isNotEmpty ? annotation.highlight : "-",
                 textAlign: TextAlign.start,
               ),
             ),

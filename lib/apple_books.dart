@@ -1,31 +1,21 @@
-import 'dart:io';
-
-import 'package:path/path.dart' as path;
+import 'package:collection/collection.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-const String bookDir =
-    'Library/Containers/com.apple.iBooksX/Data/Documents/BKLibrary/';
-const String annotationDir =
-    'Library/Containers/com.apple.iBooksX/Data/Documents/AEAnnotation/';
-
-Future<List<Book>> readBooks() async {
-  final libraryDir = await getLibraryDirectory();
-  final bookPath = path.join(
-    libraryDir.path.split("/").take(3).join("/"),
-    bookDir,
-  );
-
-  List<FileSystemEntity> files = Directory(bookPath).listSync();
+Future<List<Book>> readBooks(List<PlatformFile> files) async {
   if (files.isEmpty) {
     return [];
   }
 
-  final sqliteFile = files.firstWhere((e) => e.path.endsWith('.sqlite'));
+  final sqliteFile =
+      files.firstWhereOrNull((e) => e.path!.startsWith('BKLibrary'));
+  if (sqliteFile == null) {
+    return [];
+  }
   Database db = await openDatabase(
-    sqliteFile.path,
+    sqliteFile.path!,
     readOnly: true,
     singleInstance: false,
   );
@@ -41,21 +31,18 @@ Future<List<Book>> readBooks() async {
   });
 }
 
-Future<List<Annotation>> readAnnotations() async {
-  final libraryDir = await getLibraryDirectory();
-  final annotationPath = path.join(
-    libraryDir.path.split("/").take(3).join("/"),
-    annotationDir,
-  );
-
-  List<FileSystemEntity> files = Directory(annotationPath).listSync();
+Future<List<Annotation>> readAnnotations(List<PlatformFile> files) async {
   if (files.isEmpty) {
     return [];
   }
 
-  final sqliteFile = files.firstWhere((e) => e.path.endsWith('.sqlite'));
+  final sqliteFile =
+      files.firstWhereOrNull((e) => e.path!.startsWith('AEAnnotation'));
+  if (sqliteFile == null) {
+    return [];
+  }
   Database db = await openDatabase(
-    sqliteFile.path,
+    sqliteFile.path!,
     readOnly: true,
     singleInstance: false,
   );
@@ -76,9 +63,9 @@ Future<List<Annotation>> readAnnotations() async {
   });
 }
 
-Future<void> importAppleBooks() async {
-  final books = await readBooks();
-  final annotations = await readAnnotations();
+Future<void> importAppleBooks(List<PlatformFile> files) async {
+  final books = await readBooks(files);
+  final annotations = await readAnnotations(files);
   final helper = DBHelper();
   await helper.batchInsertBooks(books);
   await helper.batchInsertAnnotations(annotations);
