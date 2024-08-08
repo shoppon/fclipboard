@@ -29,7 +29,10 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
     super.initState();
   }
 
-  Future<bool> createCategory() async {
+  Future<bool> createServerCategory() async {
+    if (isLoggedIn() == false) {
+      return true;
+    }
     try {
       final email = loadUserEmail();
       final apiInstance = CategoryApi(ApiClient(
@@ -119,7 +122,7 @@ class _CategoryAddingPageState extends State<CategoryAddingPage> {
                         if (!_formKey.currentState!.validate()) {
                           return;
                         }
-                        final success = await createCategory();
+                        final success = await createServerCategory();
                         if (success) {
                           final category =
                               model.Category(name: _name, icon: _icon);

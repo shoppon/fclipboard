@@ -178,6 +178,15 @@ class _EntryAddingPageState extends State<EntryAddingPage> {
                             return;
                           }
 
+                          if (isLoggedIn() == false) {
+                            showToast(
+                              context,
+                              S.of(context).addSuccessfully,
+                              false,
+                            );
+                            return;
+                          }
+
                           final se = await getServerEntry(widget.entry.uuid);
                           if (se == null) {
                             await _dbHelper.insertEntry(entry);
