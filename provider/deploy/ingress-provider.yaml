@@ -10,7 +10,7 @@ metadata:
       rewrite ^/fclipboard-provider/(.*) /$1 break;
 spec:
   rules:
-    - host: fclipboard-provider.shoppon.xyz
+    - host: fclipboard-provider.lingmind.cn
       http:
         paths:
           - pathType: Prefix
@@ -20,30 +20,11 @@ spec:
                 name: provider
                 port:
                   number: 8000
-    - host: fclipboard.shoppon.xyz
+    - host: fclipboard.lingmind.cn
       http:
         paths:
           - pathType: Prefix
             path: "/v1"
-            backend:
-              service:
-                name: provider
-                port:
-                  number: 8000
-    - host: fclipboard-provider.shoppon.local
-      http:
-        paths:
-          - pathType: Prefix
-            path: "/"
-            backend:
-              service:
-                name: provider
-                port:
-                  number: 8000
-    - http:
-        paths:
-          - pathType: Prefix
-            path: /fclipboard-provider
             backend:
               service:
                 name: provider

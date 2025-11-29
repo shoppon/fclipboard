@@ -6,34 +6,19 @@ metadata:
   labels:
     name: fclipboard
   annotations:
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      rewrite ^/fclipboard/(.*) /$1 break;
+    kubernetes.io/ingress.class: nginx
 spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - fclipboard.lingmind.cn
+      secretName: wildcard-lingmind-cn-tls
   rules:
-    - host: fclipboard.shoppon.xyz
+    - host: fclipboard.lingmind.cn
       http:
         paths:
           - pathType: Prefix
             path: "/"
-            backend:
-              service:
-                name: web
-                port:
-                  number: 80
-    - host: fclipboard.shoppon.local
-      http:
-        paths:
-          - pathType: Prefix
-            path: "/"
-            backend:
-              service:
-                name: web
-                port:
-                  number: 80
-    - http:
-        paths:
-          - pathType: Prefix
-            path: /fclipboard
             backend:
               service:
                 name: web

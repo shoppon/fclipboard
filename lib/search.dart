@@ -1,4 +1,3 @@
-import 'package:fclipboard/dao.dart';
 import 'package:fclipboard/model.dart';
 import 'package:fclipboard/utils.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +27,6 @@ class SearchParamWidget extends StatefulWidget {
 class _SearchParamWidgetState extends State<SearchParamWidget> {
   Entry _entry = Entry.empty();
   final _formKey = GlobalKey<FormState>();
-  final DBHelper _dbHelper = DBHelper();
   bool _showParamsInput = true;
 
   final TextEditingController _controller = TextEditingController();
@@ -54,11 +52,6 @@ class _SearchParamWidgetState extends State<SearchParamWidget> {
     setState(() {
       _showParamsInput = mode == 2;
     });
-  }
-
-  Future<List<Category>> _loadCategories() async {
-    final categories = _dbHelper.categories();
-    return categories;
   }
 
   @override

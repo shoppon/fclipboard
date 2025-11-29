@@ -50,3 +50,4 @@ password.yaml
 windows/Output
 macos/*.dmg
 *debug.py
+output
