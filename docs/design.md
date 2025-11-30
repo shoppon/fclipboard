@@ -30,9 +30,14 @@
 - 用户偏好（可选）：默认排序/过滤、快捷键、syncEnabled。
 
 ## 关键流程
-- 搜索：本地索引查询 -> 过滤 -> 排序 -> 渲染；无网可用。
+- 搜索：本地索引查询 -> 过滤 -> 排序 -> 渲染；无网可用；不触发网络。
 - 编辑：本地事务 -> 更新 version/updatedAt -> 入 pending 队列 -> UI 即时更新 -> 后台同步；冲突保留副本。
-- 同步：定时/事件触发；上传 pending（create/update/delete）；拉取 updatedAfter；失败指数退避；本地 SQLite 永远可用。
+- 同步（全量且去重）：仅在显式触发时运行；流程：
+  - 上传 pending（create/update/delete）。
+  - 分页拉取 `/tags` 与 `/snippets`，使用 `page + limit`（上限 100），结果按 `(updated_at desc, id desc)` 排序，接口过滤掉 deleted 记录。
+  - 拉取时在服务端、客户端都按唯一键去重：Tag 唯一键 `(user_id, name)`，Snippet 唯一键 `(user_id, title)`，较新的 `updated_at`（或更高 version）覆盖。
+  - 本地落库后，如果本地无待上传，按云端 ID 集合 prune 本地缺失的数据，避免重复和陈旧。
+  - 删除策略：deleted_at != null 的记录永不出现在列表/拉取结果；推送带 deleted_at 时只更新删除标记。
 - Auth：登录获取 access/refresh；刷新；登出撤销 refresh。
 
 ## API 设计（示例）

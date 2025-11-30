@@ -39,4 +39,26 @@ class LocalTagStore {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
+  Future<void> delete(String id) async {
+    final db = await _dbProvider.database;
+    await db.delete('tags', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteByIds(List<String> ids) async {
+    if (ids.isEmpty) return;
+    final db = await _dbProvider.database;
+    final placeholders = List.filled(ids.length, '?').join(',');
+    await db.delete('tags', where: 'id IN ($placeholders)', whereArgs: ids);
+  }
+
+  Future<void> pruneNotIn(Set<String> ids) async {
+    final db = await _dbProvider.database;
+    final placeholders = ids.isEmpty ? '' : List.filled(ids.length, '?').join(',');
+    if (ids.isEmpty) {
+      await db.delete('tags');
+      return;
+    }
+    await db.delete('tags', where: 'id NOT IN ($placeholders)', whereArgs: ids.toList());
+  }
 }

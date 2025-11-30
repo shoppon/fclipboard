@@ -28,7 +28,6 @@ class SnippetRepository {
                 e.body.toLowerCase().contains(query.toLowerCase()))
             .toList()
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-    ref.read(syncServiceProvider).sync();
     return filtered;
   }
 
@@ -133,6 +132,33 @@ class SnippetRepository {
       'conflict_of': snippet.conflictOf,
       'tag_id': snippet.tagId,
     };
+  }
+
+  Future<Map<String?, int>> countByTag() async {
+    return _local.countByTag();
+  }
+
+  Future<void> pruneNotIn(Set<String> ids) async {
+    await _local.pruneNotIn(ids);
+  }
+
+  Future<void> dedupeByTitle(List<Snippet> items) async {
+    final seen = <String, Snippet>{};
+    final toDelete = <String>[];
+    for (final s in items) {
+      final existing = seen[s.title];
+      if (existing == null || s.updatedAt.isAfter(existing.updatedAt)) {
+        if (existing != null) {
+          toDelete.add(existing.id);
+        }
+        seen[s.title] = s;
+      } else {
+        toDelete.add(s.id);
+      }
+    }
+    if (toDelete.isNotEmpty) {
+      await _local.deleteByIds(toDelete);
+    }
   }
 }
 

@@ -8,6 +8,7 @@ import 'features/auth/presentation/profile_page.dart';
 import 'features/home/presentation/home_page.dart';
 import 'core/data/snippet.dart';
 import 'features/snippets/presentation/add_snippet_page.dart';
+import 'features/tags/presentation/tag_management_page.dart';
 
 final _routerNotifierProvider = Provider<RouterNotifier>((ref) {
   final notifier = RouterNotifier(ref);
@@ -45,6 +46,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/profile',
         name: 'profile',
         builder: (context, state) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: '/tags',
+        name: 'tags',
+        builder: (context, state) => const TagManagementPage(),
       ),
       GoRoute(
         path: '/snippet/new',

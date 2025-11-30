@@ -174,6 +174,11 @@ class _HomePageState extends ConsumerState<HomePage> {
             tooltip: '同步',
           ),
           IconButton(
+            icon: const Icon(Icons.sell_outlined),
+            tooltip: '标签管理',
+            onPressed: () => context.push('/tags'),
+          ),
+          IconButton(
             icon: const Icon(Icons.person),
             tooltip: '个人信息',
             onPressed: () => context.pushNamed('profile'),
@@ -650,6 +655,7 @@ class _TagBar extends StatelessWidget {
       ),
     );
   }
+
 }
 
 class _SearchField extends StatelessWidget {

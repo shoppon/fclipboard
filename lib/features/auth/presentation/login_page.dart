@@ -15,6 +15,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isRegister = false;
+  bool _showPassword = false;
   String? _error;
 
   @override
@@ -45,8 +46,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(labelText: '密码'),
-                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: '密码',
+                    suffixIcon: IconButton(
+                      icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () {
+                        setState(() => _showPassword = !_showPassword);
+                      },
+                    ),
+                  ),
+                  obscureText: !_showPassword,
                 ),
                 const SizedBox(height: 12),
                 if (_error != null)

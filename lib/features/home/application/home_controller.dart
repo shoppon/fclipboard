@@ -28,10 +28,12 @@ class HomeController extends StateNotifier<HomeState> {
     try {
       await ref.read(syncServiceProvider).sync();
       final tags = await _tags.fetchTags();
+      await _tags.dedupeByName(tags);
       final results = await _snippets.fetchSnippets(
         query: state.query,
         tagId: state.selectedTagId,
       );
+      await _snippets.dedupeByTitle(results);
       state = state.copyWith(snippets: results, tags: tags);
     } catch (_) {
       // silent fail; auth guard will redirect on logout if unauthorized
@@ -105,6 +107,19 @@ class HomeController extends StateNotifier<HomeState> {
     state = state.copyWith(creatingTag: true);
     try {
       await _tags.createTag(name: name, color: color);
+      await load();
+    } finally {
+      state = state.copyWith(creatingTag: false);
+    }
+  }
+
+  Future<void> deleteTag(String id) async {
+    if (state.creatingTag) return;
+    state = state.copyWith(creatingTag: true);
+    try {
+      await _tags.deleteTag(id);
+      final selected = state.selectedTagId == id ? null : state.selectedTagId;
+      state = state.copyWith(selectedTagId: selected);
       await load();
     } finally {
       state = state.copyWith(creatingTag: false);

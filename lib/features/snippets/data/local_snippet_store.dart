@@ -27,6 +27,16 @@ class LocalSnippetStore {
     return rows.map(_mapRow).toList();
   }
 
+  Future<List<Snippet>> listAll() async {
+    final db = await _dbProvider.database;
+    final rows = await db.query(
+      'snippets',
+      where: '(deleted_at IS NULL OR deleted_at = \'\')',
+      orderBy: 'updated_at DESC',
+    );
+    return rows.map(_mapRow).toList();
+  }
+
   Future<void> upsert(Snippet snippet) async {
     final db = await _dbProvider.database;
     await db.insert(
@@ -86,5 +96,41 @@ class LocalSnippetStore {
     } catch (_) {
       return [];
     }
+  }
+
+  Future<Map<String?, int>> countByTag() async {
+    final db = await _dbProvider.database;
+    final rows = await db.rawQuery(
+      '''
+        SELECT tag_id, COUNT(*) as cnt
+        FROM snippets
+        WHERE (deleted_at IS NULL OR deleted_at = '')
+        GROUP BY tag_id
+      ''',
+    );
+    final counts = <String?, int>{};
+    for (final r in rows) {
+      final tagId = r['tag_id'] as String?;
+      final cnt = (r['cnt'] as int?) ?? 0;
+      counts[tagId] = cnt;
+    }
+    return counts;
+  }
+
+  Future<void> pruneNotIn(Set<String> ids) async {
+    final db = await _dbProvider.database;
+    if (ids.isEmpty) {
+      await db.delete('snippets');
+      return;
+    }
+    final placeholders = List.filled(ids.length, '?').join(',');
+    await db.delete('snippets', where: 'id NOT IN ($placeholders)', whereArgs: ids.toList());
+  }
+
+  Future<void> deleteByIds(List<String> ids) async {
+    if (ids.isEmpty) return;
+    final db = await _dbProvider.database;
+    final placeholders = List.filled(ids.length, '?').join(',');
+    await db.delete('snippets', where: 'id IN ($placeholders)', whereArgs: ids);
   }
 }
