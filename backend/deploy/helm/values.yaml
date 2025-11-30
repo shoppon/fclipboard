@@ -1,0 +1,54 @@
+image:
+  repository: harbor.lingmind.cn/teabrew/fclipboard-backend
+  tag: "20251130114644"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: fclipboard-api.lingmind.cn
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - fclipboard-api.lingmind.cn
+      secretName: wildcard-lingmind-cn-tls
+
+env:
+  databaseUrl: "postgresql+psycopg2://fclipboard:fclipboard@fclipboard-backend-postgres:5432/fclipboard"
+  jwtSecret: "fclipboard-secret-key"
+  accessTokenExpireMinutes: 30
+  refreshTokenExpireDays: 7
+  corsOrigins: '["*"]'
+
+resources: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+migrate:
+  enabled: true
+  image:
+    repository: harbor.lingmind.cn/teabrew/fclipboard-backend
+    tag: "20251130114644"
+    pullPolicy: IfNotPresent
+  command: ["python", "-m", "app.migrate_db"]
+
+postgres:
+  enabled: true
+  image: harbor.lingmind.cn/library/postgres:15-alpine
+  database: fclipboard
+  user: fclipboard
+  password: fclipboard
+  storage: 5Gi
+  storageClass: "local-path-lvm"

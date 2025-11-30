@@ -1,6 +1,0 @@
-@uid=shopppon@gmail.com
-@eid=foo
-
-DELETE /v1/{uid}/entries/{eid} HTTP/1.1
-Host: 127.0.0.1:8000
-Content-Type: application/json
