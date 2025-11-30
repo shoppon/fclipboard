@@ -11,7 +11,7 @@ from .models import Base
 settings = get_settings()
 logging.basicConfig(level=settings.log_level.upper(), format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
-app = FastAPI(title="fclipboard API", version="0.1.0")
+app = FastAPI(title="fclipboard API", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,

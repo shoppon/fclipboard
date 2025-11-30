@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "fclipboard-backend.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   template:
@@ -16,6 +16,16 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-postgres
+          image: {{ .Values.postgres.image | quote }}
+          command: ["/bin/sh","-c"]
+          args:
+            - |
+              until pg_isready -h {{ include "fclipboard-backend.fullname" . }}-postgres -p 5432 -U {{ .Values.postgres.user }}; do
+                echo "Waiting for postgres...";
+                sleep 2;
+              done
       containers:
         - name: migrate
           image: "{{ .Values.migrate.image.repository }}:{{ .Values.migrate.image.tag }}"

@@ -1,94 +1,94 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/data/entry.dart';
+import '../../../core/data/snippet.dart';
 import '../../../core/sync/sync_service.dart';
-import '../../categories/data/category_repository.dart';
-import '../../entries/data/entry_repository.dart';
+import '../../snippets/data/snippet_repository.dart';
+import '../../tags/data/tag_repository.dart';
 import 'home_state.dart';
 
 final homeControllerProvider = StateNotifierProvider<HomeController, HomeState>((ref) {
-  final entriesRepo = ref.watch(entryRepositoryProvider);
-  final categoriesRepo = ref.watch(categoryRepositoryProvider);
-  return HomeController(ref, entriesRepo, categoriesRepo);
+  final snippetsRepo = ref.watch(snippetRepositoryProvider);
+  final tagsRepo = ref.watch(tagRepositoryProvider);
+  return HomeController(ref, snippetsRepo, tagsRepo);
 });
 
 class HomeController extends StateNotifier<HomeState> {
-  HomeController(this.ref, this._entries, this._categories) : super(HomeState.initial()) {
+  HomeController(this.ref, this._snippets, this._tags) : super(HomeState.initial()) {
     load();
   }
 
   final Ref ref;
-  final EntryRepository _entries;
-  final CategoryRepository _categories;
+  final SnippetRepository _snippets;
+  final TagRepository _tags;
 
   Future<void> load() async {
     state = state.copyWith(loading: true);
     await ref.read(syncServiceProvider).sync();
-    final categories = await _categories.fetchCategories();
-    final results = await _entries.fetchEntries(
+    final tags = await _tags.fetchTags();
+    final results = await _snippets.fetchSnippets(
       query: state.query,
-      categoryId: state.selectedCategoryId,
+      tagId: state.selectedTagId,
     );
-    state = state.copyWith(entries: results, categories: categories, loading: false);
+    state = state.copyWith(snippets: results, tags: tags, loading: false);
   }
 
   Future<void> updateQuery(String query) async {
     state = state.copyWith(query: query, loading: true);
-    final results = await _entries.fetchEntries(query: query, categoryId: state.selectedCategoryId);
-    state = state.copyWith(entries: results, loading: false);
+    final results = await _snippets.fetchSnippets(query: query, tagId: state.selectedTagId);
+    state = state.copyWith(snippets: results, loading: false);
   }
 
-  Future<void> selectCategory(String? categoryId) async {
-    state = state.copyWith(selectedCategoryId: categoryId, loading: true);
-    final results = await _entries.fetchEntries(query: state.query, categoryId: categoryId);
-    state = state.copyWith(entries: results, loading: false);
+  Future<void> selectTag(String? tagId) async {
+    state = state.copyWith(selectedTagId: tagId, loading: true);
+    final results = await _snippets.fetchSnippets(query: state.query, tagId: tagId);
+    state = state.copyWith(snippets: results, loading: false);
   }
 
-  Future<void> togglePin(Entry entry) async {
-    final updated = await _entries.togglePin(entry);
-    final entries = List<Entry>.from(state.entries);
-    final idx = entries.indexWhere((e) => e.id == entry.id);
+  Future<void> togglePin(Snippet snippet) async {
+    final updated = await _snippets.togglePin(snippet);
+    final snippets = List<Snippet>.from(state.snippets);
+    final idx = snippets.indexWhere((e) => e.id == snippet.id);
     if (idx == -1) {
-      entries.add(updated);
+      snippets.add(updated);
     } else {
-      entries[idx] = updated;
+      snippets[idx] = updated;
     }
-    state = state.copyWith(entries: entries..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)));
+    state = state.copyWith(snippets: snippets..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)));
   }
 
-  void selectEntry(String? entryId) {
-    state = state.copyWith(selectedEntryId: entryId);
+  void selectSnippet(String? snippetId) {
+    state = state.copyWith(selectedSnippetId: snippetId);
   }
 
-  Future<void> addCategory(String name, {String? color}) async {
-    if (state.creatingCategory) return;
-    state = state.copyWith(creatingCategory: true);
+  Future<void> addTag(String name, {String? color}) async {
+    if (state.creatingTag) return;
+    state = state.copyWith(creatingTag: true);
     try {
-      await _categories.createCategory(name: name, color: color);
+      await _tags.createTag(name: name, color: color);
       await load();
     } finally {
-      state = state.copyWith(creatingCategory: false);
+      state = state.copyWith(creatingTag: false);
     }
   }
 
-  Future<void> addEntry({
+  Future<void> addSnippet({
     required String title,
     required String body,
-    String? categoryId,
+    String? tagId,
     List<EntryParameter> parameters = const [],
   }) async {
-    if (state.creatingEntry) return;
-    state = state.copyWith(creatingEntry: true);
+    if (state.creatingSnippet) return;
+    state = state.copyWith(creatingSnippet: true);
     try {
-      await _entries.createEntry(
+      await _snippets.createSnippet(
         title: title,
         body: body,
-        categoryId: categoryId,
+        tagId: tagId,
         parameters: parameters,
       );
       await load();
     } finally {
-      state = state.copyWith(creatingEntry: false);
+      state = state.copyWith(creatingSnippet: false);
     }
   }
 }

@@ -2,17 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/data/category.dart';
-import '../../../core/data/entry.dart';
-import '../../auth/application/auth_controller.dart';
+import '../../../core/data/snippet.dart';
+import '../../../core/data/tag.dart';
 import '../application/home_controller.dart';
 import '../application/home_state.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  Snippet? _selectedSnippet;
+  List<_ParamControllers> _paramControllers = [];
+
+  void _selectSnippet(HomeController controller, Snippet snippet) {
+    controller.selectSnippet(snippet.id);
+    setState(() {
+      _selectedSnippet = snippet;
+      _paramControllers = snippet.parameters
+          .map((p) => _ParamControllers(
+                initialName: p.name,
+                initialDescription: p.description ?? '',
+                initialValue: p.initial ?? '',
+                isRequired: p.required,
+              ))
+          .toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final HomeState state = ref.watch(homeControllerProvider);
     final controller = ref.read(homeControllerProvider.notifier);
 
@@ -21,314 +43,445 @@ class HomePage extends ConsumerWidget {
         title: const Text('fclipboard'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => controller.load(),
-            tooltip: '刷新列表',
+            icon: const Icon(Icons.add_task_outlined),
+            tooltip: '新建片段',
+            onPressed: state.creatingSnippet
+                ? null
+                : () => _showAddSnippetSheet(context, controller,
+                    state.selectedTagId, state.creatingSnippet),
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: '退出登录',
-            onPressed: () async {
-              await ref.read(authControllerProvider.notifier).logout();
-            },
+            icon: const Icon(Icons.folder_open),
+            tooltip: '新建标签',
+            onPressed: state.creatingTag
+                ? null
+                : () => _showAddTagDialog(context, controller),
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => controller.load(),
+            tooltip: '同步',
+          ),
+          IconButton(
+            icon: const Icon(Icons.person),
+            tooltip: '个人信息',
+            onPressed: () => Navigator.of(context).pushNamed('/profile'),
           ),
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextField(
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: '搜索标题或正文（桌面支持全局唤起，Web 提供页面快捷键）',
-                  prefixIcon: Icon(Icons.search),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFEAF1FF), Color(0xFFF8FAFF)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '库',
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.5,
+                              ),
+                    ),
+                    const SizedBox(height: 12),
+                    _SearchField(onChanged: controller.updateQuery),
+                    const SizedBox(height: 12),
+                    _TagBar(
+                      tags: state.tags,
+                      selectedId: state.selectedTagId,
+                      onSelect: controller.selectTag,
+                      onCreate: (name) => controller.addTag(name),
+                      creating: state.creatingTag,
+                    ),
+                    if (_selectedSnippet != null && _selectedSnippet!.parameters.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: _InlineParameterForm(
+                          controllers: _paramControllers,
+                          onSubmitted: () => _handleCopy(context, controller, _selectedSnippet!),
+                        ),
+                      ),
+                  ],
                 ),
-                onChanged: controller.updateQuery,
               ),
-            ),
-            _CategoryBar(
-              categories: state.categories,
-              selectedId: state.selectedCategoryId,
-              onSelect: controller.selectCategory,
-              onCreate: (name) => controller.addCategory(name),
-              creating: state.creatingCategory,
-            ),
-            if (state.loading) const LinearProgressIndicator(minHeight: 2),
-            Expanded(
-              child: ListView.separated(
-                itemCount: state.entries.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final entry = state.entries[index];
-                  return ListTile(
-                    selected: state.selectedEntryId == entry.id,
-                    title: Text(entry.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          entry.body,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall,
+              if (state.loading) const LinearProgressIndicator(minHeight: 2),
+              Expanded(
+                child: ListView.builder(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  itemCount: state.snippets.length,
+                  itemBuilder: (context, index) {
+                    final snippet = state.snippets[index];
+                    final selected = state.selectedSnippetId == snippet.id;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Card(
+                        elevation: selected ? 4 : 2,
+                        shadowColor: selected ? Colors.black26 : Colors.black12,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {
+                            _selectSnippet(controller, snippet);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          if (snippet.pinned)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 6),
+                                              child: Icon(Icons.push_pin,
+                                                  size: 16,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary),
+                                            ),
+                                          Expanded(
+                                            child: Text(
+                                              snippet.title,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        snippet.body,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(color: Colors.grey[700]),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      if (snippet.tags.isNotEmpty)
+                                        Wrap(
+                                          spacing: 6,
+                                          runSpacing: -6,
+                                          children: snippet.tags
+                                              .map((tag) => Chip(
+                                                    label: Text(tag),
+                                                    visualDensity:
+                                                        VisualDensity.compact,
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 6,
+                                                        vertical: 0),
+                                                  ))
+                                              .toList(),
+                                        ),
+                                      if (snippet.parameters.isNotEmpty)
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 6),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.tune,
+                                                  size: 16,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary),
+                                              const SizedBox(width: 4),
+                                              Text('需要参数',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodySmall),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Column(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.copy_outlined),
+                                      tooltip: '复制',
+                                      onPressed: () => _handleCopy(
+                                          context, controller, snippet),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(snippet.pinned
+                                          ? Icons.push_pin
+                                          : Icons.push_pin_outlined),
+                                      tooltip: snippet.pinned ? '取消置顶' : '置顶',
+                                      onPressed: () =>
+                                          controller.togglePin(snippet),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 6),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: -6,
-                          children: entry.tags
-                              .map((tag) => Chip(label: Text(tag), visualDensity: VisualDensity.compact))
-                              .toList(),
-                        ),
-                      ],
-                    ),
-                    trailing: Wrap(
-                      spacing: 4,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.copy_outlined),
-                          onPressed: () => _handleCopy(context, controller, entry),
-                        ),
-                        IconButton(
-                          icon: Icon(entry.pinned ? Icons.push_pin : Icons.push_pin_outlined),
-                          onPressed: () => controller.togglePin(entry),
-                        ),
-                      ],
-                    ),
-                    onTap: () {
-                      controller.selectEntry(entry.id);
-                      _handleCopy(context, controller, entry);
-                    },
-                  );
-                },
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: state.creatingEntry
-            ? null
-            : () => _showAddEntryDialog(context, controller, state.selectedCategoryId, state.creatingEntry),
-        icon: const Icon(Icons.add),
-        label: const Text('新建条目'),
       ),
     );
   }
 
-  Future<void> _handleCopy(BuildContext context, HomeController controller, Entry entry) async {
-    controller.selectEntry(entry.id);
-    if (entry.parameters.isEmpty) {
-      await Clipboard.setData(ClipboardData(text: entry.body.isNotEmpty ? entry.body : entry.title));
+  Future<void> _handleCopy(
+      BuildContext context, HomeController controller, Snippet snippet) async {
+    _selectSnippet(controller, snippet);
+    if (snippet.parameters.isEmpty) {
+      await Clipboard.setData(ClipboardData(
+          text: snippet.body.isNotEmpty ? snippet.body : snippet.title));
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已复制')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('已复制')));
       }
       return;
     }
 
-    final controllers = entry.parameters
-        .map(
-          (p) => _ParamControllers(
-            initialName: p.name,
-            initialDescription: p.description ?? '',
-            initialValue: p.initial ?? '',
-            isRequired: p.required,
-          ),
-        )
-        .toList();
-
-    await showDialog(
-      context: context,
-      builder: (context) {
-        final formKey = GlobalKey<FormState>();
-        bool submitting = false;
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('填写参数后复制'),
-              content: Form(
-                key: formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ...controllers.map(
-                        (c) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: TextFormField(
-                                controller: c.value,
-                                decoration: InputDecoration(
-                                  labelText: c.requiredField ? '* ${c.name.text}' : c.name.text,
-                                  helperText: c.description.text.isNotEmpty ? c.description.text : null,
-                                ),
-                                validator: (v) {
-                                  if (c.requiredField && (v == null || v.trim().isEmpty)) {
-                                    return '必填';
-                                  }
-                                  return null;
-                                },
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: submitting ? null : () => Navigator.pop(context),
-                  child: const Text('取消'),
-                ),
-                FilledButton(
-                  onPressed: submitting
-                      ? null
-                      : () async {
-                          if (!(formKey.currentState?.validate() ?? false)) return;
-                          setState(() => submitting = true);
-                          var text = entry.body.isNotEmpty ? entry.body : entry.title;
-                          for (final c in controllers) {
-                            final val = c.value.text.trim();
-                            if (val.isNotEmpty) {
-                              text = text.replaceAll(c.name.text, val);
-                            }
-                          }
-                          await Clipboard.setData(ClipboardData(text: text));
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已复制')));
-                          }
-                        },
-                  child: const Text('复制'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+    // Validate parameters inline
+    for (final pc in _paramControllers) {
+      if (pc.requiredField && pc.value.text.trim().isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('请填写必填参数后再复制')),
+          );
+        }
+        return;
+      }
+    }
+    var text = snippet.body.isNotEmpty ? snippet.body : snippet.title;
+    for (final c in _paramControllers) {
+      final val = c.value.text.trim();
+      if (val.isNotEmpty) {
+        text = text.replaceAll(c.name.text, val);
+      }
+    }
+    await Clipboard.setData(ClipboardData(text: text));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('已复制')));
+    }
   }
 
-  void _showAddEntryDialog(
-      BuildContext context, HomeController controller, String? categoryId, bool creatingEntry) {
+  void _showAddSnippetSheet(BuildContext context, HomeController controller,
+      String? tagId, bool creatingSnippet) {
     final titleController = TextEditingController();
     final bodyController = TextEditingController();
     final paramControllers = <_ParamControllers>[];
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('新建条目'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(labelText: '标题'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: bodyController,
-              maxLines: 4,
-              decoration: const InputDecoration(labelText: '正文'),
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('参数（可选）', style: Theme.of(context).textTheme.titleMedium),
-            ),
-            const SizedBox(height: 8),
-            StatefulBuilder(
-              builder: (context, setState) {
-                return Column(
-                  children: [
-                    ...paramControllers.map(
-                      (pc) => Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              TextField(
-                                controller: pc.name,
-                                decoration: const InputDecoration(labelText: '名称'),
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          top: 16,
+          left: 16,
+          right: 16,
+        ),
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  Text('新建片段',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: titleController,
+                    decoration: const InputDecoration(labelText: '标题'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: bodyController,
+                    maxLines: 4,
+                    decoration: const InputDecoration(labelText: '正文'),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('参数（可选）',
+                          style: Theme.of(context).textTheme.titleMedium),
+                      TextButton.icon(
+                        onPressed: () {
+                          setState(() =>
+                              paramControllers.add(_ParamControllers.empty()));
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text('添加参数'),
+                      ),
+                    ],
+                  ),
+                  ...paramControllers.map(
+                    (pc) => Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            TextField(
+                              controller: pc.name,
+                              decoration:
+                                  const InputDecoration(labelText: '名称'),
+                            ),
+                            TextField(
+                              controller: pc.description,
+                              decoration:
+                                  const InputDecoration(labelText: '描述'),
+                            ),
+                            TextField(
+                              controller: pc.value,
+                              decoration:
+                                  const InputDecoration(labelText: '默认值'),
+                            ),
+                            SwitchListTile(
+                              value: pc.requiredField,
+                              onChanged: (v) =>
+                                  setState(() => pc.requiredField = v),
+                              title: const Text('必填'),
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () =>
+                                    setState(() => paramControllers.remove(pc)),
+                                child: const Text('删除参数'),
                               ),
-                              TextField(
-                                controller: pc.description,
-                                decoration: const InputDecoration(labelText: '描述'),
-                              ),
-                              TextField(
-                                controller: pc.value,
-                                decoration: const InputDecoration(labelText: '默认值'),
-                              ),
-                              CheckboxListTile(
-                                value: pc.requiredField,
-                                onChanged: (v) => setState(() => pc.requiredField = v ?? false),
-                                title: const Text('必填'),
-                                controlAffinity: ListTileControlAffinity.leading,
-                              ),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton(
-                                  onPressed: () {
-                                    setState(() => paramControllers.remove(pc));
-                                  },
-                                  child: const Text('删除参数'),
-                                ),
-                              )
-                            ],
-                          ),
+                            )
+                          ],
                         ),
                       ),
                     ),
-                    TextButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          paramControllers.add(_ParamControllers.empty());
-                        });
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text('添加参数'),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('取消'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        onPressed: creatingSnippet
+                            ? null
+                            : () async {
+                                final title = titleController.text.trim();
+                                if (title.isEmpty) return;
+                                final params = paramControllers
+                                    .map(
+                                      (pc) => EntryParameter(
+                                        name: pc.name.text.trim(),
+                                        description:
+                                            pc.description.text.trim().isEmpty
+                                                ? null
+                                                : pc.description.text.trim(),
+                                        initial: pc.value.text.trim().isEmpty
+                                            ? null
+                                            : pc.value.text.trim(),
+                                        required: pc.requiredField,
+                                      ),
+                                    )
+                                    .where((p) => p.name.isNotEmpty)
+                                    .toList();
+                                try {
+                                  await controller.addSnippet(
+                                    title: title,
+                                    body: bodyController.text.trim(),
+                                    tagId: tagId,
+                                    parameters: params,
+                                  );
+                                  if (context.mounted) Navigator.pop(context);
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('保存失败: $e')),
+                                    );
+                                  }
+                                }
+                              },
+                        child: const Text('保存'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showAddTagDialog(
+      BuildContext context, HomeController controller) async {
+    final nameController = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('新建标签'),
+        content: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(labelText: '名称'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: const Text('取消')),
           FilledButton(
-            onPressed: creatingEntry
-                ? null
-                : () async {
-              final title = titleController.text.trim();
-              if (title.isEmpty) return;
-              final params = paramControllers
-                  .map(
-                    (pc) => EntryParameter(
-                      name: pc.name.text.trim(),
-                      description: pc.description.text.trim().isEmpty ? null : pc.description.text.trim(),
-                      initial: pc.value.text.trim().isEmpty ? null : pc.value.text.trim(),
-                      required: pc.requiredField,
-                    ),
-                  )
-                  .where((p) => p.name.isNotEmpty)
-                  .toList();
-              try {
-                await controller.addEntry(
-                  title: title,
-                  body: bodyController.text.trim(),
-                  categoryId: categoryId,
-                  parameters: params,
-                );
-                if (context.mounted) Navigator.pop(context);
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('保存失败: $e')),
-                  );
-                }
-              }
+            onPressed: () async {
+              final name = nameController.text.trim();
+              if (name.isEmpty) return;
+              await controller.addTag(name);
+              if (context.mounted) Navigator.pop(context);
             },
             child: const Text('保存'),
           ),
@@ -349,7 +502,8 @@ class _ParamControllers {
         value = TextEditingController(text: initialValue),
         requiredField = isRequired;
 
-  factory _ParamControllers.empty() => _ParamControllers(initialName: '', initialDescription: '', initialValue: '');
+  factory _ParamControllers.empty() => _ParamControllers(
+      initialName: '', initialDescription: '', initialValue: '');
 
   final TextEditingController name;
   final TextEditingController description;
@@ -357,16 +511,16 @@ class _ParamControllers {
   bool requiredField;
 }
 
-class _CategoryBar extends StatelessWidget {
-  const _CategoryBar({
-    required this.categories,
+class _TagBar extends StatelessWidget {
+  const _TagBar({
+    required this.tags,
     required this.selectedId,
     required this.onSelect,
     required this.onCreate,
     required this.creating,
   });
 
-  final List<Category> categories;
+  final List<Tag> tags;
   final String? selectedId;
   final ValueChanged<String?> onSelect;
   final Future<void> Function(String) onCreate;
@@ -389,39 +543,42 @@ class _CategoryBar extends StatelessWidget {
                     selected: selectedId == null,
                     onSelected: (_) => onSelect(null),
                   ),
-                  ...categories.map(
-                    (c) => ChoiceChip(
-                      label: Text(c.name),
-                      selected: c.id == selectedId,
-                      onSelected: (_) => onSelect(c.id),
-                    ),
-                  ),
+                  ...tags
+                      .map(
+                        (c) => ChoiceChip(
+                          label: Text(c.name),
+                          selected: c.id == selectedId,
+                          onSelected: (_) => onSelect(c.id),
+                        ),
+                      )
+                      .toList(),
                 ],
               ),
             ),
           ),
           TextButton.icon(
-            onPressed: creating ? null : () => _showAddCategoryDialog(context),
+            onPressed: creating ? null : () => _showAddTagDialog(context),
             icon: const Icon(Icons.add),
-            label: const Text('添加分类'),
+            label: const Text('添加标签'),
           ),
         ],
       ),
     );
   }
 
-  void _showAddCategoryDialog(BuildContext context) {
+  void _showAddTagDialog(BuildContext context) {
     final nameController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('新建分类'),
+        title: const Text('新建标签'),
         content: TextField(
           controller: nameController,
           decoration: const InputDecoration(labelText: '名称'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: const Text('取消')),
           FilledButton(
             onPressed: () async {
               final name = nameController.text.trim();
@@ -441,6 +598,70 @@ class _CategoryBar extends StatelessWidget {
             child: const Text('保存'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({required this.onChanged});
+
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      autofocus: false,
+      decoration: InputDecoration(
+        hintText: '搜索标题或正文',
+        prefixIcon: const Icon(Icons.search),
+        filled: true,
+      ),
+      onChanged: onChanged,
+    );
+  }
+}
+
+class _InlineParameterForm extends StatelessWidget {
+  const _InlineParameterForm({
+    required this.controllers,
+    required this.onSubmitted,
+  });
+
+  final List<_ParamControllers> controllers;
+  final VoidCallback onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('填写参数后复制', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            ...controllers.map(
+              (c) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: TextField(
+                  controller: c.value,
+                  decoration: InputDecoration(
+                    labelText: c.requiredField ? '* ${c.name.text}' : c.name.text,
+                    helperText: c.description.text.isNotEmpty ? c.description.text : null,
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton(
+                onPressed: onSubmitted,
+                child: const Text('填完复制'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

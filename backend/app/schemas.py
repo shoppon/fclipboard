@@ -42,14 +42,14 @@ class Parameter(BaseModel):
     required: bool = False
 
 
-class EntryBase(BaseModel):
+class SnippetBase(BaseModel):
     title: str
     body: str = ""
     tags: List[str] = Field(default_factory=list)
     source: Optional[str] = None
     pinned: bool = False
     version: int = 1
-    category_id: Optional[UUID] = None
+    tag_id: Optional[UUID] = None
     parameters: List[Parameter] = Field(default_factory=list)
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -57,24 +57,24 @@ class EntryBase(BaseModel):
     conflict_of: Optional[UUID] = None
 
 
-class EntryCreate(EntryBase):
+class SnippetCreate(SnippetBase):
     id: Optional[UUID] = None
 
 
-class EntryUpdate(BaseModel):
+class SnippetUpdate(BaseModel):
     title: Optional[str] = None
     body: Optional[str] = None
     tags: Optional[List[str]] = None
     source: Optional[str] = None
     pinned: Optional[bool] = None
     version: Optional[int] = None
-    category_id: Optional[UUID] = None
+    tag_id: Optional[UUID] = None
     parameters: Optional[List[Parameter]] = None
     deleted_at: Optional[datetime] = None
     conflict_of: Optional[UUID] = None
 
 
-class EntryRead(EntryBase):
+class SnippetRead(SnippetBase):
     id: UUID
     created_at: datetime
     updated_at: datetime

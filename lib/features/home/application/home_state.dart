@@ -1,56 +1,57 @@
-import '../../../core/data/category.dart';
-import '../../../core/data/entry.dart';
+import '../../../core/data/snippet.dart';
+import '../../../core/data/tag.dart';
 
 class HomeState {
   const HomeState({
-    required this.entries,
-    required this.categories,
+    required this.snippets,
+    required this.tags,
     required this.loading,
     required this.query,
-    required this.creatingCategory,
-    required this.creatingEntry,
-    this.selectedEntryId,
-    this.selectedCategoryId,
+    required this.creatingTag,
+    required this.creatingSnippet,
+    this.selectedSnippetId,
+    this.selectedTagId,
   });
 
-  final List<Entry> entries;
-  final List<Category> categories;
+  final List<Snippet> snippets;
+  final List<Tag> tags;
   final bool loading;
   final String query;
-  final String? selectedCategoryId;
-  final bool creatingCategory;
-  final bool creatingEntry;
-  final String? selectedEntryId;
+  final String? selectedTagId;
+  final bool creatingTag;
+  final bool creatingSnippet;
+  final String? selectedSnippetId;
 
   HomeState copyWith({
-    List<Entry>? entries,
-    List<Category>? categories,
+    List<Snippet>? snippets,
+    List<Tag>? tags,
     bool? loading,
     String? query,
-    String? selectedCategoryId,
-    bool? creatingCategory,
-    bool? creatingEntry,
-    String? selectedEntryId,
+    String? selectedTagId,
+    bool? creatingTag,
+    bool? creatingSnippet,
+    String? selectedSnippetId,
   }) {
     return HomeState(
-      entries: entries ?? this.entries,
-      categories: categories ?? this.categories,
+      snippets: snippets ?? this.snippets,
+      tags: tags ?? this.tags,
       loading: loading ?? this.loading,
       query: query ?? this.query,
-      selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
-      creatingCategory: creatingCategory ?? this.creatingCategory,
-      creatingEntry: creatingEntry ?? this.creatingEntry,
-      selectedEntryId: selectedEntryId ?? this.selectedEntryId,
+      selectedTagId: selectedTagId ?? this.selectedTagId,
+      creatingTag: creatingTag ?? this.creatingTag,
+      creatingSnippet: creatingSnippet ?? this.creatingSnippet,
+      selectedSnippetId: selectedSnippetId ?? this.selectedSnippetId,
     );
   }
 
   factory HomeState.initial() => const HomeState(
-        entries: [],
-        categories: [],
+        snippets: [],
+        tags: [],
         loading: false,
         query: "",
-        creatingCategory: false,
-        creatingEntry: false,
-        selectedEntryId: null,
+        creatingTag: false,
+        creatingSnippet: false,
+        selectedSnippetId: null,
+        selectedTagId: null,
       );
 }

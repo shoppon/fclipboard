@@ -23,7 +23,7 @@ class LocalDb {
       version: 1,
       onCreate: (db, version) async {
         await db.execute('''
-          CREATE TABLE IF NOT EXISTS categories(
+          CREATE TABLE IF NOT EXISTS tags(
             id TEXT PRIMARY KEY,
             name TEXT,
             color TEXT,
@@ -33,7 +33,7 @@ class LocalDb {
           );
         ''');
         await db.execute('''
-          CREATE TABLE IF NOT EXISTS entries(
+          CREATE TABLE IF NOT EXISTS snippets(
             id TEXT PRIMARY KEY,
             title TEXT,
             body TEXT,
@@ -46,7 +46,7 @@ class LocalDb {
             updated_at TEXT,
             deleted_at TEXT,
             conflict_of TEXT,
-            category_id TEXT
+            tag_id TEXT
           );
         ''');
         await db.execute('''
@@ -67,8 +67,7 @@ class LocalDb {
         ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        // idempotent column add
-        await db.execute('ALTER TABLE entries ADD COLUMN IF NOT EXISTS parameters TEXT');
+        await db.execute('ALTER TABLE snippets ADD COLUMN IF NOT EXISTS parameters TEXT');
       },
     );
   }

@@ -1,6 +1,6 @@
 image:
   repository: harbor.lingmind.cn/teabrew/fclipboard-backend
-  tag: "20251130114644"
+  tag: "20251130172108"
   pullPolicy: IfNotPresent
 
 replicaCount: 1
@@ -40,7 +40,7 @@ migrate:
   enabled: true
   image:
     repository: harbor.lingmind.cn/teabrew/fclipboard-backend
-    tag: "20251130114644"
+    tag: "20251130172108"
     pullPolicy: IfNotPresent
   command: ["python", "-m", "app.migrate_db"]
 

@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import 'features/auth/application/auth_controller.dart';
 import 'features/auth/presentation/login_page.dart';
+import 'features/auth/presentation/profile_page.dart';
 import 'features/home/presentation/home_page.dart';
+import 'features/snippets/presentation/add_snippet_page.dart';
 
 final _routerNotifierProvider = Provider<RouterNotifier>((ref) {
   final notifier = RouterNotifier(ref);
@@ -37,6 +39,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: '/snippet/new',
+        name: 'snippet_new',
+        builder: (context, state) => const AddSnippetPage(),
       ),
     ],
   );

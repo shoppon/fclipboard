@@ -16,16 +16,16 @@
 
 ## 模块划分（后端）
 - Auth Service：注册/登录/刷新/重置；密码哈希（bcrypt）；角色校验。
-- Entry Service：CRUD、分页、增量（updatedAfter）、冲突检测（version/updatedAt）；导入/导出 JSON/CSV；parameters 存储。
-- Category Service：CRUD、增量同步。
-- Sync：entries/categories 批量同步接口；增量与冲突副本（conflictOf）。
+- Snippet Service：CRUD、分页、增量（updatedAfter）、冲突检测（version/updatedAt）；导入/导出 JSON/CSV；parameters 存储。
+- Tag Service：CRUD、增量同步。
+- Sync：snippets/tags 批量同步接口；增量与冲突副本（conflictOf）。
 - Admin：用户管理（列表/禁用/重置）。
 - Infra：数据库会话、设置、日志、CORS、依赖注入。
 
 ## 数据模型（核心字段）
 - User：id, email, password_hash, role, created_at, updated_at, is_active, reset_token(opt).
-- Entry：id, user_id, title, body, tags (string[]/json), source, pinned, parameters(json), created_at, updated_at, version, deleted_at(opt), conflict_of(opt), category_id(opt).
-- Category：id, user_id, name, color, version, created_at, updated_at.
+- Snippet：id, user_id, title, body, tags (string[]/json), source, pinned, parameters(json), created_at, updated_at, version, deleted_at(opt), conflict_of(opt), tag_id(opt).
+- Tag：id, user_id, name, color, version, created_at, updated_at.
 - RefreshToken：jti, user_id, expires_at, revoked.
 - 用户偏好（可选）：默认排序/过滤、快捷键、syncEnabled。
 
@@ -37,9 +37,9 @@
 
 ## API 设计（示例）
 - Auth：POST /auth/register | /auth/login | /auth/refresh | /auth/reset/request | /auth/reset/confirm
-- Entries：GET /entries?updatedAfter&limit&cursor；POST /entries；PUT /entries/{id}；PATCH /entries/{id}/pin；DELETE /entries/{id}；POST /entries/sync
-- Categories：GET /categories?updatedAfter&limit；POST /categories；PUT /categories/{id}；DELETE /categories/{id}；POST /categories/sync
-- Bulk：POST /entries/import (json/csv)；GET /entries/export?format=json|csv
+- Snippets：GET /snippets?updatedAfter&limit&cursor；POST /snippets；PUT /snippets/{id}；PATCH /snippets/{id}/pin；DELETE /snippets/{id}；POST /snippets/sync
+- Tags：GET /tags?updatedAfter&limit；POST /tags；PUT /tags/{id}；DELETE /tags/{id}；POST /tags/sync
+- Bulk：POST /snippets/import (json/csv)；GET /snippets/export?format=json|csv
 
 ## 部署/配置要点
 - 环境变量：DATABASE_URL、JWT_SECRET、ACCESS_TOKEN_EXPIRE_MINUTES、REFRESH_TOKEN_EXPIRE_DAYS、CORS_ORIGINS、LOG_LEVEL。

@@ -13,7 +13,6 @@ from ..db import get_db
 from ..deps import get_current_user
 from ..security import create_access_token, create_refresh_token, get_password_hash, verify_password
 
-
 router = APIRouter()
 settings = get_settings()
 logger = logging.getLogger(__name__)

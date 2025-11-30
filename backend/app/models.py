@@ -24,17 +24,17 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    entries: Mapped[list["Entry"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    snippets: Mapped[list["Snippet"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(back_populates="user", cascade="all, delete-orphan")
-    categories: Mapped[list["Category"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    tags: Mapped[list["Tag"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
-class Entry(Base):
-    __tablename__ = "entries"
+class Snippet(Base):
+    __tablename__ = "snippets"
 
     id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
-    category_id: Mapped[UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)
+    tag_id: Mapped[UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("tags.id"), nullable=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     body: Mapped[str] = mapped_column(Text, default="")
     tags: Mapped[list[str] | None] = mapped_column(JSONB, default=list)
@@ -47,8 +47,8 @@ class Entry(Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     conflict_of: Mapped[UUID | None] = mapped_column(UUID(as_uuid=True))
 
-    user: Mapped[User] = relationship(back_populates="entries")
-    category: Mapped[Optional["Category"]] = relationship(back_populates="entries")
+    user: Mapped[User] = relationship(back_populates="snippets")
+    tag: Mapped[Optional["Tag"]] = relationship(back_populates="snippets")
 
 
 class RefreshToken(Base):
@@ -62,8 +62,8 @@ class RefreshToken(Base):
     user: Mapped[User] = relationship(back_populates="refresh_tokens")
 
 
-class Category(Base):
-    __tablename__ = "categories"
+class Tag(Base):
+    __tablename__ = "tags"
 
     id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
@@ -73,5 +73,5 @@ class Category(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    user: Mapped[User] = relationship(back_populates="categories")
-    entries: Mapped[list[Entry]] = relationship(back_populates="category", cascade="all, delete-orphan")
+    user: Mapped[User] = relationship(back_populates="tags")
+    snippets: Mapped[list[Snippet]] = relationship(back_populates="tag", cascade="all, delete-orphan")
