@@ -17,14 +17,17 @@ class SnippetRepository {
   final SyncStore _sync;
   final _uuid = const Uuid();
 
-  Future<List<Snippet>> fetchSnippets({String query = "", String? tagId}) async {
+  Future<List<Snippet>> fetchSnippets(
+      {String query = "", String? tagId}) async {
     final snippets = await _local.list(tagId: tagId);
     final filtered = query.isEmpty
         ? snippets
         : snippets
-            .where((e) => e.title.toLowerCase().contains(query.toLowerCase()) || e.body.toLowerCase().contains(query.toLowerCase()))
+            .where((e) =>
+                e.title.toLowerCase().contains(query.toLowerCase()) ||
+                e.body.toLowerCase().contains(query.toLowerCase()))
             .toList()
-          ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     ref.read(syncServiceProvider).sync();
     return filtered;
   }
@@ -50,15 +53,66 @@ class SnippetRepository {
       pinned: false,
     );
     await _local.upsert(snippet);
-    await _sync.enqueue(entityType: 'snippet', entityId: snippet.id, op: 'upsert', payload: _snippetToJson(snippet));
+    await _sync.enqueue(
+        entityType: 'snippet',
+        entityId: snippet.id,
+        op: 'upsert',
+        payload: _snippetToJson(snippet));
     ref.read(syncServiceProvider).sync();
     return snippet;
   }
 
-  Future<Snippet> togglePin(Snippet snippet) async {
-    final updated = snippet.copyWith(pinned: !snippet.pinned, updatedAt: DateTime.now(), version: snippet.version + 1);
+  Future<Snippet> updateSnippet({
+    required Snippet snippet,
+    required String title,
+    required String body,
+    String? tagId,
+    List<EntryParameter> parameters = const [],
+  }) async {
+    final updated = snippet.copyWith(
+      title: title,
+      body: body,
+      tagId: tagId,
+      parameters: parameters,
+      updatedAt: DateTime.now(),
+      version: snippet.version + 1,
+    );
     await _local.upsert(updated);
-    await _sync.enqueue(entityType: 'snippet', entityId: updated.id, op: 'upsert', payload: _snippetToJson(updated));
+    await _sync.enqueue(
+        entityType: 'snippet',
+        entityId: updated.id,
+        op: 'upsert',
+        payload: _snippetToJson(updated));
+    ref.read(syncServiceProvider).sync();
+    return updated;
+  }
+
+  Future<void> deleteSnippet(Snippet snippet) async {
+    final deleted = snippet.copyWith(
+      deletedAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      version: snippet.version + 1,
+    );
+    await _local.upsert(deleted);
+    await _sync.enqueue(
+        entityType: 'snippet',
+        entityId: deleted.id,
+        op: 'upsert',
+        payload: _snippetToJson(deleted));
+    ref.read(syncServiceProvider).sync();
+  }
+
+  Future<Snippet> togglePin(Snippet snippet) async {
+    final updated = snippet.copyWith(
+        pinned: !snippet.pinned,
+        updatedAt: DateTime.now(),
+        version: snippet.version + 1);
+    await _local.upsert(updated);
+    await _sync.enqueue(
+        entityType: 'snippet',
+        entityId: updated.id,
+        op: 'upsert',
+        payload: _snippetToJson(updated));
     ref.read(syncServiceProvider).sync();
     return updated;
   }
@@ -82,4 +136,5 @@ class SnippetRepository {
   }
 }
 
-final snippetRepositoryProvider = Provider<SnippetRepository>((ref) => SnippetRepository(ref));
+final snippetRepositoryProvider =
+    Provider<SnippetRepository>((ref) => SnippetRepository(ref));

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/data/snippet.dart';
 import '../../../core/data/tag.dart';
@@ -17,20 +18,73 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   Snippet? _selectedSnippet;
   List<_ParamControllers> _paramControllers = [];
+  late final ProviderSubscription<HomeState> _homeSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _homeSub = ref.listenManual<HomeState>(
+      homeControllerProvider,
+      (previous, next) {
+        final selectedId = next.selectedSnippetId;
+        if (selectedId == null) {
+          if (_selectedSnippet != null) {
+            _setSelectedSnippet(null);
+          }
+          return;
+        }
+        final match = next.snippets.where((s) => s.id == selectedId);
+        if (match.isEmpty) {
+          if (_selectedSnippet != null) {
+            _setSelectedSnippet(null);
+          }
+          return;
+        }
+        final snippet = match.first;
+        if (_selectedSnippet?.id != snippet.id ||
+            _selectedSnippet?.updatedAt != snippet.updatedAt ||
+            _selectedSnippet?.parameters.length != snippet.parameters.length) {
+          _setSelectedSnippet(snippet);
+        }
+      },
+      fireImmediately: true,
+    );
+  }
+
+  @override
+  void dispose() {
+    _homeSub.close();
+    _clearParamControllers();
+    super.dispose();
+  }
+
+  void _clearParamControllers() {
+    for (final c in _paramControllers) {
+      c.dispose();
+    }
+    _paramControllers = [];
+  }
+
+  void _setSelectedSnippet(Snippet? snippet) {
+    _clearParamControllers();
+    setState(() {
+      _selectedSnippet = snippet;
+      if (snippet != null) {
+        _paramControllers = snippet.parameters
+            .map((p) => _ParamControllers(
+                  initialName: p.name,
+                  initialDescription: p.description ?? '',
+                  initialValue: p.initial ?? '',
+                  isRequired: p.required,
+                ))
+            .toList();
+      }
+    });
+  }
 
   void _selectSnippet(HomeController controller, Snippet snippet) {
     controller.selectSnippet(snippet.id);
-    setState(() {
-      _selectedSnippet = snippet;
-      _paramControllers = snippet.parameters
-          .map((p) => _ParamControllers(
-                initialName: p.name,
-                initialDescription: p.description ?? '',
-                initialValue: p.initial ?? '',
-                isRequired: p.required,
-              ))
-          .toList();
-    });
+    _setSelectedSnippet(snippet);
   }
 
   @override
@@ -40,15 +94,13 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('fclipboard'),
+        title: const Text('第二大脑'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_task_outlined),
             tooltip: '新建片段',
-            onPressed: state.creatingSnippet
-                ? null
-                : () => _showAddSnippetSheet(context, controller,
-                    state.selectedTagId, state.creatingSnippet),
+            onPressed: () =>
+                _openAddSnippetPage(context, controller, state.selectedTagId),
           ),
           IconButton(
             icon: const Icon(Icons.folder_open),
@@ -65,7 +117,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           IconButton(
             icon: const Icon(Icons.person),
             tooltip: '个人信息',
-            onPressed: () => Navigator.of(context).pushNamed('/profile'),
+            onPressed: () => context.pushNamed('profile'),
           ),
         ],
       ),
@@ -85,15 +137,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '库',
-                      style:
-                          Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.5,
-                              ),
-                    ),
-                    const SizedBox(height: 12),
                     _SearchField(onChanged: controller.updateQuery),
                     const SizedBox(height: 12),
                     _TagBar(
@@ -103,12 +146,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                       onCreate: (name) => controller.addTag(name),
                       creating: state.creatingTag,
                     ),
-                    if (_selectedSnippet != null && _selectedSnippet!.parameters.isNotEmpty)
+                    if (_selectedSnippet != null &&
+                        _selectedSnippet!.parameters.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 12),
                         child: _InlineParameterForm(
                           controllers: _paramControllers,
-                          onSubmitted: () => _handleCopy(context, controller, _selectedSnippet!),
+                          onSubmitted: () => _handleCopy(
+                              context, controller, _selectedSnippet!),
                         ),
                       ),
                   ],
@@ -126,8 +171,22 @@ class _HomePageState extends ConsumerState<HomePage> {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Card(
-                        elevation: selected ? 4 : 2,
+                        color: selected
+                            ? Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.06)
+                            : null,
+                        elevation: selected ? 6 : 2,
                         shadowColor: selected ? Colors.black26 : Colors.black12,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: BorderSide(
+                            color: selected
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.transparent,
+                          ),
+                        ),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () {
@@ -221,12 +280,26 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   ),
                                 ),
                                 const SizedBox(width: 12),
-                                Column(
+                                Wrap(
+                                  spacing: 4,
+                                  runSpacing: 4,
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.copy_outlined),
                                       tooltip: '复制',
                                       onPressed: () => _handleCopy(
+                                          context, controller, snippet),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.edit_outlined),
+                                      tooltip: '编辑',
+                                      onPressed: () => _openEditSnippetPage(
+                                          context, controller, snippet),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline),
+                                      tooltip: '删除',
+                                      onPressed: () => _confirmDelete(
                                           context, controller, snippet),
                                     ),
                                     IconButton(
@@ -257,7 +330,9 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Future<void> _handleCopy(
       BuildContext context, HomeController controller, Snippet snippet) async {
-    _selectSnippet(controller, snippet);
+    if (_selectedSnippet?.id != snippet.id) {
+      _selectSnippet(controller, snippet);
+    }
     if (snippet.parameters.isEmpty) {
       await Clipboard.setData(ClipboardData(
           text: snippet.body.isNotEmpty ? snippet.body : snippet.title));
@@ -293,173 +368,61 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-  void _showAddSnippetSheet(BuildContext context, HomeController controller,
-      String? tagId, bool creatingSnippet) {
-    final titleController = TextEditingController();
-    final bodyController = TextEditingController();
-    final paramControllers = <_ParamControllers>[];
-    showModalBottomSheet(
+  Future<void> _openAddSnippetPage(
+    BuildContext context,
+    HomeController controller,
+    String? tagId,
+  ) async {
+    final created = await context.pushNamed('snippet_new', extra: tagId);
+    if (created == true) {
+      if (!mounted) return;
+      await controller.load();
+    }
+  }
+
+  Future<void> _openEditSnippetPage(
+    BuildContext context,
+    HomeController controller,
+    Snippet snippet,
+  ) async {
+    final updated = await context.pushNamed('snippet_edit',
+        pathParameters: {'id': snippet.id}, extra: snippet);
+    if (updated == true) {
+      if (!mounted) return;
+      await controller.load();
+      controller.selectSnippet(snippet.id);
+    }
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    HomeController controller,
+    Snippet snippet,
+  ) async {
+    final ok = await showDialog<bool>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          top: 16,
-          left: 16,
-          right: 16,
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 44,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  Text('新建片段',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: titleController,
-                    decoration: const InputDecoration(labelText: '标题'),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: bodyController,
-                    maxLines: 4,
-                    decoration: const InputDecoration(labelText: '正文'),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('参数（可选）',
-                          style: Theme.of(context).textTheme.titleMedium),
-                      TextButton.icon(
-                        onPressed: () {
-                          setState(() =>
-                              paramControllers.add(_ParamControllers.empty()));
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text('添加参数'),
-                      ),
-                    ],
-                  ),
-                  ...paramControllers.map(
-                    (pc) => Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          children: [
-                            TextField(
-                              controller: pc.name,
-                              decoration:
-                                  const InputDecoration(labelText: '名称'),
-                            ),
-                            TextField(
-                              controller: pc.description,
-                              decoration:
-                                  const InputDecoration(labelText: '描述'),
-                            ),
-                            TextField(
-                              controller: pc.value,
-                              decoration:
-                                  const InputDecoration(labelText: '默认值'),
-                            ),
-                            SwitchListTile(
-                              value: pc.requiredField,
-                              onChanged: (v) =>
-                                  setState(() => pc.requiredField = v),
-                              title: const Text('必填'),
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () =>
-                                    setState(() => paramControllers.remove(pc)),
-                                child: const Text('删除参数'),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('取消'),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton(
-                        onPressed: creatingSnippet
-                            ? null
-                            : () async {
-                                final title = titleController.text.trim();
-                                if (title.isEmpty) return;
-                                final params = paramControllers
-                                    .map(
-                                      (pc) => EntryParameter(
-                                        name: pc.name.text.trim(),
-                                        description:
-                                            pc.description.text.trim().isEmpty
-                                                ? null
-                                                : pc.description.text.trim(),
-                                        initial: pc.value.text.trim().isEmpty
-                                            ? null
-                                            : pc.value.text.trim(),
-                                        required: pc.requiredField,
-                                      ),
-                                    )
-                                    .where((p) => p.name.isNotEmpty)
-                                    .toList();
-                                try {
-                                  await controller.addSnippet(
-                                    title: title,
-                                    body: bodyController.text.trim(),
-                                    tagId: tagId,
-                                    parameters: params,
-                                  );
-                                  if (context.mounted) Navigator.pop(context);
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('保存失败: $e')),
-                                    );
-                                  }
-                                }
-                              },
-                        child: const Text('保存'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                ],
-              ),
-            );
-          },
-        ),
+      builder: (context) => AlertDialog(
+        title: const Text('删除片段'),
+        content: Text('确定删除“${snippet.title}”吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('删除'),
+          ),
+        ],
       ),
     );
+    if (ok == true) {
+      await controller.deleteSnippet(snippet);
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('已删除')));
+      }
+    }
   }
 
   Future<void> _showAddTagDialog(
@@ -502,13 +465,16 @@ class _ParamControllers {
         value = TextEditingController(text: initialValue),
         requiredField = isRequired;
 
-  factory _ParamControllers.empty() => _ParamControllers(
-      initialName: '', initialDescription: '', initialValue: '');
-
   final TextEditingController name;
   final TextEditingController description;
   final TextEditingController value;
   bool requiredField;
+
+  void dispose() {
+    name.dispose();
+    description.dispose();
+    value.dispose();
+  }
 }
 
 class _TagBar extends StatelessWidget {
@@ -639,19 +605,44 @@ class _InlineParameterForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('填写参数后复制', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            ...controllers.map(
-              (c) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: TextField(
-                  controller: c.value,
-                  decoration: InputDecoration(
-                    labelText: c.requiredField ? '* ${c.name.text}' : c.name.text,
-                    helperText: c.description.text.isNotEmpty ? c.description.text : null,
-                  ),
-                ),
-              ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                var columns = 1;
+                if (width >= 1200) {
+                  columns = 4;
+                } else if (width >= 900) {
+                  columns = 3;
+                } else if (width >= 640) {
+                  columns = 2;
+                }
+                const spacing = 12.0;
+                final fieldWidth = columns == 1
+                    ? width
+                    : (width - spacing * (columns - 1)) / columns;
+                return Wrap(
+                  spacing: spacing,
+                  runSpacing: spacing,
+                  children: controllers
+                      .map(
+                        (c) => SizedBox(
+                          width: fieldWidth,
+                          child: TextField(
+                            controller: c.value,
+                            decoration: InputDecoration(
+                              labelText: c.requiredField
+                                  ? '* ${c.name.text}'
+                                  : c.name.text,
+                              helperText: c.description.text.isNotEmpty
+                                  ? c.description.text
+                                  : null,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                );
+              },
             ),
             Align(
               alignment: Alignment.centerRight,

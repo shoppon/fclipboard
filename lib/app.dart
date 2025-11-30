@@ -12,7 +12,7 @@ class FClipboardApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final GoRouter router = ref.watch(appRouterProvider);
     return MaterialApp.router(
-      title: 'fclipboard',
+      title: '第二大脑',
       theme: buildAppTheme(),
       routerConfig: router,
       debugShowCheckedModeBanner: false,

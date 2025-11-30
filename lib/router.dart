@@ -6,6 +6,7 @@ import 'features/auth/application/auth_controller.dart';
 import 'features/auth/presentation/login_page.dart';
 import 'features/auth/presentation/profile_page.dart';
 import 'features/home/presentation/home_page.dart';
+import 'core/data/snippet.dart';
 import 'features/snippets/presentation/add_snippet_page.dart';
 
 final _routerNotifierProvider = Provider<RouterNotifier>((ref) {
@@ -48,7 +49,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/snippet/new',
         name: 'snippet_new',
-        builder: (context, state) => const AddSnippetPage(),
+        builder: (context, state) {
+          final initialTagId =
+              state.extra is String ? state.extra as String : null;
+          return AddSnippetPage(initialTagId: initialTagId);
+        },
+      ),
+      GoRoute(
+        path: '/snippet/:id/edit',
+        name: 'snippet_edit',
+        builder: (context, state) {
+          final initialTagId =
+              state.extra is String ? state.extra as String : null;
+          final snippet =
+              state.extra is Snippet ? state.extra as Snippet : null;
+          return AddSnippetPage(initialTagId: initialTagId, snippet: snippet);
+        },
       ),
     ],
   );

@@ -27,20 +27,24 @@ class HomeState {
     List<Tag>? tags,
     bool? loading,
     String? query,
-    String? selectedTagId,
+    Object? selectedTagId = _unset,
     bool? creatingTag,
     bool? creatingSnippet,
-    String? selectedSnippetId,
+    Object? selectedSnippetId = _unset,
   }) {
     return HomeState(
       snippets: snippets ?? this.snippets,
       tags: tags ?? this.tags,
       loading: loading ?? this.loading,
       query: query ?? this.query,
-      selectedTagId: selectedTagId ?? this.selectedTagId,
+      selectedTagId: selectedTagId == _unset
+          ? this.selectedTagId
+          : selectedTagId as String?,
       creatingTag: creatingTag ?? this.creatingTag,
       creatingSnippet: creatingSnippet ?? this.creatingSnippet,
-      selectedSnippetId: selectedSnippetId ?? this.selectedSnippetId,
+      selectedSnippetId: selectedSnippetId == _unset
+          ? this.selectedSnippetId
+          : selectedSnippetId as String?,
     );
   }
 
@@ -55,3 +59,5 @@ class HomeState {
         selectedTagId: null,
       );
 }
+
+const _unset = Object();
