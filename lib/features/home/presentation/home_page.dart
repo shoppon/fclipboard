@@ -99,6 +99,14 @@ class _HomePageState extends ConsumerState<HomePage> {
     _setSelectedSnippet(snippet);
   }
 
+  void _selectSnippetAndCopyIfNoParams(
+      HomeController controller, Snippet snippet) {
+    _selectSnippet(controller, snippet);
+    if (snippet.parameters.isEmpty) {
+      _copySnippetWithoutParameters(context, snippet);
+    }
+  }
+
   Map<ShortcutActivator, VoidCallback> _shortcutBindings(
       HomeState state, HomeController controller) {
     final bindings = <ShortcutActivator, VoidCallback>{};
@@ -118,7 +126,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       final key = digits[i];
       bindings[SingleActivator(key, meta: isMac, control: !isMac)] = () {
         final snippet = state.snippets[i];
-        _selectSnippet(controller, snippet);
+        _selectSnippetAndCopyIfNoParams(controller, snippet);
         Scrollable.ensureVisible(
           _itemKeys[snippet.id]!.currentContext!,
           alignment: 0.2,
@@ -170,13 +178,13 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => controller.load(),
+            onPressed: () => controller.load(withSync: true),
             tooltip: '同步',
           ),
           IconButton(
             icon: const Icon(Icons.sell_outlined),
             tooltip: '标签管理',
-            onPressed: () => context.push('/tags'),
+            onPressed: () => _openTagManagement(controller),
           ),
           IconButton(
             icon: const Icon(Icons.person),
@@ -265,7 +273,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                             child: InkWell(
                               borderRadius: BorderRadius.circular(16),
                               onTap: () {
-                                _selectSnippet(controller, snippet);
+                                _selectSnippetAndCopyIfNoParams(
+                                    controller, snippet);
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(14),
@@ -413,18 +422,23 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
+  Future<void> _copySnippetWithoutParameters(
+      BuildContext context, Snippet snippet) async {
+    final text = snippet.body.isNotEmpty ? snippet.body : snippet.title;
+    await Clipboard.setData(ClipboardData(text: text));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('已复制')));
+    }
+  }
+
   Future<void> _handleCopy(
       BuildContext context, HomeController controller, Snippet snippet) async {
     if (_selectedSnippet?.id != snippet.id) {
       _selectSnippet(controller, snippet);
     }
     if (snippet.parameters.isEmpty) {
-      await Clipboard.setData(ClipboardData(
-          text: snippet.body.isNotEmpty ? snippet.body : snippet.title));
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('已复制')));
-      }
+      await _copySnippetWithoutParameters(context, snippet);
       return;
     }
 
@@ -463,6 +477,12 @@ class _HomePageState extends ConsumerState<HomePage> {
       if (!mounted) return;
       await controller.load();
     }
+  }
+
+  Future<void> _openTagManagement(HomeController controller) async {
+    await context.push('/tags');
+    if (!mounted) return;
+    await controller.load();
   }
 
   Future<void> _openEditSnippetPage(
@@ -655,7 +675,6 @@ class _TagBar extends StatelessWidget {
       ),
     );
   }
-
 }
 
 class _SearchField extends StatelessWidget {

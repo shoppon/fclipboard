@@ -3,7 +3,6 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/data/snippet.dart';
 import '../../../core/db/local_db.dart';
-import '../../../core/sync/sync_service.dart';
 import '../../../core/sync/sync_store.dart';
 import 'local_snippet_store.dart';
 
@@ -57,7 +56,6 @@ class SnippetRepository {
         entityId: snippet.id,
         op: 'upsert',
         payload: _snippetToJson(snippet));
-    ref.read(syncServiceProvider).sync();
     return snippet;
   }
 
@@ -82,7 +80,6 @@ class SnippetRepository {
         entityId: updated.id,
         op: 'upsert',
         payload: _snippetToJson(updated));
-    ref.read(syncServiceProvider).sync();
     return updated;
   }
 
@@ -98,7 +95,6 @@ class SnippetRepository {
         entityId: deleted.id,
         op: 'upsert',
         payload: _snippetToJson(deleted));
-    ref.read(syncServiceProvider).sync();
   }
 
   Future<Snippet> togglePin(Snippet snippet) async {
@@ -112,7 +108,6 @@ class SnippetRepository {
         entityId: updated.id,
         op: 'upsert',
         payload: _snippetToJson(updated));
-    ref.read(syncServiceProvider).sync();
     return updated;
   }
 

@@ -4,7 +4,6 @@ import 'package:uuid/uuid.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/data/tag.dart';
 import '../../../core/db/local_db.dart';
-import '../../../core/sync/sync_service.dart';
 import '../../../core/sync/sync_store.dart';
 import 'local_tag_store.dart';
 
@@ -47,11 +46,10 @@ class TagRepository {
         'created_at': tag.updatedAt.toIso8601String(),
       },
     );
-    ref.read(syncServiceProvider).sync();
     return tag;
   }
 
-  Future<void> dedupeByName(List<Tag> tags) async {
+  Future<List<Tag>> dedupeByName(List<Tag> tags) async {
     final seen = <String, Tag>{};
     final toDelete = <String>[];
     for (final t in tags) {
@@ -66,6 +64,9 @@ class TagRepository {
     if (toDelete.isNotEmpty) {
       await _local.deleteByIds(toDelete);
     }
+    final deduped = seen.values.toList()
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    return deduped;
   }
 
   Future<void> updateTag({required Tag tag, required String name, String? color}) async {
@@ -89,7 +90,6 @@ class TagRepository {
         'created_at': updated.updatedAt.toIso8601String(),
       },
     );
-    ref.read(syncServiceProvider).sync();
   }
 
   Future<void> deleteTag(String id) async {
@@ -99,7 +99,6 @@ class TagRepository {
     } catch (_) {
       // ignore; next sync pull will refresh local state
     }
-    ref.read(syncServiceProvider).sync();
   }
 }
 

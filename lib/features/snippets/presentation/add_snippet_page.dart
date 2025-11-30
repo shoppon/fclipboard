@@ -247,7 +247,9 @@ class _AddSnippetPageState extends ConsumerState<AddSnippetPage> {
 }
 
 final _tagsProvider = FutureProvider<List<Tag>>((ref) async {
-  return ref.read(tagRepositoryProvider).fetchTags();
+  final repo = ref.read(tagRepositoryProvider);
+  final tags = await repo.fetchTags();
+  return repo.dedupeByName(tags);
 });
 
 class _ParamControllers {

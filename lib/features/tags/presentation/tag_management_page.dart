@@ -30,10 +30,12 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
       _error = null;
     });
     try {
-      final tags = await ref.read(tagRepositoryProvider).fetchTags();
+      final tagsRepo = ref.read(tagRepositoryProvider);
+      final tags = await tagsRepo.fetchTags();
+      final dedupedTags = await tagsRepo.dedupeByName(tags);
       final counts = await ref.read(snippetRepositoryProvider).countByTag();
       setState(() {
-        _tags = tags;
+        _tags = dedupedTags;
         _counts = counts;
       });
     } catch (e) {

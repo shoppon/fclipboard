@@ -23,18 +23,20 @@ class HomeController extends StateNotifier<HomeState> {
   final SnippetRepository _snippets;
   final TagRepository _tags;
 
-  Future<void> load() async {
+  Future<void> load({bool withSync = false}) async {
     state = state.copyWith(loading: true);
     try {
-      await ref.read(syncServiceProvider).sync();
+      if (withSync) {
+        await ref.read(syncServiceProvider).sync();
+      }
       final tags = await _tags.fetchTags();
-      await _tags.dedupeByName(tags);
+      final dedupedTags = await _tags.dedupeByName(tags);
       final results = await _snippets.fetchSnippets(
         query: state.query,
         tagId: state.selectedTagId,
       );
       await _snippets.dedupeByTitle(results);
-      state = state.copyWith(snippets: results, tags: tags);
+      state = state.copyWith(snippets: results, tags: dedupedTags);
     } catch (_) {
       // silent fail; auth guard will redirect on logout if unauthorized
     } finally {
