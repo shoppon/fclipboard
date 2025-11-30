@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 
 import '../../../core/data/snippet.dart';
 import '../../../core/data/tag.dart';
@@ -19,6 +20,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   Snippet? _selectedSnippet;
   List<_ParamControllers> _paramControllers = [];
   late final ProviderSubscription<HomeState> _homeSub;
+  final Map<String, GlobalKey> _itemKeys = {};
+  final FocusNode _searchFocusNode = FocusNode();
+  final FocusNode _shortcutFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -26,6 +30,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     _homeSub = ref.listenManual<HomeState>(
       homeControllerProvider,
       (previous, next) {
+        _syncKeys(next.snippets);
         final selectedId = next.selectedSnippetId;
         if (selectedId == null) {
           if (_selectedSnippet != null) {
@@ -54,6 +59,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void dispose() {
     _homeSub.close();
+    _searchFocusNode.dispose();
+    _shortcutFocusNode.dispose();
     _clearParamControllers();
     super.dispose();
   }
@@ -78,6 +85,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                   isRequired: p.required,
                 ))
             .toList();
+        if (_paramControllers.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _paramControllers.first.focusNode.requestFocus();
+          });
+        }
       }
     });
   }
@@ -87,10 +99,57 @@ class _HomePageState extends ConsumerState<HomePage> {
     _setSelectedSnippet(snippet);
   }
 
+  Map<ShortcutActivator, VoidCallback> _shortcutBindings(
+      HomeState state, HomeController controller) {
+    final bindings = <ShortcutActivator, VoidCallback>{};
+    final isMac = Theme.of(context).platform == TargetPlatform.macOS;
+    final digits = [
+      LogicalKeyboardKey.digit1,
+      LogicalKeyboardKey.digit2,
+      LogicalKeyboardKey.digit3,
+      LogicalKeyboardKey.digit4,
+      LogicalKeyboardKey.digit5,
+      LogicalKeyboardKey.digit6,
+      LogicalKeyboardKey.digit7,
+      LogicalKeyboardKey.digit8,
+      LogicalKeyboardKey.digit9,
+    ];
+    for (var i = 0; i < state.snippets.length && i < digits.length; i++) {
+      final key = digits[i];
+      bindings[SingleActivator(key, meta: isMac, control: !isMac)] = () {
+        final snippet = state.snippets[i];
+        _selectSnippet(controller, snippet);
+        Scrollable.ensureVisible(
+          _itemKeys[snippet.id]!.currentContext!,
+          alignment: 0.2,
+          duration: const Duration(milliseconds: 200),
+        );
+      };
+    }
+    bindings[const SingleActivator(LogicalKeyboardKey.enter, shift: true)] =
+        () {
+      _searchFocusNode.requestFocus();
+    };
+    return bindings;
+  }
+
+  void _syncKeys(List<Snippet> snippets) {
+    final seen = <String>{};
+    for (final s in snippets) {
+      seen.add(s.id);
+      _itemKeys.putIfAbsent(s.id, () => GlobalKey());
+    }
+    final stale = _itemKeys.keys.where((k) => !seen.contains(k)).toList();
+    for (final k in stale) {
+      _itemKeys.remove(k);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final HomeState state = ref.watch(homeControllerProvider);
     final controller = ref.read(homeControllerProvider.notifier);
+    _syncKeys(state.snippets);
 
     return Scaffold(
       appBar: AppBar(
@@ -122,206 +181,227 @@ class _HomePageState extends ConsumerState<HomePage> {
         ],
       ),
       body: SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFEAF1FF), Color(0xFFF8FAFF)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _SearchField(onChanged: controller.updateQuery),
-                    const SizedBox(height: 12),
-                    _TagBar(
-                      tags: state.tags,
-                      selectedId: state.selectedTagId,
-                      onSelect: controller.selectTag,
-                      onCreate: (name) => controller.addTag(name),
-                      creating: state.creatingTag,
-                    ),
-                    if (_selectedSnippet != null &&
-                        _selectedSnippet!.parameters.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: _InlineParameterForm(
-                          controllers: _paramControllers,
-                          onSubmitted: () => _handleCopy(
-                              context, controller, _selectedSnippet!),
-                        ),
-                      ),
-                  ],
+        child: CallbackShortcuts(
+          bindings: _shortcutBindings(state, controller),
+          child: Focus(
+            focusNode: _shortcutFocusNode,
+            autofocus: true,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFEAF1FF), Color(0xFFF8FAFF)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
               ),
-              if (state.loading) const LinearProgressIndicator(minHeight: 2),
-              Expanded(
-                child: ListView.builder(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: state.snippets.length,
-                  itemBuilder: (context, index) {
-                    final snippet = state.snippets[index];
-                    final selected = state.selectedSnippetId == snippet.id;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Card(
-                        color: selected
-                            ? Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(0.06)
-                            : null,
-                        elevation: selected ? 6 : 2,
-                        shadowColor: selected ? Colors.black26 : Colors.black12,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(
-                            color: selected
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.transparent,
-                          ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SearchField(
+                          onChanged: controller.updateQuery,
+                          focusNode: _searchFocusNode,
                         ),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () {
-                            _selectSnippet(controller, snippet);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(14),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
+                        const SizedBox(height: 12),
+                        _TagBar(
+                          tags: state.tags,
+                          selectedId: state.selectedTagId,
+                          onSelect: controller.selectTag,
+                          onCreate: (name) => controller.addTag(name),
+                          creating: state.creatingTag,
+                        ),
+                        if (_selectedSnippet != null &&
+                            _selectedSnippet!.parameters.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: _InlineParameterForm(
+                              controllers: _paramControllers,
+                              onSubmitted: () => _handleCopy(
+                                  context, controller, _selectedSnippet!),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (state.loading)
+                    const LinearProgressIndicator(minHeight: 2),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      itemCount: state.snippets.length,
+                      itemBuilder: (context, index) {
+                        final snippet = state.snippets[index];
+                        final selected = state.selectedSnippetId == snippet.id;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Card(
+                            key: _itemKeys[snippet.id],
+                            color: selected
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.06)
+                                : null,
+                            elevation: selected ? 6 : 2,
+                            shadowColor:
+                                selected ? Colors.black26 : Colors.black12,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(
+                                color: selected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Colors.transparent,
+                              ),
+                            ),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () {
+                                _selectSnippet(controller, snippet);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(14),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          if (snippet.pinned)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 6),
-                                              child: Icon(Icons.push_pin,
-                                                  size: 16,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .primary),
-                                            ),
-                                          Expanded(
-                                            child: Text(
-                                              snippet.title,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        snippet.body,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(color: Colors.grey[700]),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      if (snippet.tags.isNotEmpty)
-                                        Wrap(
-                                          spacing: 6,
-                                          runSpacing: -6,
-                                          children: snippet.tags
-                                              .map((tag) => Chip(
-                                                    label: Text(tag),
-                                                    visualDensity:
-                                                        VisualDensity.compact,
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 6,
-                                                        vertical: 0),
-                                                  ))
-                                              .toList(),
-                                        ),
-                                      if (snippet.parameters.isNotEmpty)
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 6),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
+                                          Row(
                                             children: [
-                                              Icon(Icons.tune,
-                                                  size: 16,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .primary),
-                                              const SizedBox(width: 4),
-                                              Text('需要参数',
+                                              if (snippet.pinned)
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 6),
+                                                  child: Icon(Icons.push_pin,
+                                                      size: 16,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .primary),
+                                                ),
+                                              Expanded(
+                                                child: Text(
+                                                  snippet.title,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                   style: Theme.of(context)
                                                       .textTheme
-                                                      .bodySmall),
+                                                      .titleMedium
+                                                      ?.copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
+                                                ),
+                                              ),
                                             ],
                                           ),
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            snippet.body,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                    color: Colors.grey[700]),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          if (snippet.tags.isNotEmpty)
+                                            Wrap(
+                                              spacing: 6,
+                                              runSpacing: -6,
+                                              children: snippet.tags
+                                                  .map((tag) => Chip(
+                                                        label: Text(tag),
+                                                        visualDensity:
+                                                            VisualDensity
+                                                                .compact,
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 6,
+                                                                vertical: 0),
+                                                      ))
+                                                  .toList(),
+                                            ),
+                                          if (snippet.parameters.isNotEmpty)
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.only(top: 6),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(Icons.tune,
+                                                      size: 16,
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .primary),
+                                                  const SizedBox(width: 4),
+                                                  Text('需要参数',
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodySmall),
+                                                ],
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Wrap(
+                                      spacing: 4,
+                                      runSpacing: 4,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.copy_outlined),
+                                          tooltip: '复制',
+                                          onPressed: () => _handleCopy(
+                                              context, controller, snippet),
                                         ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Wrap(
-                                  spacing: 4,
-                                  runSpacing: 4,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.copy_outlined),
-                                      tooltip: '复制',
-                                      onPressed: () => _handleCopy(
-                                          context, controller, snippet),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.edit_outlined),
-                                      tooltip: '编辑',
-                                      onPressed: () => _openEditSnippetPage(
-                                          context, controller, snippet),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete_outline),
-                                      tooltip: '删除',
-                                      onPressed: () => _confirmDelete(
-                                          context, controller, snippet),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(snippet.pinned
-                                          ? Icons.push_pin
-                                          : Icons.push_pin_outlined),
-                                      tooltip: snippet.pinned ? '取消置顶' : '置顶',
-                                      onPressed: () =>
-                                          controller.togglePin(snippet),
+                                        IconButton(
+                                          icon: const Icon(Icons.edit_outlined),
+                                          tooltip: '编辑',
+                                          onPressed: () => _openEditSnippetPage(
+                                              context, controller, snippet),
+                                        ),
+                                        IconButton(
+                                          icon:
+                                              const Icon(Icons.delete_outline),
+                                          tooltip: '删除',
+                                          onPressed: () => _confirmDelete(
+                                              context, controller, snippet),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(snippet.pinned
+                                              ? Icons.push_pin
+                                              : Icons.push_pin_outlined),
+                                          tooltip:
+                                              snippet.pinned ? '取消置顶' : '置顶',
+                                          onPressed: () =>
+                                              controller.togglePin(snippet),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -463,17 +543,20 @@ class _ParamControllers {
   })  : name = TextEditingController(text: initialName),
         description = TextEditingController(text: initialDescription),
         value = TextEditingController(text: initialValue),
-        requiredField = isRequired;
+        requiredField = isRequired,
+        focusNode = FocusNode();
 
   final TextEditingController name;
   final TextEditingController description;
   final TextEditingController value;
   bool requiredField;
+  final FocusNode focusNode;
 
   void dispose() {
     name.dispose();
     description.dispose();
     value.dispose();
+    focusNode.dispose();
   }
 }
 
@@ -570,14 +653,16 @@ class _TagBar extends StatelessWidget {
 }
 
 class _SearchField extends StatelessWidget {
-  const _SearchField({required this.onChanged});
+  const _SearchField({required this.onChanged, this.focusNode});
 
   final ValueChanged<String> onChanged;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       autofocus: false,
+      focusNode: focusNode,
       decoration: InputDecoration(
         hintText: '搜索标题或正文',
         prefixIcon: const Icon(Icons.search),
@@ -605,6 +690,8 @@ class _InlineParameterForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('填写参数后复制', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
             LayoutBuilder(
               builder: (context, constraints) {
                 final width = constraints.maxWidth;
@@ -629,6 +716,18 @@ class _InlineParameterForm extends StatelessWidget {
                           width: fieldWidth,
                           child: TextField(
                             controller: c.value,
+                            focusNode: c.focusNode,
+                            textInputAction: TextInputAction.next,
+                            onEditingComplete: () {
+                              final currentIndex = controllers.indexOf(c);
+                              final nextIndex = currentIndex + 1;
+                              if (nextIndex < controllers.length) {
+                                controllers[nextIndex].focusNode.requestFocus();
+                              } else {
+                                FocusScope.of(context).unfocus();
+                                onSubmitted();
+                              }
+                            },
                             decoration: InputDecoration(
                               labelText: c.requiredField
                                   ? '* ${c.name.text}'
