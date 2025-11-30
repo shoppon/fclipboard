@@ -18,6 +18,7 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  static const double _contentMaxWidth = 1120;
   Snippet? _selectedSnippet;
   List<_ParamControllers> _paramControllers = [];
   late final ProviderSubscription<HomeState> _homeSub;
@@ -215,26 +216,16 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
           ),
           _AppBarIcon(
-            icon: Icons.folder_open,
-            tooltip: '新建标签',
-            onPressed: state.creatingTag
-                ? null
-                : () => _showAddTagDialog(context, controller),
-          ),
-          _AppBarIcon(
             icon: Icons.refresh,
             tooltip: '同步',
             onPressed: () => controller.load(withSync: true),
           ),
-          _AppBarIcon(
-            icon: Icons.sell_outlined,
-            tooltip: '标签管理',
-            onPressed: () => _openTagManagement(controller),
-          ),
-          _AppBarIcon(
-            icon: Icons.person,
-            tooltip: '个人信息',
-            onPressed: () => context.pushNamed('profile'),
+          _MoreMenu(
+            onNewTag: state.creatingTag
+                ? null
+                : () => _showAddTagDialog(context, controller),
+            onManageTags: () => _openTagManagement(controller),
+            onProfile: () => context.pushNamed('profile'),
           ),
           const SizedBox(width: 6),
         ],
@@ -250,59 +241,73 @@ class _HomePageState extends ConsumerState<HomePage> {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: _HeaderPanel(
-                    searchFocusNode: _searchFocusNode,
-                    onQueryChanged: controller.updateQuery,
-                    tags: state.tags,
-                    selectedTagId: state.selectedTagId,
-                    onSelectTag: controller.selectTag,
-                    paramControllers:
-                        _selectedSnippet != null ? _paramControllers : const [],
-                    showParams:
-                        _selectedSnippet?.parameters.isNotEmpty ?? false,
-                    creatingTags: state.creatingTag,
-                    onSubmitParams: _selectedSnippet == null
-                        ? null
-                        : () => _handleCopy(
-                              context,
-                              controller,
-                              _selectedSnippet!,
-                            ),
-                    snippetTitle: _selectedSnippet?.title,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(maxWidth: _contentMaxWidth),
+                      child: _HeaderPanel(
+                        searchFocusNode: _searchFocusNode,
+                        onQueryChanged: controller.updateQuery,
+                        tags: state.tags,
+                        selectedTagId: state.selectedTagId,
+                        onSelectTag: controller.selectTag,
+                        paramControllers: _selectedSnippet != null
+                            ? _paramControllers
+                            : const [],
+                        showParams:
+                            _selectedSnippet?.parameters.isNotEmpty ?? false,
+                        creatingTags: state.creatingTag,
+                        onSubmitParams: _selectedSnippet == null
+                            ? null
+                            : () => _handleCopy(
+                                  context,
+                                  controller,
+                                  _selectedSnippet!,
+                                ),
+                        snippetTitle: _selectedSnippet?.title,
+                      ),
+                    ),
                   ),
                 ),
                 if (state.loading) const LinearProgressIndicator(minHeight: 2),
                 Expanded(
-                  child: state.snippets.isEmpty
-                      ? _EmptyState(
-                          onCreate: () => _openAddSnippetPage(
-                              context, controller, state.selectedTagId),
-                        )
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                          itemCount: state.snippets.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 10),
-                          itemBuilder: (context, index) {
-                            final snippet = state.snippets[index];
-                            final selected =
-                                state.selectedSnippetId == snippet.id;
-                            return _SnippetCard(
-                              key: _itemKeys[snippet.id],
-                              snippet: snippet,
-                              selected: selected,
-                              onTap: () => _selectSnippetAndCopyIfNoParams(
-                                  controller, snippet),
-                              onCopy: () =>
-                                  _handleCopy(context, controller, snippet),
-                              onEdit: () => _openEditSnippetPage(
-                                  context, controller, snippet),
-                              onDelete: () =>
-                                  _confirmDelete(context, controller, snippet),
-                              onPin: () => controller.togglePin(snippet),
-                            );
-                          },
-                        ),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(maxWidth: _contentMaxWidth),
+                      child: state.snippets.isEmpty
+                          ? _EmptyState(
+                              onCreate: () => _openAddSnippetPage(
+                                  context, controller, state.selectedTagId),
+                            )
+                          : ListView.separated(
+                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+                              itemCount: state.snippets.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 10),
+                              itemBuilder: (context, index) {
+                                final snippet = state.snippets[index];
+                                final selected =
+                                    state.selectedSnippetId == snippet.id;
+                                return _SnippetCard(
+                                  key: _itemKeys[snippet.id],
+                                  snippet: snippet,
+                                  selected: selected,
+                                  onTap: () => _selectSnippetAndCopyIfNoParams(
+                                      controller, snippet),
+                                  onCopy: () =>
+                                      _handleCopy(context, controller, snippet),
+                                  onEdit: () => _openEditSnippetPage(
+                                      context, controller, snippet),
+                                  onDelete: () => _confirmDelete(
+                                      context, controller, snippet),
+                                  onPin: () => controller.togglePin(snippet),
+                                );
+                              },
+                            ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -488,7 +493,7 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-class _SnippetCard extends StatelessWidget {
+class _SnippetCard extends StatefulWidget {
   const _SnippetCard({
     super.key,
     required this.snippet,
@@ -509,9 +514,20 @@ class _SnippetCard extends StatelessWidget {
   final VoidCallback onPin;
 
   @override
+  State<_SnippetCard> createState() => _SnippetCardState();
+}
+
+class _SnippetCardState extends State<_SnippetCard> {
+  bool _expanded = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dateText = DateFormat('MM-dd HH:mm').format(snippet.updatedAt);
+    final dateText = DateFormat('MM-dd HH:mm').format(widget.snippet.updatedAt);
+    final pinLabel = widget.snippet.pinned ? '取消置顶' : '置顶';
+    final maxLines = _expanded ? 12 : 3;
+    final canExpand = widget.snippet.body.trim().length > 140;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 160),
       curve: Curves.easeOut,
@@ -519,16 +535,17 @@ class _SnippetCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: UiTokens.cardRadius,
         border: Border.all(
-          color:
-              selected ? UiTokens.primary.withOpacity(0.45) : UiTokens.border,
+          color: widget.selected
+              ? UiTokens.primary.withOpacity(0.45)
+              : UiTokens.border,
         ),
-        boxShadow: selected ? UiTokens.hoverShadow : UiTokens.softShadow,
+        boxShadow: widget.selected ? UiTokens.hoverShadow : UiTokens.softShadow,
       ),
       child: Material(
         color: Colors.transparent,
         borderRadius: UiTokens.cardRadius,
         child: InkWell(
-          onTap: onTap,
+          onTap: widget.onTap,
           borderRadius: UiTokens.cardRadius,
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -545,7 +562,7 @@ class _SnippetCard extends StatelessWidget {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              if (snippet.pinned)
+                              if (widget.snippet.pinned)
                                 Padding(
                                   padding: const EdgeInsets.only(right: 6),
                                   child: Icon(
@@ -556,7 +573,7 @@ class _SnippetCard extends StatelessWidget {
                                 ),
                               Expanded(
                                 child: Text(
-                                  snippet.title,
+                                  widget.snippet.title,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.titleMedium?.copyWith(
@@ -568,46 +585,64 @@ class _SnippetCard extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Text(
-                            snippet.body,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: UiTokens.textSecondary,
-                              height: 1.4,
-                              fontFamily: 'monospace',
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: UiTokens.codeBackground,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: UiTokens.codeBorder),
+                            ),
+                            padding: const EdgeInsets.all(12),
+                            child: Text(
+                              widget.snippet.body,
+                              maxLines: maxLines,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: UiTokens.textSecondary,
+                                height: 1.35,
+                                fontFamily: 'monospace',
+                              ),
                             ),
                           ),
+                          if (canExpand && !_expanded)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton.icon(
+                                onPressed: () => setState(() {
+                                  _expanded = true;
+                                }),
+                                icon: const Icon(
+                                  Icons.expand_more,
+                                  size: 16,
+                                ),
+                                label: const Text('展开全部'),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 6),
+                                  foregroundColor: UiTokens.textSecondary,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        _ActionIconButton(
+                        _PrimaryActionButton(
+                          label: '复制',
                           icon: Icons.copy_outlined,
-                          tooltip: '复制',
-                          onTap: onCopy,
+                          onTap: widget.onCopy,
                         ),
-                        _ActionIconButton(
-                          icon: Icons.edit_outlined,
-                          tooltip: '编辑',
-                          onTap: onEdit,
-                        ),
-                        _ActionIconButton(
-                          icon: Icons.delete_outline,
-                          tooltip: '删除',
-                          onTap: onDelete,
-                        ),
-                        _ActionIconButton(
-                          icon: snippet.pinned
-                              ? Icons.push_pin
-                              : Icons.push_pin_outlined,
-                          tooltip: snippet.pinned ? '取消置顶' : '置顶',
-                          onTap: onPin,
-                          active: snippet.pinned,
+                        const SizedBox(height: 8),
+                        _SnippetMenuButton(
+                          pinned: widget.snippet.pinned,
+                          pinLabel: pinLabel,
+                          onEdit: widget.onEdit,
+                          onDelete: widget.onDelete,
+                          onPin: widget.onPin,
                         ),
                       ],
                     ),
@@ -619,8 +654,8 @@ class _SnippetCard extends StatelessWidget {
                   runSpacing: 6,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    if (snippet.tags.isNotEmpty)
-                      ...snippet.tags.map(
+                    if (widget.snippet.tags.isNotEmpty)
+                      ...widget.snippet.tags.map(
                         (tag) => _InfoBadge(
                           label: tag,
                           icon: Icons.sell_outlined,
@@ -628,7 +663,7 @@ class _SnippetCard extends StatelessWidget {
                           foreground: UiTokens.textSecondary,
                         ),
                       ),
-                    if (snippet.parameters.isNotEmpty)
+                    if (widget.snippet.parameters.isNotEmpty)
                       const _InfoBadge(
                         label: '需要参数',
                         icon: Icons.tune,
@@ -641,9 +676,10 @@ class _SnippetCard extends StatelessWidget {
                       background: UiTokens.surface,
                       foreground: UiTokens.textSecondary,
                     ),
-                    if (snippet.source != null && snippet.source!.isNotEmpty)
+                    if (widget.snippet.source != null &&
+                        widget.snippet.source!.isNotEmpty)
                       _InfoBadge(
-                        label: snippet.source!,
+                        label: widget.snippet.source!,
                         icon: Icons.work_outline,
                         background: UiTokens.surface,
                         foreground: UiTokens.textSecondary,
@@ -659,42 +695,126 @@ class _SnippetCard extends StatelessWidget {
   }
 }
 
-class _ActionIconButton extends StatelessWidget {
-  const _ActionIconButton({
+class _PrimaryActionButton extends StatelessWidget {
+  const _PrimaryActionButton({
+    required this.label,
     required this.icon,
-    required this.tooltip,
     required this.onTap,
-    this.active = false,
   });
 
+  final String label;
   final IconData icon;
-  final String tooltip;
   final VoidCallback onTap;
-  final bool active;
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: active ? UiTokens.subtle : Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color:
-                  active ? UiTokens.primary.withOpacity(0.5) : UiTokens.border,
+    return FilledButton.tonalIcon(
+      onPressed: onTap,
+      style: FilledButton.styleFrom(
+        backgroundColor: UiTokens.subtle,
+        foregroundColor: UiTokens.textPrimary,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: UiTokens.border),
+        ),
+        elevation: 0,
+      ),
+      icon: Icon(icon, size: 18),
+      label: Text(
+        label,
+        style: const TextStyle(fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
+enum _SnippetMenu { edit, delete, pin, unpin }
+
+class _SnippetMenuButton extends StatelessWidget {
+  const _SnippetMenuButton({
+    required this.pinned,
+    required this.pinLabel,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onPin,
+  });
+
+  final bool pinned;
+  final String pinLabel;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final VoidCallback onPin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: UiTokens.border),
+        color: Colors.white,
+      ),
+      child: PopupMenuButton<_SnippetMenu>(
+        tooltip: '更多操作',
+        onSelected: (action) {
+          switch (action) {
+            case _SnippetMenu.edit:
+              onEdit();
+              break;
+            case _SnippetMenu.delete:
+              onDelete();
+              break;
+            case _SnippetMenu.pin:
+            case _SnippetMenu.unpin:
+              onPin();
+              break;
+          }
+        },
+        position: PopupMenuPosition.under,
+        itemBuilder: (context) => [
+          _menuItem(
+            icon: Icons.edit_outlined,
+            label: '编辑',
+            value: _SnippetMenu.edit,
+          ),
+          _menuItem(
+            icon: pinned ? Icons.push_pin : Icons.push_pin_outlined,
+            label: pinLabel,
+            value: pinned ? _SnippetMenu.unpin : _SnippetMenu.pin,
+          ),
+          _menuItem(
+            icon: Icons.delete_outline,
+            label: '删除',
+            value: _SnippetMenu.delete,
+          ),
+        ],
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Icon(Icons.more_horiz, color: UiTokens.textSecondary),
+        ),
+      ),
+    );
+  }
+
+  PopupMenuItem<_SnippetMenu> _menuItem({
+    required IconData icon,
+    required String label,
+    required _SnippetMenu value,
+  }) {
+    return PopupMenuItem(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: UiTokens.textSecondary),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              color: UiTokens.textPrimary,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          child: Icon(
-            icon,
-            size: 18,
-            color: active ? UiTokens.primary : UiTokens.textSecondary,
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -736,6 +856,87 @@ class _InfoBadge extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+enum _OverflowAction { newTag, manageTags, profile }
+
+class _MoreMenu extends StatelessWidget {
+  const _MoreMenu({
+    required this.onNewTag,
+    required this.onManageTags,
+    required this.onProfile,
+  });
+
+  final VoidCallback? onNewTag;
+  final VoidCallback onManageTags;
+  final VoidCallback onProfile;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: UiTokens.border),
+        ),
+        child: PopupMenuButton<_OverflowAction>(
+          tooltip: '更多',
+          onSelected: (action) {
+            switch (action) {
+              case _OverflowAction.newTag:
+                onNewTag?.call();
+                break;
+              case _OverflowAction.manageTags:
+                onManageTags();
+                break;
+              case _OverflowAction.profile:
+                onProfile();
+                break;
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: _OverflowAction.newTag,
+              enabled: onNewTag != null,
+              child: Row(
+                children: const [
+                  Icon(Icons.folder_open, size: 18),
+                  SizedBox(width: 8),
+                  Text('新建标签'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: _OverflowAction.manageTags,
+              child: Row(
+                children: const [
+                  Icon(Icons.sell_outlined, size: 18),
+                  SizedBox(width: 8),
+                  Text('标签管理'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: _OverflowAction.profile,
+              child: Row(
+                children: const [
+                  Icon(Icons.person, size: 18),
+                  SizedBox(width: 8),
+                  Text('个人信息'),
+                ],
+              ),
+            ),
+          ],
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Icon(Icons.more_vert, color: UiTokens.textSecondary),
+          ),
+        ),
       ),
     );
   }
