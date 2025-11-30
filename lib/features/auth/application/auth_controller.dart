@@ -7,7 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants.dart';
 import '../application/auth_state.dart';
 
-final authControllerProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
+final authControllerProvider =
+    StateNotifierProvider<AuthController, AuthState>((ref) {
   return AuthController(ref);
 });
 
@@ -96,19 +97,25 @@ class AuthController extends StateNotifier<AuthState> {
     state = AuthState.initial().copyWith(initialized: true);
   }
 
-  Future<void> _persistSession(String? access, String? refresh, String? email, String? userId) async {
+  Future<void> _persistSession(
+      String? access, String? refresh, String? email, String? userId) async {
     final prefs = await SharedPreferences.getInstance();
     if (access != null) await prefs.setString(_kAccessKey, access);
     if (refresh != null) await prefs.setString(_kRefreshKey, refresh);
     if (email != null) await prefs.setString(_kEmailKey, email);
     if (userId != null) await prefs.setString(_kUserIdKey, userId);
-    state = state.copyWith(accessToken: access, refreshToken: refresh, email: email, userId: userId);
+    state = state.copyWith(
+        accessToken: access,
+        refreshToken: refresh,
+        email: email,
+        userId: userId);
   }
 
   Future<String?> _fetchUserId(String? access) async {
     if (access == null) return null;
     final uri = Uri.parse('$kApiBaseUrl/auth/me');
-    final res = await http.get(uri, headers: {'Authorization': 'Bearer $access'});
+    final res =
+        await http.get(uri, headers: {'Authorization': 'Bearer $access'});
     if (res.statusCode != 200) return null;
     final data = jsonDecode(res.body) as Map<String, dynamic>;
     final id = data['id'] as String?;

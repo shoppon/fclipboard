@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -114,7 +113,8 @@ class SyncService {
         if (res.statusCode != 200) break;
         final list = _decodeJsonList(res.bodyBytes);
         if (list.isEmpty) break;
-        final mapped = list.map((item) => _mapTag(item as Map<String, dynamic>));
+        final mapped =
+            list.map((item) => _mapTag(item as Map<String, dynamic>));
         final deduped = _dedupeTagsByName(mapped);
         for (final c in deduped.values) {
           seenIds.add(c.id);
@@ -176,7 +176,8 @@ class SyncService {
             await snippets.upsert(e);
             savedCount++;
           } catch (err) {
-            debugPrint('snippet upsert failed id=${e.id} title=${e.title} err=$err');
+            debugPrint(
+                'snippet upsert failed id=${e.id} title=${e.title} err=$err');
           }
           if (maxTs == null || e.updatedAt.isAfter(maxTs)) maxTs = e.updatedAt;
         }

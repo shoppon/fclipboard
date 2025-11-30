@@ -48,7 +48,8 @@ class LocalSnippetStore {
         'tags': jsonEncode(snippet.tags),
         'source': snippet.source,
         'pinned': snippet.pinned ? 1 : 0,
-        'parameters': jsonEncode(snippet.parameters.map((p) => p.toJson()).toList()),
+        'parameters':
+            jsonEncode(snippet.parameters.map((p) => p.toJson()).toList()),
         'version': snippet.version,
         'created_at': snippet.createdAt.toIso8601String(),
         'updated_at': snippet.updatedAt.toIso8601String(),
@@ -70,9 +71,13 @@ class LocalSnippetStore {
       pinned: (r['pinned'] as int? ?? 0) == 1,
       parameters: _decodeParams(r['parameters'] as String?),
       version: (r['version'] as int?) ?? 1,
-      createdAt: DateTime.tryParse((r['created_at'] as String?) ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse((r['updated_at'] as String?) ?? '') ?? DateTime.now(),
-      deletedAt: r['deleted_at'] != null ? DateTime.tryParse(r['deleted_at'] as String) : null,
+      createdAt: DateTime.tryParse((r['created_at'] as String?) ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse((r['updated_at'] as String?) ?? '') ??
+          DateTime.now(),
+      deletedAt: r['deleted_at'] != null
+          ? DateTime.tryParse(r['deleted_at'] as String)
+          : null,
       conflictOf: r['conflict_of'] as String?,
       tagId: r['tag_id'] as String?,
     );
@@ -124,7 +129,8 @@ class LocalSnippetStore {
       return;
     }
     final placeholders = List.filled(ids.length, '?').join(',');
-    await db.delete('snippets', where: 'id NOT IN ($placeholders)', whereArgs: ids.toList());
+    await db.delete('snippets',
+        where: 'id NOT IN ($placeholders)', whereArgs: ids.toList());
   }
 
   Future<void> deleteByIds(List<String> ids) async {

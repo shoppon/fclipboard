@@ -56,7 +56,8 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
           decoration: const InputDecoration(labelText: '名称'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: const Text('取消')),
           FilledButton(
             onPressed: () {
               final name = nameController.text.trim();
@@ -69,7 +70,9 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
       ),
     );
     if (result != null && result.trim().isNotEmpty) {
-      await ref.read(tagRepositoryProvider).updateTag(tag: tag, name: result.trim(), color: tag.color);
+      await ref
+          .read(tagRepositoryProvider)
+          .updateTag(tag: tag, name: result.trim(), color: tag.color);
       await _load();
     }
   }
@@ -81,8 +84,12 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
         title: const Text('删除标签'),
         content: Text('确定删除“${tag.name}”吗？'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('删除')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('取消')),
+          FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('删除')),
         ],
       ),
     );
@@ -103,7 +110,8 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
           decoration: const InputDecoration(labelText: '名称'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('取消')),
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: const Text('取消')),
           FilledButton(
             onPressed: () {
               final name = nameController.text.trim();
@@ -149,7 +157,8 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(16),
-                        child: Text(_error!, style: const TextStyle(color: Colors.red)),
+                        child: Text(_error!,
+                            style: const TextStyle(color: Colors.red)),
                       ),
                     ],
                   )
@@ -165,7 +174,8 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
                       )
                     : GridView.builder(
                         padding: const EdgeInsets.all(12),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 4,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
@@ -177,14 +187,21 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
                           final count = _counts[tag.id] ?? 0;
                           return Card(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(tag.name, style: Theme.of(context).textTheme.titleMedium),
+                                  Text(tag.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium),
                                   const SizedBox(height: 6),
-                                  Text('片段数：$count', style: Theme.of(context).textTheme.bodySmall),
+                                  Text('片段数：$count',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall),
                                   const Spacer(),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,

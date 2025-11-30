@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 ThemeData buildAppTheme() {
   const seed = Color(0xFF0A84FF); // Apple-like blue
   final base = ThemeData.light(useMaterial3: true);
-  final scheme = ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.light);
+  final scheme =
+      ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.light);
   return base.copyWith(
     colorScheme: scheme,
     scaffoldBackgroundColor: const Color(0xFFF5F6F7),
@@ -51,7 +52,8 @@ ThemeData buildAppTheme() {
     textTheme: base.textTheme.copyWith(
       bodyMedium: base.textTheme.bodyMedium?.copyWith(letterSpacing: -0.1),
       bodyLarge: base.textTheme.bodyLarge?.copyWith(letterSpacing: -0.1),
-      titleMedium: base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+      titleMedium:
+          base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
     ),
   );
 }

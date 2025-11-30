@@ -60,7 +60,8 @@ class SyncStore {
             entityId: r['entity_id'] as String,
             op: r['op'] as String,
             payload: jsonDecode(r['payload'] as String) as Map<String, dynamic>,
-            createdAt: DateTime.tryParse((r['created_at'] as String?) ?? '') ?? DateTime.now(),
+            createdAt: DateTime.tryParse((r['created_at'] as String?) ?? '') ??
+                DateTime.now(),
           ),
         )
         .toList();
@@ -70,12 +71,14 @@ class SyncStore {
     if (ids.isEmpty) return;
     final db = await _dbProvider.database;
     final placeholders = List.filled(ids.length, '?').join(',');
-    await db.delete('sync_ops', where: 'op_id IN ($placeholders)', whereArgs: ids);
+    await db.delete('sync_ops',
+        where: 'op_id IN ($placeholders)', whereArgs: ids);
   }
 
   Future<DateTime?> lastSynced(String key) async {
     final db = await _dbProvider.database;
-    final rows = await db.query('metadata', where: 'key = ?', whereArgs: [key], limit: 1);
+    final rows = await db.query('metadata',
+        where: 'key = ?', whereArgs: [key], limit: 1);
     if (rows.isEmpty) return null;
     return DateTime.tryParse((rows.first['value'] as String?) ?? '');
   }
