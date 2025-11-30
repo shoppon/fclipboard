@@ -630,47 +630,6 @@ class _TagBar extends StatelessWidget {
               ),
             ),
           ),
-          TextButton.icon(
-            onPressed: creating ? null : () => _showAddTagDialog(context),
-            icon: const Icon(Icons.add),
-            label: const Text('添加标签'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAddTagDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('新建标签'),
-        content: TextField(
-          controller: nameController,
-          decoration: const InputDecoration(labelText: '名称'),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context), child: const Text('取消')),
-          FilledButton(
-            onPressed: () async {
-              final name = nameController.text.trim();
-              if (name.isNotEmpty) {
-                try {
-                  await onCreate(name);
-                  if (context.mounted) Navigator.pop(context);
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('创建失败: $e')),
-                    );
-                  }
-                }
-              }
-            },
-            child: const Text('保存'),
-          ),
         ],
       ),
     );
@@ -715,8 +674,6 @@ class _InlineParameterForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('填写参数后复制', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
             LayoutBuilder(
               builder: (context, constraints) {
                 final width = constraints.maxWidth;
@@ -767,13 +724,6 @@ class _InlineParameterForm extends StatelessWidget {
                       .toList(),
                 );
               },
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: FilledButton(
-                onPressed: onSubmitted,
-                child: const Text('填完复制'),
-              ),
             ),
           ],
         ),
