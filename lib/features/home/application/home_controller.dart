@@ -23,25 +23,41 @@ class HomeController extends StateNotifier<HomeState> {
 
   Future<void> load() async {
     state = state.copyWith(loading: true);
-    await ref.read(syncServiceProvider).sync();
-    final tags = await _tags.fetchTags();
-    final results = await _snippets.fetchSnippets(
-      query: state.query,
-      tagId: state.selectedTagId,
-    );
-    state = state.copyWith(snippets: results, tags: tags, loading: false);
+    try {
+      await ref.read(syncServiceProvider).sync();
+      final tags = await _tags.fetchTags();
+      final results = await _snippets.fetchSnippets(
+        query: state.query,
+        tagId: state.selectedTagId,
+      );
+      state = state.copyWith(snippets: results, tags: tags);
+    } catch (_) {
+      // silent fail; auth guard will redirect on logout if unauthorized
+    } finally {
+      state = state.copyWith(loading: false);
+    }
   }
 
   Future<void> updateQuery(String query) async {
     state = state.copyWith(query: query, loading: true);
-    final results = await _snippets.fetchSnippets(query: query, tagId: state.selectedTagId);
-    state = state.copyWith(snippets: results, loading: false);
+    try {
+      final results = await _snippets.fetchSnippets(query: query, tagId: state.selectedTagId);
+      state = state.copyWith(snippets: results);
+    } catch (_) {
+    } finally {
+      state = state.copyWith(loading: false);
+    }
   }
 
   Future<void> selectTag(String? tagId) async {
     state = state.copyWith(selectedTagId: tagId, loading: true);
-    final results = await _snippets.fetchSnippets(query: state.query, tagId: tagId);
-    state = state.copyWith(snippets: results, loading: false);
+    try {
+      final results = await _snippets.fetchSnippets(query: state.query, tagId: tagId);
+      state = state.copyWith(snippets: results);
+    } catch (_) {
+    } finally {
+      state = state.copyWith(loading: false);
+    }
   }
 
   Future<void> togglePin(Snippet snippet) async {

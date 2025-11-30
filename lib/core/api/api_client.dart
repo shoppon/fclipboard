@@ -23,19 +23,31 @@ class ApiClient {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
     };
+    late http.Response res;
     switch (method) {
       case 'GET':
-        return http.get(uri, headers: headers);
+        res = await http.get(uri, headers: headers);
+        break;
       case 'POST':
-        return http.post(uri, headers: headers, body: body == null ? null : jsonEncode(body));
+        res = await http.post(uri, headers: headers, body: body == null ? null : jsonEncode(body));
+        break;
       case 'PUT':
-        return http.put(uri, headers: headers, body: body == null ? null : jsonEncode(body));
+        res = await http.put(uri, headers: headers, body: body == null ? null : jsonEncode(body));
+        break;
       case 'DELETE':
-        return http.delete(uri, headers: headers);
+        res = await http.delete(uri, headers: headers);
+        break;
       default:
         throw UnsupportedError('Method $method not supported');
     }
+    if (res.statusCode == 401) {
+      await ref.read(authControllerProvider.notifier).logout();
+      throw UnauthorizedException();
+    }
+    return res;
   }
 }
 
 final apiClientProvider = Provider<ApiClient>((ref) => ApiClient(ref));
+
+class UnauthorizedException implements Exception {}

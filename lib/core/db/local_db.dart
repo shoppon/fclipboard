@@ -21,55 +21,61 @@ class LocalDb {
     return openDatabase(
       dbPath,
       version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS tags(
-            id TEXT PRIMARY KEY,
-            name TEXT,
-            color TEXT,
-            version INTEGER,
-            updated_at TEXT,
-            user_id TEXT
-          );
-        ''');
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS snippets(
-            id TEXT PRIMARY KEY,
-            title TEXT,
-            body TEXT,
-            tags TEXT,
-            source TEXT,
-            pinned INTEGER,
-            parameters TEXT,
-            version INTEGER,
-            created_at TEXT,
-            updated_at TEXT,
-            deleted_at TEXT,
-            conflict_of TEXT,
-            tag_id TEXT
-          );
-        ''');
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS sync_ops(
-            op_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            entity_type TEXT,
-            entity_id TEXT,
-            op TEXT,
-            payload TEXT,
-            created_at TEXT
-          );
-        ''');
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS metadata(
-            key TEXT PRIMARY KEY,
-            value TEXT
-          );
-        ''');
+      onCreate: (db, version) async => _createSchema(db),
+      onOpen: (db) async {
+        await _createSchema(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        await db.execute('ALTER TABLE snippets ADD COLUMN IF NOT EXISTS parameters TEXT');
+        await db.execute(
+            'ALTER TABLE snippets ADD COLUMN IF NOT EXISTS parameters TEXT');
       },
     );
+  }
+
+  Future<void> _createSchema(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS tags(
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        color TEXT,
+        version INTEGER,
+        updated_at TEXT,
+        user_id TEXT
+      );
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS snippets(
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        body TEXT,
+        tags TEXT,
+        source TEXT,
+        pinned INTEGER,
+        parameters TEXT,
+        version INTEGER,
+        created_at TEXT,
+        updated_at TEXT,
+        deleted_at TEXT,
+        conflict_of TEXT,
+        tag_id TEXT
+      );
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS sync_ops(
+        op_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        entity_type TEXT,
+        entity_id TEXT,
+        op TEXT,
+        payload TEXT,
+        created_at TEXT
+      );
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS metadata(
+        key TEXT PRIMARY KEY,
+        value TEXT
+      );
+    ''');
   }
 
   Future<String> _dbPath() async {
