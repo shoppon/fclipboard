@@ -1,7 +1,7 @@
 name: fclipboard
 description: Fuzzy search by title and copy to clipboard.
 publish_to: "none"
-version: 3.6.4
+version: 4.0.1
 
 environment:
   sdk: ">=3.0.0-339.0.dev <4.0.0"
@@ -19,7 +19,7 @@ dependencies:
   sqflite: ^2.3.0
   sqflite_common_ffi: ^2.2.2
   sqlite3_flutter_libs: ^0.5.16
-  sqflite_common_ffi_web: '>=0.1.0-dev.1'
+  sqflite_common_ffi_web: ">=0.1.0-dev.1"
   hotkey_manager: ^0.1.7
   window_manager: ^0.3.1
   fluttertoast: ^8.2.1

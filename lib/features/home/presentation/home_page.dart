@@ -526,7 +526,6 @@ class _SnippetCardState extends State<_SnippetCard> {
     final dateText = DateFormat('MM-dd HH:mm').format(widget.snippet.updatedAt);
     final pinLabel = widget.snippet.pinned ? '取消置顶' : '置顶';
     final maxLines = _expanded ? 12 : 3;
-    final canExpand = widget.snippet.body.trim().length > 140;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 160),
@@ -585,44 +584,72 @@ class _SnippetCardState extends State<_SnippetCard> {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: UiTokens.codeBackground,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: UiTokens.codeBorder),
-                            ),
-                            padding: const EdgeInsets.all(12),
-                            child: Text(
-                              widget.snippet.body,
-                              maxLines: maxLines,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: UiTokens.textSecondary,
-                                height: 1.35,
-                                fontFamily: 'monospace',
-                              ),
-                            ),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final direction = Directionality.of(context);
+                              final textStyle =
+                                  theme.textTheme.bodyMedium?.copyWith(
+                                        color: UiTokens.textSecondary,
+                                        height: 1.35,
+                                        fontFamily: 'monospace',
+                                      ) ??
+                                      const TextStyle(
+                                        color: UiTokens.textSecondary,
+                                        height: 1.35,
+                                        fontFamily: 'monospace',
+                                      );
+                              final painter = TextPainter(
+                                text: TextSpan(
+                                  text: widget.snippet.body,
+                                  style: textStyle,
+                                ),
+                                maxLines: _expanded ? null : maxLines,
+                                textDirection: direction,
+                              )..layout(maxWidth: constraints.maxWidth - 24);
+                              final isOverflow = painter.didExceedMaxLines;
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: UiTokens.codeBackground,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                          color: UiTokens.codeBorder),
+                                    ),
+                                    padding: const EdgeInsets.all(12),
+                                    child: Text(
+                                      widget.snippet.body,
+                                      maxLines: maxLines,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: textStyle,
+                                    ),
+                                  ),
+                                  if (isOverflow && !_expanded)
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: TextButton.icon(
+                                        onPressed: () =>
+                                            setState(() => _expanded = true),
+                                        icon: const Icon(
+                                          Icons.expand_more,
+                                          size: 16,
+                                        ),
+                                        label: const Text('展开全部'),
+                                        style: TextButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 6),
+                                          foregroundColor:
+                                              UiTokens.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
                           ),
-                          if (canExpand && !_expanded)
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton.icon(
-                                onPressed: () => setState(() {
-                                  _expanded = true;
-                                }),
-                                icon: const Icon(
-                                  Icons.expand_more,
-                                  size: 16,
-                                ),
-                                label: const Text('展开全部'),
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 6),
-                                  foregroundColor: UiTokens.textSecondary,
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     ),
