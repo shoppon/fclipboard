@@ -15,7 +15,7 @@ spec:
         component: web
     spec:
       containers:
-        - image: harbor.lingmind.cn/teabrew/fclipboard-web:20251129112655
+        - image: harbor.lingmind.cn/teabrew/fclipboard-web:20251201100838
           name: web
           # command: ["/bin/bash", "-c", "--"]
           # args: ["while true; do sleep 30; done;"]

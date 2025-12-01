@@ -101,12 +101,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     _setSelectedSnippet(snippet);
   }
 
-  void _selectSnippetAndCopyIfNoParams(
-      HomeController controller, Snippet snippet) {
+  void _selectSnippetAndCopy(HomeController controller, Snippet snippet) {
     _selectSnippet(controller, snippet);
-    if (snippet.parameters.isEmpty) {
-      _copySnippetWithoutParameters(context, snippet);
-    }
+    _handleCopy(context, controller, snippet);
   }
 
   Map<ShortcutActivator, VoidCallback> _shortcutBindings(
@@ -128,7 +125,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       final key = digits[i];
       bindings[SingleActivator(key, meta: isMac, control: !isMac)] = () {
         final snippet = state.snippets[i];
-        _selectSnippetAndCopyIfNoParams(controller, snippet);
+        _selectSnippetAndCopy(controller, snippet);
         Scrollable.ensureVisible(
           _itemKeys[snippet.id]!.currentContext!,
           alignment: 0.2,
@@ -162,6 +159,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     _syncKeys(state.snippets);
 
     final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isCompact = screenWidth < 760;
 
     return Scaffold(
       backgroundColor: UiTokens.surface,
@@ -170,46 +169,70 @@ class _HomePageState extends ConsumerState<HomePage> {
         surfaceTintColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 2,
-        toolbarHeight: 66,
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            const Text(
-              '第二大脑',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: UiTokens.textPrimary,
+        toolbarHeight: isCompact ? 60 : 66,
+        titleSpacing: isCompact ? 12 : 16,
+        title: isCompact
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    '第二大脑',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: UiTokens.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '高效检索 · 快速粘贴',
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: UiTokens.textSecondary),
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  const Text(
+                    '第二大脑',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: UiTokens.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: const BoxDecoration(
+                      color: UiTokens.subtle,
+                      borderRadius: UiTokens.chipRadius,
+                    ),
+                    child: Text(
+                      '高效检索 · 快速粘贴',
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: UiTokens.textSecondary),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: const BoxDecoration(
-                color: UiTokens.subtle,
-                borderRadius: UiTokens.chipRadius,
-              ),
-              child: Text(
-                '高效检索 · 快速粘贴',
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: UiTokens.textSecondary),
-              ),
-            ),
-          ],
-        ),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
+            padding: EdgeInsets.symmetric(horizontal: isCompact ? 4 : 6),
             child: FilledButton.icon(
               style: FilledButton.styleFrom(
                 backgroundColor: UiTokens.primary,
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isCompact ? 10 : 14,
+                  vertical: isCompact ? 8 : 10,
+                ),
+                minimumSize: Size(isCompact ? 0 : 120, 40),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              icon: const Icon(Icons.add_task_outlined),
+              icon: const Icon(Icons.add_task_outlined, size: 20),
               label: const Text('新建片段'),
               onPressed: () =>
                   _openAddSnippetPage(context, controller, state.selectedTagId),
@@ -239,8 +262,10 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: Column(
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isCompact ? 12 : 16,
+                    vertical: isCompact ? 8 : 12,
+                  ),
                   child: Center(
                     child: ConstrainedBox(
                       constraints:
@@ -251,6 +276,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         tags: state.tags,
                         selectedTagId: state.selectedTagId,
                         onSelectTag: controller.selectTag,
+                        compact: isCompact,
                         paramControllers: _selectedSnippet != null
                             ? _paramControllers
                             : const [],
@@ -282,7 +308,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   context, controller, state.selectedTagId),
                             )
                           : ListView.separated(
-                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+                              padding: EdgeInsets.fromLTRB(
+                                  isCompact ? 10 : 12,
+                                  isCompact ? 6 : 8,
+                                  isCompact ? 10 : 12,
+                                  isCompact ? 20 : 24),
                               itemCount: state.snippets.length,
                               separatorBuilder: (_, __) =>
                                   const SizedBox(height: 10),
@@ -294,10 +324,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   key: _itemKeys[snippet.id],
                                   snippet: snippet,
                                   selected: selected,
-                                  onTap: () => _selectSnippetAndCopyIfNoParams(
+                                  onCopy: () => _selectSnippetAndCopy(
                                       controller, snippet),
-                                  onCopy: () =>
-                                      _handleCopy(context, controller, snippet),
+                                  compact: isCompact,
                                   onEdit: () => _openEditSnippetPage(
                                       context, controller, snippet),
                                   onDelete: () => _confirmDelete(
@@ -459,19 +488,29 @@ class _FilterChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.dense = false,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final bool dense;
 
   @override
   Widget build(BuildContext context) {
     final color = selected ? UiTokens.primary : UiTokens.textSecondary;
+    final maxLabelWidth = dense ? 110.0 : 140.0;
     return Padding(
       padding: const EdgeInsets.only(right: 8, bottom: 6),
       child: ChoiceChip(
-        label: Text(label),
+        label: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxLabelWidth),
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            softWrap: false,
+          ),
+        ),
         labelStyle: TextStyle(
           fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
           color: color,
@@ -487,7 +526,10 @@ class _FilterChip extends StatelessWidget {
           borderRadius: UiTokens.chipRadius,
         ),
         visualDensity: VisualDensity.compact,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        labelPadding: EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: dense ? 6 : 8,
+        ),
       ),
     );
   }
@@ -498,20 +540,20 @@ class _SnippetCard extends StatefulWidget {
     super.key,
     required this.snippet,
     required this.selected,
-    required this.onTap,
     required this.onCopy,
     required this.onEdit,
     required this.onDelete,
     required this.onPin,
+    this.compact = false,
   });
 
   final Snippet snippet;
   final bool selected;
-  final VoidCallback onTap;
   final VoidCallback onCopy;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onPin;
+  final bool compact;
 
   @override
   State<_SnippetCard> createState() => _SnippetCardState();
@@ -525,324 +567,256 @@ class _SnippetCardState extends State<_SnippetCard> {
     final theme = Theme.of(context);
     final dateText = DateFormat('MM-dd HH:mm').format(widget.snippet.updatedAt);
     final pinLabel = widget.snippet.pinned ? '取消置顶' : '置顶';
-    final maxLines = _expanded ? 12 : 3;
+    final maxLines = _expanded ? 12 : (widget.compact ? 4 : 3);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 160),
-      curve: Curves.easeOut,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: UiTokens.cardRadius,
-        border: Border.all(
-          color: widget.selected
-              ? UiTokens.primary.withOpacity(0.45)
-              : UiTokens.border,
-        ),
-        boxShadow: widget.selected ? UiTokens.hoverShadow : UiTokens.softShadow,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: UiTokens.cardRadius,
-        child: InkWell(
-          onTap: widget.onTap,
-          borderRadius: UiTokens.cardRadius,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final showMeta = !widget.compact;
+        Future<void> _showActionsSheet() async {
+          await showModalBottomSheet(
+            context: context,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            builder: (context) => SafeArea(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.copy_outlined,
+                          color: UiTokens.textPrimary),
+                      title: const Text('复制'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        widget.onCopy();
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.edit_outlined,
+                          color: UiTokens.textPrimary),
+                      title: const Text('编辑'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        widget.onEdit();
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        widget.snippet.pinned
+                            ? Icons.push_pin
+                            : Icons.push_pin_outlined,
+                        color: UiTokens.textPrimary,
+                      ),
+                      title: Text(pinLabel),
+                      onTap: () {
+                        Navigator.pop(context);
+                        widget.onPin();
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.delete_outline,
+                          color: UiTokens.textPrimary),
+                      title: const Text('删除'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        widget.onDelete();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          curve: Curves.easeOut,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: UiTokens.cardRadius,
+            border: Border.all(
+              color: widget.selected
+                  ? UiTokens.primary.withOpacity(0.45)
+                  : UiTokens.border,
+            ),
+            boxShadow:
+                widget.selected ? UiTokens.hoverShadow : UiTokens.softShadow,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: UiTokens.cardRadius,
+            child: InkWell(
+              onTap: widget.onCopy,
+              onLongPress: _showActionsSheet,
+              borderRadius: UiTokens.cardRadius,
+              child: Padding(
+                padding: EdgeInsets.all(widget.compact ? 12 : 16),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (widget.snippet.pinned)
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 6),
-                                  child: Icon(
-                                    Icons.push_pin,
-                                    size: 18,
-                                    color: UiTokens.primary,
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  if (widget.snippet.pinned)
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 6),
+                                      child: Icon(
+                                        Icons.push_pin,
+                                        size: 18,
+                                        color: UiTokens.primary,
+                                      ),
+                                    ),
+                                  Expanded(
+                                    child: Text(
+                                      widget.snippet.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style:
+                                          theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: UiTokens.textPrimary,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              Expanded(
-                                child: Text(
-                                  widget.snippet.title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: UiTokens.textPrimary,
-                                  ),
-                                ),
+                                ],
+                              ),
+                              SizedBox(height: widget.compact ? 6 : 8),
+                              LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final direction = Directionality.of(context);
+                                  final textStyle =
+                                      theme.textTheme.bodyMedium?.copyWith(
+                                            color: UiTokens.textSecondary,
+                                            height: 1.35,
+                                            fontFamily: 'monospace',
+                                          ) ??
+                                          const TextStyle(
+                                            color: UiTokens.textSecondary,
+                                            height: 1.35,
+                                            fontFamily: 'monospace',
+                                          );
+                                  final painter = TextPainter(
+                                    text: TextSpan(
+                                      text: widget.snippet.body,
+                                      style: textStyle,
+                                    ),
+                                    maxLines: _expanded ? null : maxLines,
+                                    textDirection: direction,
+                                  )..layout(
+                                      maxWidth: constraints.maxWidth - 24);
+                                  final isOverflow = painter.didExceedMaxLines;
+
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          color: UiTokens.codeBackground,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                              color: UiTokens.codeBorder),
+                                        ),
+                                        padding: const EdgeInsets.all(12),
+                                        child: Text(
+                                          widget.snippet.body,
+                                          maxLines: maxLines,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: textStyle,
+                                        ),
+                                      ),
+                                      if (isOverflow &&
+                                          !_expanded &&
+                                          !widget.compact)
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: TextButton.icon(
+                                            onPressed: () => setState(
+                                                () => _expanded = true),
+                                            icon: const Icon(
+                                              Icons.expand_more,
+                                              size: 16,
+                                            ),
+                                            label: const Text('展开全部'),
+                                            style: TextButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 6),
+                                              foregroundColor:
+                                                  UiTokens.textSecondary,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  );
+                                },
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final direction = Directionality.of(context);
-                              final textStyle =
-                                  theme.textTheme.bodyMedium?.copyWith(
-                                        color: UiTokens.textSecondary,
-                                        height: 1.35,
-                                        fontFamily: 'monospace',
-                                      ) ??
-                                      const TextStyle(
-                                        color: UiTokens.textSecondary,
-                                        height: 1.35,
-                                        fontFamily: 'monospace',
-                                      );
-                              final painter = TextPainter(
-                                text: TextSpan(
-                                  text: widget.snippet.body,
-                                  style: textStyle,
-                                ),
-                                maxLines: _expanded ? null : maxLines,
-                                textDirection: direction,
-                              )..layout(maxWidth: constraints.maxWidth - 24);
-                              final isOverflow = painter.didExceedMaxLines;
-
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      color: UiTokens.codeBackground,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                          color: UiTokens.codeBorder),
-                                    ),
-                                    padding: const EdgeInsets.all(12),
-                                    child: Text(
-                                      widget.snippet.body,
-                                      maxLines: maxLines,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: textStyle,
-                                    ),
-                                  ),
-                                  if (isOverflow && !_expanded)
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: TextButton.icon(
-                                        onPressed: () =>
-                                            setState(() => _expanded = true),
-                                        icon: const Icon(
-                                          Icons.expand_more,
-                                          size: 16,
-                                        ),
-                                        label: const Text('展开全部'),
-                                        style: TextButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 6),
-                                          foregroundColor:
-                                              UiTokens.textSecondary,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _PrimaryActionButton(
-                          label: '复制',
-                          icon: Icons.copy_outlined,
-                          onTap: widget.onCopy,
-                        ),
-                        const SizedBox(height: 8),
-                        _SnippetMenuButton(
-                          pinned: widget.snippet.pinned,
-                          pinLabel: pinLabel,
-                          onEdit: widget.onEdit,
-                          onDelete: widget.onDelete,
-                          onPin: widget.onPin,
                         ),
                       ],
                     ),
+                    if (showMeta) ...[
+                      SizedBox(height: widget.compact ? 10 : 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          if (widget.snippet.tags.isNotEmpty)
+                            ...widget.snippet.tags.map(
+                              (tag) => _InfoBadge(
+                                label: tag,
+                                icon: Icons.sell_outlined,
+                                background: UiTokens.subtle,
+                                foreground: UiTokens.textSecondary,
+                              ),
+                            ),
+                          if (widget.snippet.parameters.isNotEmpty)
+                            const _InfoBadge(
+                              label: '需要参数',
+                              icon: Icons.tune,
+                              background: Color(0xFFEFF6FF),
+                              foreground: UiTokens.primary,
+                            ),
+                          _InfoBadge(
+                            label: dateText,
+                            icon: Icons.schedule,
+                            background: UiTokens.surface,
+                            foreground: UiTokens.textSecondary,
+                          ),
+                          if (widget.snippet.source != null &&
+                              widget.snippet.source!.isNotEmpty)
+                            _InfoBadge(
+                              label: widget.snippet.source!,
+                              icon: Icons.work_outline,
+                              background: UiTokens.surface,
+                              foreground: UiTokens.textSecondary,
+                            ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    if (widget.snippet.tags.isNotEmpty)
-                      ...widget.snippet.tags.map(
-                        (tag) => _InfoBadge(
-                          label: tag,
-                          icon: Icons.sell_outlined,
-                          background: UiTokens.subtle,
-                          foreground: UiTokens.textSecondary,
-                        ),
-                      ),
-                    if (widget.snippet.parameters.isNotEmpty)
-                      const _InfoBadge(
-                        label: '需要参数',
-                        icon: Icons.tune,
-                        background: Color(0xFFEFF6FF),
-                        foreground: UiTokens.primary,
-                      ),
-                    _InfoBadge(
-                      label: dateText,
-                      icon: Icons.schedule,
-                      background: UiTokens.surface,
-                      foreground: UiTokens.textSecondary,
-                    ),
-                    if (widget.snippet.source != null &&
-                        widget.snippet.source!.isNotEmpty)
-                      _InfoBadge(
-                        label: widget.snippet.source!,
-                        icon: Icons.work_outline,
-                        background: UiTokens.surface,
-                        foreground: UiTokens.textSecondary,
-                      ),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PrimaryActionButton extends StatelessWidget {
-  const _PrimaryActionButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilledButton.tonalIcon(
-      onPressed: onTap,
-      style: FilledButton.styleFrom(
-        backgroundColor: UiTokens.subtle,
-        foregroundColor: UiTokens.textPrimary,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: UiTokens.border),
-        ),
-        elevation: 0,
-      ),
-      icon: Icon(icon, size: 18),
-      label: Text(
-        label,
-        style: const TextStyle(fontWeight: FontWeight.w700),
-      ),
-    );
-  }
-}
-
-enum _SnippetMenu { edit, delete, pin, unpin }
-
-class _SnippetMenuButton extends StatelessWidget {
-  const _SnippetMenuButton({
-    required this.pinned,
-    required this.pinLabel,
-    required this.onEdit,
-    required this.onDelete,
-    required this.onPin,
-  });
-
-  final bool pinned;
-  final String pinLabel;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-  final VoidCallback onPin;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: UiTokens.border),
-        color: Colors.white,
-      ),
-      child: PopupMenuButton<_SnippetMenu>(
-        tooltip: '更多操作',
-        onSelected: (action) {
-          switch (action) {
-            case _SnippetMenu.edit:
-              onEdit();
-              break;
-            case _SnippetMenu.delete:
-              onDelete();
-              break;
-            case _SnippetMenu.pin:
-            case _SnippetMenu.unpin:
-              onPin();
-              break;
-          }
-        },
-        position: PopupMenuPosition.under,
-        itemBuilder: (context) => [
-          _menuItem(
-            icon: Icons.edit_outlined,
-            label: '编辑',
-            value: _SnippetMenu.edit,
-          ),
-          _menuItem(
-            icon: pinned ? Icons.push_pin : Icons.push_pin_outlined,
-            label: pinLabel,
-            value: pinned ? _SnippetMenu.unpin : _SnippetMenu.pin,
-          ),
-          _menuItem(
-            icon: Icons.delete_outline,
-            label: '删除',
-            value: _SnippetMenu.delete,
-          ),
-        ],
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          child: Icon(Icons.more_horiz, color: UiTokens.textSecondary),
-        ),
-      ),
-    );
-  }
-
-  PopupMenuItem<_SnippetMenu> _menuItem({
-    required IconData icon,
-    required String label,
-    required _SnippetMenu value,
-  }) {
-    return PopupMenuItem(
-      value: value,
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: UiTokens.textSecondary),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              color: UiTokens.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -1094,6 +1068,7 @@ class _HeaderPanel extends StatelessWidget {
     required this.snippetTitle,
     this.onSubmitParams,
     this.creatingTags = false,
+    this.compact = false,
   });
 
   final FocusNode searchFocusNode;
@@ -1106,6 +1081,7 @@ class _HeaderPanel extends StatelessWidget {
   final VoidCallback? onSubmitParams;
   final String? snippetTitle;
   final bool creatingTags;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -1118,24 +1094,27 @@ class _HeaderPanel extends StatelessWidget {
             border: Border.all(color: UiTokens.border),
             boxShadow: UiTokens.softShadow,
           ),
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+          padding: EdgeInsets.fromLTRB(
+              compact ? 12 : 14, compact ? 12 : 14, compact ? 12 : 14, 10),
           child: Column(
             children: [
               _SearchField(
                 onChanged: onQueryChanged,
                 focusNode: searchFocusNode,
+                dense: compact,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: compact ? 10 : 12),
               _TagBar(
                 tags: tags,
                 selectedId: selectedTagId,
                 onSelect: onSelectTag,
                 creating: creatingTags,
+                compact: compact,
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: compact ? 10 : 12),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           switchInCurve: Curves.easeOut,
@@ -1160,12 +1139,14 @@ class _TagBar extends StatelessWidget {
     required this.selectedId,
     required this.onSelect,
     required this.creating,
+    this.compact = false,
   });
 
   final List<Tag> tags;
   final String? selectedId;
   final ValueChanged<String?> onSelect;
   final bool creating;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -1200,12 +1181,14 @@ class _TagBar extends StatelessWidget {
                 label: '全部',
                 selected: selectedId == null,
                 onTap: () => onSelect(null),
+                dense: compact,
               ),
               ...tags.map(
                 (c) => _FilterChip(
                   label: c.name,
                   selected: c.id == selectedId,
                   onTap: () => onSelect(c.id),
+                  dense: compact,
                 ),
               ),
             ],
@@ -1217,10 +1200,12 @@ class _TagBar extends StatelessWidget {
 }
 
 class _SearchField extends StatelessWidget {
-  const _SearchField({required this.onChanged, this.focusNode});
+  const _SearchField(
+      {required this.onChanged, this.focusNode, this.dense = false});
 
   final ValueChanged<String> onChanged;
   final FocusNode? focusNode;
+  final bool dense;
 
   @override
   Widget build(BuildContext context) {
@@ -1233,8 +1218,10 @@ class _SearchField extends StatelessWidget {
         prefixIcon: const Icon(Icons.search),
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: dense ? 12 : 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: UiTokens.border),
@@ -1248,7 +1235,8 @@ class _SearchField extends StatelessWidget {
           borderSide: const BorderSide(color: UiTokens.primary, width: 1.4),
         ),
       ),
-      style: theme.textTheme.bodyLarge?.copyWith(
+      style: (dense ? theme.textTheme.bodyMedium : theme.textTheme.bodyLarge)
+          ?.copyWith(
         color: UiTokens.textPrimary,
         fontWeight: FontWeight.w500,
       ),
