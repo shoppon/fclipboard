@@ -7,10 +7,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from .. import models
+from .. import models, schemas
 from ..deps import get_current_user
 from ..db import get_db
 from ..schemas_tag import TagCreate, TagRead, TagUpdate
+from ..services.share_service import create_share_token
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -127,6 +128,41 @@ def delete_tag(
     db.delete(tag)
     db.commit()
     return None
+
+
+@router.post("/{tag_id}/share", response_model=schemas.ShareTokenResponse)
+def share_tag(
+    tag_id: str,
+    payload: schemas.TagShareRequest,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
+    tag = db.get(models.Tag, tag_id)
+    if tag is None or str(tag.user_id) != str(user.id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found")
+
+    recipient = (
+        db.query(models.User)
+        .filter(models.User.email == payload.email)
+        .first()
+    )
+    if recipient is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Recipient not found")
+
+    token = create_share_token(
+        token_type="share_tag",
+        sender_id=str(user.id),
+        recipient_email=recipient.email,
+        extra={
+            "tag_id": tag.id,
+            "tag_name": payload.tag_name or tag.name,
+        },
+    )
+    logger.info("tag.share token created sender=%s recipient=%s tag=%s",
+                user.id, recipient.id, tag.id)
+    return token
 
 
 class TagSyncPayload(BaseModel):

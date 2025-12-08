@@ -11,6 +11,12 @@ from sqlalchemy.orm import Session
 from .. import models, schemas
 from ..deps import get_current_user
 from ..db import get_db
+from ..services.share_service import (
+    create_share_token,
+    decode_share_token,
+    resolve_target_tag,
+    upsert_shared_snippet,
+)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -37,7 +43,8 @@ def list_snippets(
     user: models.User = Depends(get_current_user),
 ):
     if page < 1:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="page must be >= 1")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="page must be >= 1")
     query = db.query(models.Snippet).filter(
         models.Snippet.user_id == user.id, models.Snippet.deleted_at.is_(None)
     )
@@ -49,12 +56,14 @@ def list_snippets(
         try:
             tag_uuid = UUID(tagId)
         except ValueError:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid tag id")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid tag id")
         query = query.filter(models.Snippet.tag_id == tag_uuid)
     page_size = max(1, min(limit, 100))
     offset = (page - 1) * page_size
     items = (
-        query.order_by(desc(models.Snippet.updated_at), desc(models.Snippet.id))
+        query.order_by(desc(models.Snippet.updated_at),
+                       desc(models.Snippet.id))
         .offset(offset)
         .limit(page_size)
         .all()
@@ -150,6 +159,38 @@ def delete_snippet(
     return None
 
 
+@router.post("/{snippet_id}/share", response_model=schemas.ShareTokenResponse)
+def share_snippet(
+    snippet_id: str,
+    payload: schemas.SnippetShareRequest,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
+    snippet = db.get(models.Snippet, snippet_id)
+    if snippet is None or str(snippet.user_id) != str(user.id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found")
+    recipient = (
+        db.query(models.User)
+        .filter(models.User.email == payload.email)
+        .first()
+    )
+    if recipient is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Recipient not found")
+
+    return create_share_token(
+        token_type="share_snippet",
+        sender_id=str(user.id),
+        recipient_email=recipient.email,
+        extra={
+            "snippet_id": snippet.id,
+            "tag_id": payload.tag_id,
+            "tag_name": payload.tag_name,
+        },
+    )
+
+
 class SyncPayload(BaseModel):
     snippets: List[schemas.SnippetCreate] = Field(default_factory=list)
     updatedAfter: Optional[datetime] = None
@@ -191,7 +232,8 @@ def sync_snippets(
                         source=item.source,
                         pinned=item.pinned,
                         version=item.version,
-                        parameters=[param.model_dump() for param in item.parameters],
+                        parameters=[param.model_dump()
+                                    for param in item.parameters],
                         created_at=_ensure_aware(item.created_at) or _now(),
                         updated_at=incoming_updated,
                         deleted_at=item.deleted_at,
@@ -226,14 +268,18 @@ def sync_snippets(
             saved.append(snippet)
 
         pull_query = db.query(models.Snippet).filter(
-            models.Snippet.user_id == user.id, models.Snippet.deleted_at.is_(None)
+            models.Snippet.user_id == user.id, models.Snippet.deleted_at.is_(
+                None)
         )
         if payload.updatedAfter:
-            pull_query = pull_query.filter(models.Snippet.updated_at > payload.updatedAfter)
+            pull_query = pull_query.filter(
+                models.Snippet.updated_at > payload.updatedAfter)
         if payload.updatedBefore:
-            pull_query = pull_query.filter(models.Snippet.updated_at < payload.updatedBefore)
+            pull_query = pull_query.filter(
+                models.Snippet.updated_at < payload.updatedBefore)
         pulled_raw = (
-            pull_query.order_by(desc(models.Snippet.updated_at), desc(models.Snippet.id))
+            pull_query.order_by(
+                desc(models.Snippet.updated_at), desc(models.Snippet.id))
             .limit(100)
             .all()
         )
@@ -242,7 +288,8 @@ def sync_snippets(
             existing = deduped.get(it.title)
             if existing is None or (it.updated_at and existing.updated_at and it.updated_at > existing.updated_at):
                 deduped[it.title] = it
-        logger.info("snippet.sync user=%s pushed=%s pulled=%s", user.id, len(saved), len(deduped))
+        logger.info("snippet.sync user=%s pushed=%s pulled=%s",
+                    user.id, len(saved), len(deduped))
         return SyncResponse(saved=saved, pulled=list(deduped.values()))
     except Exception as exc:  # noqa: BLE001
         db.rollback()

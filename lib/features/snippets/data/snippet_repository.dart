@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/api/api_client.dart';
 import '../../../core/data/snippet.dart';
 import '../../../core/db/local_db.dart';
 import '../../../core/sync/sync_store.dart';
@@ -9,11 +12,13 @@ import 'local_snippet_store.dart';
 class SnippetRepository {
   SnippetRepository(this.ref)
       : _local = LocalSnippetStore(LocalDb.instance),
-        _sync = SyncStore(LocalDb.instance);
+        _sync = SyncStore(LocalDb.instance),
+        _api = ref.read(apiClientProvider);
 
   final Ref ref;
   final LocalSnippetStore _local;
   final SyncStore _sync;
+  final ApiClient _api;
   final _uuid = const Uuid();
 
   Future<List<Snippet>> fetchSnippets(
@@ -109,6 +114,52 @@ class SnippetRepository {
         op: 'upsert',
         payload: _snippetToJson(updated));
     return updated;
+  }
+
+  Future<String> shareSnippet({
+    required Snippet snippet,
+    required String email,
+    String? tagId,
+    String? tagName,
+  }) async {
+    final payload = <String, dynamic>{
+      'email': email,
+      'tag_id': tagId,
+      'tag_name': tagName,
+    }..removeWhere((_, value) => value == null);
+    final res = await _api.post('/snippets/${snippet.id}/share', body: payload);
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception('Share failed with status ${res.statusCode}');
+    }
+    final data = jsonDecode(res.body) as Map<String, dynamic>;
+    return data['token'] as String? ?? '';
+  }
+
+  Future<String> shareTag({
+    required String tagId,
+    required String email,
+    String? tagName,
+  }) async {
+    final payload = <String, dynamic>{
+      'email': email,
+      'tag_name': tagName,
+    }..removeWhere((_, value) => value == null);
+    final res = await _api.post('/tags/$tagId/share', body: payload);
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception('Share tag failed with status ${res.statusCode}');
+    }
+    final data = jsonDecode(res.body) as Map<String, dynamic>;
+    return data['token'] as String? ?? '';
+  }
+
+  Future<int> acceptShareToken(String token) async {
+    final res =
+        await _api.post('/share/accept', body: {'token': token});
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception('Accept share failed with status ${res.statusCode}');
+    }
+    final data = jsonDecode(res.body) as Map<String, dynamic>;
+    return (data['imported'] as num?)?.toInt() ?? 0;
   }
 
   Map<String, dynamic> _snippetToJson(Snippet snippet) {

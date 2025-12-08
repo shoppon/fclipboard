@@ -82,3 +82,35 @@ class SnippetRead(SnippetBase):
     conflict_of: Optional[UUID] = None
 
     model_config = {"from_attributes": True}
+
+
+class SnippetShareRequest(BaseModel):
+    email: EmailStr
+    tag_id: Optional[UUID] = Field(default=None, alias="tagId")
+    tag_name: Optional[str] = Field(
+        default=None, alias="tagName", max_length=120)
+
+    model_config = {"populate_by_name": True}
+
+
+class TagShareRequest(BaseModel):
+    email: EmailStr
+    tag_id: Optional[UUID] = Field(default=None, alias="tagId")
+    tag_name: Optional[str] = Field(
+        default=None, alias="tagName", max_length=120)
+
+    model_config = {"populate_by_name": True}
+
+
+class ShareTokenResponse(BaseModel):
+    token: str
+    expires_at: datetime = Field(alias="expiresAt")
+
+
+class ShareAcceptRequest(BaseModel):
+    token: str
+
+
+class ShareAcceptResponse(BaseModel):
+    imported: int
+    tag_id: Optional[UUID] = Field(default=None, alias="tagId")

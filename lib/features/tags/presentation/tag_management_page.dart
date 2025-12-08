@@ -17,6 +17,7 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
   String? _error;
   List<Tag> _tags = [];
   Map<String?, int> _counts = {};
+  String? _sharingTagId;
 
   @override
   void initState() {
@@ -99,6 +100,95 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
     }
   }
 
+  Future<void> _share(Tag tag) async {
+    final emailController = TextEditingController();
+    final tagNameController = TextEditingController(text: tag.name);
+    final formKey = GlobalKey<FormState>();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('分享标签内片段'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '将标签“${tag.name}”下的所有片段分享给指定邮箱用户。',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: Colors.black87),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  labelText: '对方邮箱',
+                  hintText: 'user@example.com',
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  final email = value?.trim() ?? '';
+                  if (email.isEmpty) return '请输入邮箱';
+                  if (!email.contains('@')) return '邮箱格式不正确';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: tagNameController,
+                decoration: const InputDecoration(
+                  labelText: '分享时使用的标签名',
+                  helperText: '默认为当前标签名称',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState?.validate() != true) return;
+              Navigator.pop(context, true);
+            },
+            child: const Text('分享'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+    final email = emailController.text.trim();
+    final tagName = tagNameController.text.trim().isEmpty
+        ? tag.name
+        : tagNameController.text.trim();
+
+    setState(() => _sharingTagId = tag.id);
+    try {
+      final token = await ref.read(snippetRepositoryProvider).shareTag(
+            tagId: tag.id,
+            email: email,
+            tagName: tagName,
+          );
+      if (mounted) {
+        await _showShareToken(token);
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('分享失败，请稍后重试')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _sharingTagId = null);
+    }
+  }
+
   Future<void> _create() async {
     final nameController = TextEditingController();
     final result = await showDialog<String>(
@@ -127,6 +217,38 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
       await ref.read(tagRepositoryProvider).createTag(name: result.trim());
       await _load();
     }
+  }
+
+  Future<void> _showShareToken(String token) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('分享令牌已生成'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('请将令牌发送给接收人，对方在个人信息页粘贴确认后才会导入。'),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: SelectableText(token),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('完成'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -185,6 +307,7 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
                         itemBuilder: (context, index) {
                           final tag = _tags[index];
                           final count = _counts[tag.id] ?? 0;
+                          final sharing = _sharingTagId == tag.id;
                           return Card(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
@@ -210,6 +333,21 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
                                         icon: const Icon(Icons.edit),
                                         tooltip: '重命名',
                                         onPressed: () => _edit(tag),
+                                      ),
+                                      IconButton(
+                                        icon: sharing
+                                            ? const SizedBox(
+                                                width: 18,
+                                                height: 18,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                ),
+                                              )
+                                            : const Icon(Icons.share_outlined),
+                                        tooltip: '分享标签内片段',
+                                        onPressed:
+                                            sharing ? null : () => _share(tag),
                                       ),
                                       IconButton(
                                         icon: const Icon(Icons.delete_outline),

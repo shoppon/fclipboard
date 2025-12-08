@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/data/snippet.dart';
 import '../../../core/data/tag.dart';
 import '../../../design/ui_tokens.dart';
+import '../../../core/hotkey/search_focus_controller.dart';
 import '../application/home_controller.dart';
 import '../application/home_state.dart';
 
@@ -56,11 +57,18 @@ class _HomePageState extends ConsumerState<HomePage> {
       },
       fireImmediately: true,
     );
+    ref.read(homeFocusControllerProvider).registerSearchHandler(() {
+      if (mounted) {
+        _shortcutFocusNode.requestFocus();
+        _searchFocusNode.requestFocus();
+      }
+    });
   }
 
   @override
   void dispose() {
     _homeSub.close();
+    ref.read(homeFocusControllerProvider).clear();
     _searchFocusNode.dispose();
     _shortcutFocusNode.dispose();
     _clearParamControllers();
@@ -332,6 +340,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   onDelete: () => _confirmDelete(
                                       context, controller, snippet),
                                   onPin: () => controller.togglePin(snippet),
+                                  onShare: () => _shareSnippetDialog(
+                                      context, controller, snippet, state.tags),
                                 );
                               },
                             ),
@@ -454,6 +464,178 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
+  Future<void> _shareSnippetDialog(
+    BuildContext context,
+    HomeController controller,
+    Snippet snippet,
+    List<Tag> tags,
+  ) async {
+    Tag? _findTag(String? id) {
+      if (id == null) return null;
+      for (final t in tags) {
+        if (t.id == id) return t;
+      }
+      return null;
+    }
+
+    final initialTag = _findTag(snippet.tagId);
+    final emailController = TextEditingController();
+    final tagNameController =
+        TextEditingController(text: initialTag != null ? initialTag.name : '');
+    String? selectedTagId = snippet.tagId;
+    final formKey = GlobalKey<FormState>();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('分享片段'),
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('将“${snippet.title}”分享给其他邮箱用户，并同步标签。'),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: emailController,
+                    decoration: const InputDecoration(
+                      labelText: '对方邮箱',
+                      hintText: 'user@example.com',
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      final email = value?.trim() ?? '';
+                      if (email.isEmpty) return '请输入邮箱';
+                      if (!email.contains('@')) return '邮箱格式不正确';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<String?>(
+                    value: selectedTagId,
+                    decoration: const InputDecoration(
+                      labelText: '选择标签（可选）',
+                    ),
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('不指定标签'),
+                      ),
+                      ...tags.map(
+                        (t) => DropdownMenuItem<String?>(
+                          value: t.id,
+                          child: Text(t.name),
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedTagId = value;
+                        final tag = _findTag(value);
+                        tagNameController.text = tag?.name ?? '';
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: tagNameController,
+                    decoration: const InputDecoration(
+                      labelText: '共享时使用的标签名（可选）',
+                      helperText: '留空则不附带标签，或使用上面选择的标签名称',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (formKey.currentState?.validate() != true) return;
+                Navigator.pop(context, true);
+              },
+              child: const Text('发送'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final email = emailController.text.trim();
+    final tagName = tagNameController.text.trim().isNotEmpty
+        ? tagNameController.text.trim()
+        : _findTag(selectedTagId)?.name;
+    try {
+      final token = await controller.shareSnippet(
+        snippet: snippet,
+        email: email,
+        tagId: selectedTagId,
+        tagName: tagName,
+      );
+      if (mounted) {
+        await _showShareToken(context, token);
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('分享失败，请稍后重试')));
+      }
+    }
+  }
+
+  Future<void> _showShareToken(BuildContext context, String token) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('分享令牌已生成'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('请将下方令牌发送给接收人，对方确认后才会导入片段。'),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: UiTokens.surface,
+                borderRadius: UiTokens.cardRadius,
+                border: Border.all(color: UiTokens.border),
+              ),
+              child: SelectableText(token),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: token));
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('已复制令牌')),
+                );
+              }
+            },
+            child: const Text('复制令牌'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('完成'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _showAddTagDialog(
       BuildContext context, HomeController controller) async {
     final nameController = TextEditingController();
@@ -544,6 +726,7 @@ class _SnippetCard extends StatefulWidget {
     required this.onEdit,
     required this.onDelete,
     required this.onPin,
+    required this.onShare,
     this.compact = false,
   });
 
@@ -553,6 +736,7 @@ class _SnippetCard extends StatefulWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onPin;
+  final VoidCallback onShare;
   final bool compact;
 
   @override
@@ -604,6 +788,15 @@ class _SnippetCardState extends State<_SnippetCard> {
                       },
                     ),
                     ListTile(
+                      leading: const Icon(Icons.share_outlined,
+                          color: UiTokens.textPrimary),
+                      title: const Text('分享'),
+                      onTap: () {
+                        Navigator.pop(context);
+                        widget.onShare();
+                      },
+                    ),
+                    ListTile(
                       leading: Icon(
                         widget.snippet.pinned
                             ? Icons.push_pin
@@ -651,7 +844,7 @@ class _SnippetCardState extends State<_SnippetCard> {
             borderRadius: UiTokens.cardRadius,
             child: InkWell(
               onTap: widget.onCopy,
-              onLongPress: _showActionsSheet,
+              onLongPress: widget.compact ? _showActionsSheet : null,
               borderRadius: UiTokens.cardRadius,
               child: Padding(
                 padding: EdgeInsets.all(widget.compact ? 12 : 16),
@@ -772,40 +965,86 @@ class _SnippetCardState extends State<_SnippetCard> {
                     ),
                     if (showMeta) ...[
                       SizedBox(height: widget.compact ? 10 : 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        crossAxisAlignment: WrapCrossAlignment.center,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (widget.snippet.tags.isNotEmpty)
-                            ...widget.snippet.tags.map(
-                              (tag) => _InfoBadge(
-                                label: tag,
-                                icon: Icons.sell_outlined,
-                                background: UiTokens.subtle,
-                                foreground: UiTokens.textSecondary,
-                              ),
+                          Expanded(
+                            child: Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                if (widget.snippet.tags.isNotEmpty)
+                                  ...widget.snippet.tags.map(
+                                    (tag) => _InfoBadge(
+                                      label: tag,
+                                      icon: Icons.sell_outlined,
+                                      background: UiTokens.subtle,
+                                      foreground: UiTokens.textSecondary,
+                                    ),
+                                  ),
+                                if (widget.snippet.parameters.isNotEmpty)
+                                  const _InfoBadge(
+                                    label: '需要参数',
+                                    icon: Icons.tune,
+                                    background: Color(0xFFEFF6FF),
+                                    foreground: UiTokens.primary,
+                                  ),
+                                _InfoBadge(
+                                  label: dateText,
+                                  icon: Icons.schedule,
+                                  background: UiTokens.surface,
+                                  foreground: UiTokens.textSecondary,
+                                ),
+                                if (widget.snippet.source != null &&
+                                    widget.snippet.source!.isNotEmpty)
+                                  _InfoBadge(
+                                    label: widget.snippet.source!,
+                                    icon: Icons.work_outline,
+                                    background: UiTokens.surface,
+                                    foreground: UiTokens.textSecondary,
+                                  ),
+                              ],
                             ),
-                          if (widget.snippet.parameters.isNotEmpty)
-                            const _InfoBadge(
-                              label: '需要参数',
-                              icon: Icons.tune,
-                              background: Color(0xFFEFF6FF),
-                              foreground: UiTokens.primary,
-                            ),
-                          _InfoBadge(
-                            label: dateText,
-                            icon: Icons.schedule,
-                            background: UiTokens.surface,
-                            foreground: UiTokens.textSecondary,
                           ),
-                          if (widget.snippet.source != null &&
-                              widget.snippet.source!.isNotEmpty)
-                            _InfoBadge(
-                              label: widget.snippet.source!,
-                              icon: Icons.work_outline,
-                              background: UiTokens.surface,
-                              foreground: UiTokens.textSecondary,
+                          if (!widget.compact)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Wrap(
+                                spacing: 6,
+                                runSpacing: 4,
+                                children: [
+                                  _ActionIcon(
+                                    icon: Icons.copy_outlined,
+                                    tooltip: '复制',
+                                    onPressed: widget.onCopy,
+                                  ),
+                                  _ActionIcon(
+                                    icon: Icons.share_outlined,
+                                    tooltip: '分享',
+                                    onPressed: widget.onShare,
+                                  ),
+                                  _ActionIcon(
+                                    icon: Icons.edit_outlined,
+                                    tooltip: '编辑',
+                                    onPressed: widget.onEdit,
+                                  ),
+                                  _ActionIcon(
+                                    icon: widget.snippet.pinned
+                                        ? Icons.push_pin
+                                        : Icons.push_pin_outlined,
+                                    tooltip:
+                                        widget.snippet.pinned ? '取消置顶' : '置顶',
+                                    onPressed: widget.onPin,
+                                  ),
+                                  _ActionIcon(
+                                    icon: Icons.delete_outline,
+                                    tooltip: '删除',
+                                    onPressed: widget.onDelete,
+                                    foreground: Colors.redAccent,
+                                  ),
+                                ],
+                              ),
                             ),
                         ],
                       ),
@@ -817,6 +1056,38 @@ class _SnippetCardState extends State<_SnippetCard> {
           ),
         );
       },
+    );
+  }
+}
+
+class _ActionIcon extends StatelessWidget {
+  const _ActionIcon({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    this.foreground,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+  final Color? foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      style: IconButton.styleFrom(
+        backgroundColor: UiTokens.surface,
+        foregroundColor: foreground ?? UiTokens.textSecondary,
+        padding: const EdgeInsets.all(10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: const BorderSide(color: UiTokens.border),
+        ),
+      ),
     );
   }
 }

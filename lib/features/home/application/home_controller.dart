@@ -148,4 +148,18 @@ class HomeController extends StateNotifier<HomeState> {
       state = state.copyWith(creatingSnippet: false);
     }
   }
+
+  Future<String> shareSnippet({
+    required Snippet snippet,
+    required String email,
+    String? tagId,
+    String? tagName,
+  }) async {
+    return _snippets.shareSnippet(
+      snippet: snippet,
+      email: email,
+      tagId: tagId,
+      tagName: tagName,
+    );
+  }
 }
