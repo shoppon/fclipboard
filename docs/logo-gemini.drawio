@@ -1,0 +1,37 @@
+<mxfile host="65bd71144e">
+    <diagram id="logo-diagram" name="Second Brain Logo">
+        <mxGraphModel dx="602" dy="508" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="bg" value="" style="group" parent="1" vertex="1" connectable="0">
+                    <mxGeometry x="300" y="260" width="240" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="brain_shape_union" value="" style="shape=mxgraph.basic.oval_callout;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#64B5F6;strokeWidth=3;rounded=1;arcSize=50;rotation=-180;flipV=1;flipH=1;" parent="bg" vertex="1">
+                    <mxGeometry width="240" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="left_hemisphere_group" value="" style="group" parent="bg" vertex="1" connectable="0">
+                    <mxGeometry x="30" y="40" width="80" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="snippet_1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=none;arcSize=20;" parent="left_hemisphere_group" vertex="1">
+                    <mxGeometry width="80" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="snippet_2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=none;arcSize=20;" parent="left_hemisphere_group" vertex="1">
+                    <mxGeometry y="25" width="80" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="snippet_3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=none;arcSize=20;" parent="left_hemisphere_group" vertex="1">
+                    <mxGeometry y="50" width="60" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="right_hemisphere_group" value="" style="group" parent="bg" vertex="1" connectable="0">
+                    <mxGeometry x="130" y="55" width="80" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="active_snippet" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2196F3;strokeColor=none;arcSize=20;" parent="right_hemisphere_group" vertex="1">
+                    <mxGeometry width="60" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="action_triangle" value="" style="shape=triangle;whiteSpace=wrap;html=1;fillColor=#00BCD4;strokeColor=none;rotation=0;" parent="right_hemisphere_group" vertex="1">
+                    <mxGeometry x="55" y="-5" width="30" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
