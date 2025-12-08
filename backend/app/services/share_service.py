@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from uuid import UUID
 
 from jose import jwt
 from sqlalchemy import desc
@@ -24,16 +25,17 @@ def create_share_token(
     extra: dict,
 ) -> schemas.ShareTokenResponse:
     settings = get_settings()
+    expires_at = _share_expiry()
     payload = {
         "type": token_type,
         "sender_id": sender_id,
         "recipient_email": recipient_email,
-        **extra,
-        "exp": _share_expiry(),
+        **{k: str(v) if isinstance(v, UUID) else v for k, v in extra.items()},
+        "exp": int(expires_at.timestamp()),
     }
     token = jwt.encode(payload, settings.jwt_secret,
                        algorithm=settings.jwt_algorithm)
-    return schemas.ShareTokenResponse(token=token, expiresAt=payload["exp"])
+    return schemas.ShareTokenResponse(token=token, expiresAt=expires_at)
 
 
 def decode_share_token(token: str) -> dict:

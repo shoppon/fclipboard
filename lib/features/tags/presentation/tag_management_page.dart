@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/data/tag.dart';
@@ -220,6 +221,22 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
   }
 
   Future<void> _showShareToken(String token) async {
+    try {
+      await Clipboard.setData(ClipboardData(text: token));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('分享令牌已复制到剪贴板')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('自动复制失败，请手动复制令牌')),
+        );
+      }
+    }
+    if (!mounted) return;
+
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -229,6 +246,8 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('请将令牌发送给接收人，对方在个人信息页粘贴确认后才会导入。'),
+            const SizedBox(height: 8),
+            const Text('令牌已自动复制到剪贴板。'),
             const SizedBox(height: 12),
             Container(
               width: double.infinity,
@@ -242,6 +261,17 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
           ],
         ),
         actions: [
+          TextButton(
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: token));
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('已复制令牌')),
+                );
+              }
+            },
+            child: const Text('重新复制'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('完成'),
