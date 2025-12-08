@@ -40,6 +40,7 @@ class LocalDb {
         color TEXT,
         version INTEGER,
         updated_at TEXT,
+        deleted_at TEXT,
         user_id TEXT
       );
     ''');
@@ -76,6 +77,14 @@ class LocalDb {
         value TEXT
       );
     ''');
+    await _ensureColumn(db, 'tags', 'deleted_at', 'TEXT');
+  }
+
+  Future<void> _ensureColumn(Database db, String table, String column, String type) async {
+    final cols = await db.rawQuery('PRAGMA table_info($table);');
+    final exists = cols.any((c) => (c['name'] as String?) == column);
+    if (exists) return;
+    await db.execute('ALTER TABLE $table ADD COLUMN $column $type;');
   }
 
   Future<String> _dbPath() async {

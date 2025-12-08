@@ -47,6 +47,17 @@ class SyncService {
     }
   }
 
+  Future<void> downloadAll() async {
+    if (_busy) return;
+    _busy = true;
+    try {
+      await _downloadTags();
+      await _downloadSnippets();
+    } finally {
+      _busy = false;
+    }
+  }
+
   Future<DateTime?> _safeLastSynced(String key) async {
     final last = await syncStore.lastSynced(key);
     if (last == null) return null;
@@ -62,81 +73,47 @@ class SyncService {
     return last;
   }
 
-  DateTime _clampToNow(DateTime ts) {
-    final now = DateTime.now();
-    return ts.isAfter(now) ? now : ts;
-  }
-
-  Map<String, Tag> _dedupeTagsByName(Iterable<Tag> items) {
-    final map = <String, Tag>{};
-    for (final t in items) {
-      final existing = map[t.name];
-      if (existing == null || t.updatedAt.isAfter(existing.updatedAt)) {
-        map[t.name] = t;
-      }
-    }
-    return map;
-  }
-
-  Map<String, Snippet> _dedupeSnippetsByTitle(Iterable<Snippet> items) {
-    final map = <String, Snippet>{};
-    for (final s in items) {
-      final existing = map[s.title];
-      if (existing == null || s.updatedAt.isAfter(existing.updatedAt)) {
-        map[s.title] = s;
-      }
-    }
-    return map;
-  }
-
   Future<void> _syncTags() async {
     try {
-      var savedCount = 0;
       final pending = await syncStore.pending('tag');
-      if (pending.isNotEmpty) {
-        final payload = {
-          'tags': pending.map((p) => p.payload).toList(),
-        };
-        final res = await api.post('/tags/sync', body: payload);
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          await syncStore.deleteOps(pending.map((e) => e.id).toList());
-        }
-      }
+      final cursor = await _safeLastSynced('tags_cursor');
+      final payload = <String, dynamic>{
+        'cursor': cursor?.toIso8601String(),
+        'ops': pending
+            .map((p) => {
+                  'op': p.op,
+                  'tag': p.payload,
+                })
+            .toList(),
+      }..removeWhere((_, value) =>
+          value == null || (value is List && value.isEmpty));
 
-      // Force full fetch; page forward by page number.
-      DateTime? maxTs;
-      final seenIds = <String>{};
-      const limit = 100;
-      var page = 1;
-      while (true) {
-        final res = await api.get('/tags?limit=$limit&page=$page');
-        if (res.statusCode != 200) break;
-        final list = _decodeJsonList(res.bodyBytes);
-        if (list.isEmpty) break;
-        final mapped =
-            list.map((item) => _mapTag(item as Map<String, dynamic>));
-        final deduped = _dedupeTagsByName(mapped);
-        for (final c in deduped.values) {
-          seenIds.add(c.id);
-          try {
-            await tags.upsert(c);
-            savedCount++;
-          } catch (e) {
-            debugPrint('tag upsert failed id=${c.id} name=${c.name} err=$e');
-          }
-          if (maxTs == null || c.updatedAt.isAfter(maxTs)) maxTs = c.updatedAt;
+      final res = await api.post('/tags/sync', body: payload);
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        throw Exception('tags sync failed with status ${res.statusCode}');
+      }
+      final data =
+          jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+      if (pending.isNotEmpty) {
+        await syncStore.deleteOps(pending.map((e) => e.id).toList());
+      }
+      final changes = (data['changes'] as List<dynamic>? ?? [])
+          .map((item) => _mapTag(item as Map<String, dynamic>))
+          .toList();
+      for (final t in changes) {
+        if (t.deletedAt != null) {
+          await tags.delete(t.id);
+        } else {
+          await tags.upsert(t);
         }
-        if (list.length < limit) break;
-        page += 1;
       }
-      if (maxTs != null) {
-        await syncStore.setLastSynced('tags', _clampToNow(maxTs));
-      }
-      if (seenIds.isNotEmpty) {
-        await tags.pruneNotIn(seenIds);
+      final nextCursorStr = data['nextCursor'] as String?;
+      if (nextCursorStr != null && nextCursorStr.isNotEmpty) {
+        await syncStore
+            .setLastSynced('tags_cursor', DateTime.parse(nextCursorStr));
       }
       debugPrint(
-          'sync tags done fetched=${seenIds.length} saved=$savedCount pending=${pending.length} maxTs=$maxTs');
+          'sync tags done changes=${changes.length} pending=${pending.length}');
     } catch (e) {
       // swallow errors to stay offline-friendly
       debugPrint('sync tags error: $e');
@@ -145,61 +122,135 @@ class SyncService {
 
   Future<void> _syncSnippets() async {
     try {
-      var savedCount = 0;
       final pending = await syncStore.pending('snippet');
-      if (pending.isNotEmpty) {
-        final payload = {
-          'snippets': pending.map((p) => p.payload).toList(),
-        };
-        final res = await api.post('/snippets/sync', body: payload);
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          await syncStore.deleteOps(pending.map((e) => e.id).toList());
-        }
-      }
+      final cursor = await _safeLastSynced('snippets_cursor');
+      final payload = <String, dynamic>{
+        'cursor': cursor?.toIso8601String(),
+        'ops': pending
+            .map((p) => {
+                  'op': p.op,
+                  'snippet': p.payload,
+                })
+            .toList(),
+      }..removeWhere((_, value) =>
+          value == null || (value is List && value.isEmpty));
 
-      // Always start from scratch; page forward by page number.
-      DateTime? maxTs;
-      final seenIds = <String>{};
-      const limit = 100;
-      var page = 1;
-      while (true) {
-        final res = await api.get('/snippets?limit=$limit&page=$page');
-        if (res.statusCode != 200) break;
-        final list = _decodeJsonList(res.bodyBytes);
-        if (list.isEmpty) break;
-        final mapped =
-            list.map((item) => _mapSnippet(item as Map<String, dynamic>));
-        final deduped = _dedupeSnippetsByTitle(mapped);
-        for (final e in deduped.values) {
-          seenIds.add(e.id);
-          try {
-            await snippets.upsert(e);
-            savedCount++;
-          } catch (err) {
-            debugPrint(
-                'snippet upsert failed id=${e.id} title=${e.title} err=$err');
-          }
-          if (maxTs == null || e.updatedAt.isAfter(maxTs)) maxTs = e.updatedAt;
-        }
-        if (list.length < limit) break;
-        page += 1;
+      final res = await api.post('/snippets/sync', body: payload);
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        throw Exception('snippets sync failed with status ${res.statusCode}');
       }
-      if (maxTs != null) {
-        await syncStore.setLastSynced('snippets', _clampToNow(maxTs));
+      final data =
+          jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+      if (pending.isNotEmpty) {
+        await syncStore.deleteOps(pending.map((e) => e.id).toList());
       }
-      if (seenIds.isNotEmpty && pending.isEmpty) {
-        await snippets.pruneNotIn(seenIds);
+      final changes = (data['changes'] as List<dynamic>? ?? [])
+          .map((item) => _mapSnippet(item as Map<String, dynamic>))
+          .toList();
+      for (final s in changes) {
+        await snippets.upsert(s);
+      }
+      final nextCursorStr = data['nextCursor'] as String?;
+      if (nextCursorStr != null && nextCursorStr.isNotEmpty) {
+        await syncStore.setLastSynced(
+            'snippets_cursor', DateTime.parse(nextCursorStr));
       }
       debugPrint(
-          'sync snippets done fetched=${seenIds.length} saved=$savedCount pending=${pending.length} maxTs=$maxTs');
+          'sync snippets done changes=${changes.length} pending=${pending.length}');
     } catch (e) {
       // offline or server error; will retry later
       debugPrint('sync snippets error: $e');
     }
   }
 
-  List<dynamic> _decodeJsonList(Uint8List bodyBytes) {
-    return jsonDecode(utf8.decode(bodyBytes)) as List<dynamic>;
+  Future<void> _downloadTags() async {
+    try {
+      final pending = await syncStore.pending('tag');
+      final pendingDeletes =
+          pending.where((op) => op.op == 'delete').map((op) => op.entityId).toSet();
+      final ids = <String>{};
+      DateTime? maxTs;
+      const limit = 200;
+      var page = 1;
+      while (true) {
+        final res = await api.get('/tags/full?limit=$limit&page=$page');
+        if (res.statusCode != 200) {
+          throw Exception(
+              'full tags fetch failed with status ${res.statusCode}');
+        }
+        final list = jsonDecode(utf8.decode(res.bodyBytes)) as List<dynamic>;
+        if (list.isEmpty) break;
+        final mapped = list
+            .map((item) => _mapTag(item as Map<String, dynamic>))
+            .toList();
+        for (final t in mapped) {
+          ids.add(t.id);
+          if (pendingDeletes.contains(t.id)) {
+            // Keep local tombstone; do not resurrect remote copy.
+            continue;
+          }
+          await tags.upsert(t);
+          final ts = t.deletedAt ?? t.updatedAt;
+          if (maxTs == null || ts.isAfter(maxTs)) maxTs = ts;
+        }
+        if (list.length < limit) break;
+        page += 1;
+      }
+      if (ids.isNotEmpty) {
+        await tags.pruneNotIn(ids);
+      }
+      if (maxTs != null) {
+        await syncStore.setLastSynced('tags_cursor', maxTs);
+      }
+      debugPrint('download all tags done count=${ids.length}');
+    } catch (e) {
+      debugPrint('download all tags error: $e');
+    }
+  }
+
+  Future<void> _downloadSnippets() async {
+    try {
+      final pending = await syncStore.pending('snippet');
+      final pendingDeletes =
+          pending.where((op) => op.op == 'delete').map((op) => op.entityId).toSet();
+      final ids = <String>{};
+      DateTime? maxTs;
+      const limit = 200;
+      var page = 1;
+      while (true) {
+        final res = await api.get('/snippets/full?limit=$limit&page=$page');
+        if (res.statusCode != 200) {
+          throw Exception(
+              'full snippets fetch failed with status ${res.statusCode}');
+        }
+        final list = jsonDecode(utf8.decode(res.bodyBytes)) as List<dynamic>;
+        if (list.isEmpty) break;
+        final mapped = list
+            .map((item) => _mapSnippet(item as Map<String, dynamic>))
+            .toList();
+        for (final s in mapped) {
+          ids.add(s.id);
+          if (pendingDeletes.contains(s.id)) {
+            // Keep local tombstone; do not resurrect remote copy.
+            continue;
+          }
+          await snippets.upsert(s);
+          final ts = s.deletedAt ?? s.updatedAt;
+          if (maxTs == null || ts.isAfter(maxTs)) maxTs = ts;
+        }
+        if (list.length < limit) break;
+        page += 1;
+      }
+      if (ids.isNotEmpty) {
+        await snippets.pruneNotIn(ids);
+      }
+      if (maxTs != null) {
+        await syncStore.setLastSynced('snippets_cursor', maxTs);
+      }
+      debugPrint('download all snippets done count=${ids.length}');
+    } catch (e) {
+      debugPrint('download all snippets error: $e');
+    }
   }
 
   Tag _mapTag(Map<String, dynamic> json) {
@@ -208,7 +259,11 @@ class SyncService {
       name: json['name'] as String? ?? '',
       color: json['color'] as String?,
       version: (json['version'] as num?)?.toInt() ?? 1,
-      updatedAt: DateTime.parse(json['updated_at'].toString()),
+      updatedAt:
+          DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now(),
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.tryParse(json['deleted_at'].toString())
+          : null,
     );
   }
 

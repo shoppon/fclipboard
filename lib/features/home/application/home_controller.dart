@@ -29,16 +29,22 @@ class HomeController extends StateNotifier<HomeState> {
       if (withSync) {
         await ref.read(syncServiceProvider).sync();
       }
-      final tags = await _tags.fetchTags();
-      final dedupedTags = await _tags.dedupeByName(tags);
-      final results = await _snippets.fetchSnippets(
-        query: state.query,
-        tagId: state.selectedTagId,
-      );
-      await _snippets.dedupeByTitle(results);
-      state = state.copyWith(snippets: results, tags: dedupedTags);
+      await _refreshState();
     } catch (_) {
       // silent fail; auth guard will redirect on logout if unauthorized
+    } finally {
+      state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<void> downloadAll() async {
+    if (state.loading) return;
+    state = state.copyWith(loading: true, selectedSnippetId: null);
+    try {
+      await ref.read(syncServiceProvider).downloadAll();
+      await _refreshState();
+    } catch (_) {
+      // silent fail to keep UI responsive
     } finally {
       state = state.copyWith(loading: false);
     }
@@ -58,6 +64,26 @@ class HomeController extends StateNotifier<HomeState> {
     } finally {
       state = state.copyWith(loading: false);
     }
+  }
+
+  Future<void> _refreshState() async {
+    final tags = await _tags.fetchTags();
+    final dedupedTags = await _tags.dedupeByName(tags);
+    final results = await _snippets.fetchSnippets(
+      query: state.query,
+      tagId: state.selectedTagId,
+    );
+    await _snippets.dedupeByTitle(results);
+    final selectedSnippetExists =
+        results.any((e) => e.id == state.selectedSnippetId);
+    final selectedTagExists =
+        dedupedTags.any((t) => t.id == state.selectedTagId);
+    state = state.copyWith(
+      snippets: results,
+      tags: dedupedTags,
+      selectedSnippetId: selectedSnippetExists ? state.selectedSnippetId : null,
+      selectedTagId: selectedTagExists ? state.selectedTagId : null,
+    );
   }
 
   Future<void> selectTag(String? tagId) async {

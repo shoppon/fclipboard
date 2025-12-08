@@ -33,6 +33,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     _homeSub = ref.listenManual<HomeState>(
       homeControllerProvider,
       (previous, next) {
+        if (!mounted) return;
         _syncKeys(next.snippets);
         final selectedId = next.selectedSnippetId;
         if (selectedId == null) {
@@ -84,6 +85,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   void _setSelectedSnippet(Snippet? snippet) {
     _clearParamControllers();
+    if (!mounted) return;
     setState(() {
       _selectedSnippet = snippet;
       if (snippet != null) {
@@ -257,6 +259,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                 : () => _showAddTagDialog(context, controller),
             onManageTags: () => _openTagManagement(controller),
             onProfile: () => context.pushNamed('profile'),
+            onFullSync:
+                state.loading ? null : () => controller.downloadAll(),
           ),
           const SizedBox(width: 6),
         ],
@@ -1133,18 +1137,20 @@ class _InfoBadge extends StatelessWidget {
   }
 }
 
-enum _OverflowAction { newTag, manageTags, profile }
+enum _OverflowAction { fullSync, newTag, manageTags, profile }
 
 class _MoreMenu extends StatelessWidget {
   const _MoreMenu({
     required this.onNewTag,
     required this.onManageTags,
     required this.onProfile,
+    required this.onFullSync,
   });
 
   final VoidCallback? onNewTag;
   final VoidCallback onManageTags;
   final VoidCallback onProfile;
+  final VoidCallback? onFullSync;
 
   @override
   Widget build(BuildContext context) {
@@ -1160,6 +1166,9 @@ class _MoreMenu extends StatelessWidget {
           tooltip: '更多',
           onSelected: (action) {
             switch (action) {
+              case _OverflowAction.fullSync:
+                onFullSync?.call();
+                break;
               case _OverflowAction.newTag:
                 onNewTag?.call();
                 break;
@@ -1172,6 +1181,17 @@ class _MoreMenu extends StatelessWidget {
             }
           },
           itemBuilder: (context) => [
+            PopupMenuItem(
+              value: _OverflowAction.fullSync,
+              enabled: onFullSync != null,
+              child: Row(
+                children: const [
+                  Icon(Icons.cloud_download, size: 18),
+                  SizedBox(width: 8),
+                  Text('全量同步'),
+                ],
+              ),
+            ),
             PopupMenuItem(
               value: _OverflowAction.newTag,
               enabled: onNewTag != null,

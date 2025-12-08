@@ -5,6 +5,7 @@ class Tag {
     required this.updatedAt,
     this.color,
     this.version = 1,
+    this.deletedAt,
   });
 
   final String id;
@@ -12,6 +13,7 @@ class Tag {
   final String? color;
   final DateTime updatedAt;
   final int version;
+  final DateTime? deletedAt;
 
   Tag copyWith({
     String? id,
@@ -19,6 +21,7 @@ class Tag {
     String? color,
     DateTime? updatedAt,
     int? version,
+    DateTime? deletedAt,
   }) {
     return Tag(
       id: id ?? this.id,
@@ -26,6 +29,7 @@ class Tag {
       color: color ?? this.color,
       updatedAt: updatedAt ?? this.updatedAt,
       version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
   }
 }

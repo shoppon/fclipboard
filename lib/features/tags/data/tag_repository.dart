@@ -44,6 +44,7 @@ class TagRepository {
         'version': tag.version,
         'updated_at': tag.updatedAt.toIso8601String(),
         'created_at': tag.updatedAt.toIso8601String(),
+        'deleted_at': tag.deletedAt?.toIso8601String(),
       },
     );
     return tag;
@@ -88,16 +89,45 @@ class TagRepository {
         'version': updated.version,
         'updated_at': updated.updatedAt.toIso8601String(),
         'created_at': updated.updatedAt.toIso8601String(),
+        'deleted_at': updated.deletedAt?.toIso8601String(),
       },
     );
   }
 
   Future<void> deleteTag(String id) async {
-    await _local.delete(id);
+    final existing = await _local.findById(id);
+    final now = DateTime.now();
+    final tombstone = Tag(
+      id: id,
+      name: existing?.name ?? '',
+      color: existing?.color,
+      version: (existing?.version ?? 1) + 1,
+      updatedAt: now,
+      deletedAt: now,
+    );
+    await _local.upsert(tombstone);
+    await _sync.deleteByEntity('tag', id);
     try {
-      await _api.delete('/tags/$id');
+      final res = await _api.delete('/tags/$id');
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        throw Exception('Tag delete failed with status ${res.statusCode}');
+      }
     } catch (_) {
-      // ignore; next sync pull will refresh local state
+      await _sync.enqueue(
+        entityType: 'tag',
+        entityId: id,
+        op: 'delete',
+        payload: {
+          'id': id,
+          'name': tombstone.name,
+          'color': tombstone.color,
+          'version': tombstone.version,
+          'updated_at': tombstone.updatedAt.toIso8601String(),
+          'deleted_at': tombstone.deletedAt?.toIso8601String(),
+          'created_at':
+              (existing?.updatedAt ?? tombstone.updatedAt).toIso8601String(),
+        },
+      );
     }
   }
 }

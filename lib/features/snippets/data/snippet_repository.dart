@@ -98,7 +98,7 @@ class SnippetRepository {
     await _sync.enqueue(
         entityType: 'snippet',
         entityId: deleted.id,
-        op: 'upsert',
+        op: 'delete',
         payload: _snippetToJson(deleted));
   }
 

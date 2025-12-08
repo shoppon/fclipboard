@@ -75,6 +75,15 @@ class SyncStore {
         where: 'op_id IN ($placeholders)', whereArgs: ids);
   }
 
+  Future<void> deleteByEntity(String entityType, String entityId) async {
+    final db = await _dbProvider.database;
+    await db.delete(
+      'sync_ops',
+      where: 'entity_type = ? AND entity_id = ?',
+      whereArgs: [entityType, entityId],
+    );
+  }
+
   Future<DateTime?> lastSynced(String key) async {
     final db = await _dbProvider.database;
     final rows = await db.query('metadata',

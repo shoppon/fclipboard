@@ -13,9 +13,6 @@ from ..deps import get_current_user
 from ..db import get_db
 from ..services.share_service import (
     create_share_token,
-    decode_share_token,
-    resolve_target_tag,
-    upsert_shared_snippet,
 )
 
 router = APIRouter()
@@ -30,6 +27,15 @@ def _ensure_aware(value: datetime | None) -> datetime | None:
     if value is None:
         return None
     return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
+
+
+def _safe_tag_id(db: Session, user_id: UUID, tag_id: UUID | None) -> UUID | None:
+    if tag_id is None:
+        return None
+    tag = db.get(models.Tag, tag_id)
+    if tag is None or str(tag.user_id) != str(user_id):
+        return None
+    return tag_id
 
 
 @router.get("", response_model=List[schemas.SnippetRead])
@@ -69,6 +75,28 @@ def list_snippets(
         .all()
     )
     return items
+
+
+@router.get("/full", response_model=List[schemas.SnippetRead])
+def download_all_snippets(
+    limit: int = 200,
+    page: int = 1,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
+    if page < 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="page must be >= 1")
+    page_size = max(1, min(limit, 500))
+    offset = (page - 1) * page_size
+    return (
+        db.query(models.Snippet)
+        .filter(models.Snippet.user_id == user.id)
+        .order_by(desc(models.Snippet.updated_at), desc(models.Snippet.id))
+        .offset(offset)
+        .limit(page_size)
+        .all()
+    )
 
 
 @router.post("", response_model=schemas.SnippetRead, status_code=status.HTTP_201_CREATED)
@@ -170,6 +198,9 @@ def share_snippet(
     if snippet is None or str(snippet.user_id) != str(user.id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Snippet not found")
+    if snippet.deleted_at is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Snippet is deleted")
     recipient = (
         db.query(models.User)
         .filter(models.User.email == payload.email)
@@ -191,15 +222,21 @@ def share_snippet(
     )
 
 
+class SyncOp(BaseModel):
+    op: str = Field(pattern="^(upsert|delete)$")
+    snippet: schemas.SnippetCreate
+
+
 class SyncPayload(BaseModel):
-    snippets: List[schemas.SnippetCreate] = Field(default_factory=list)
-    updatedAfter: Optional[datetime] = None
-    updatedBefore: Optional[datetime] = None
+    cursor: Optional[datetime] = None
+    ops: List[SyncOp] = Field(default_factory=list)
 
 
 class SyncResponse(BaseModel):
-    saved: List[schemas.SnippetRead]
-    pulled: List[schemas.SnippetRead]
+    changes: List[schemas.SnippetRead]
+    next_cursor: Optional[datetime] = Field(default=None, alias="nextCursor")
+
+    model_config = {"populate_by_name": True}
 
 
 @router.post("/sync", response_model=SyncResponse)
@@ -209,44 +246,44 @@ def sync_snippets(
     user: models.User = Depends(get_current_user),
 ):
     try:
-        saved: List[models.Snippet] = []
-        for item in payload.snippets:
-            snippet = db.get(models.Snippet, item.id) if item.id else None
+        cursor = _ensure_aware(payload.cursor)
+        applied = 0
+        for op in payload.ops:
+            item = op.snippet
             incoming_updated = _ensure_aware(item.updated_at) or _now()
+            snippet = db.get(models.Snippet, item.id) if item.id else None
             if snippet is None:
-                # merge by title if id not found
-                snippet = (
-                    db.query(models.Snippet)
-                    .filter(models.Snippet.user_id == user.id, models.Snippet.title == item.title)
-                    .order_by(desc(models.Snippet.updated_at))
-                    .first()
-                )
-                if snippet is None:
-                    snippet = models.Snippet(
-                        id=item.id,
-                        user_id=user.id,
-                        tag_id=item.tag_id,
-                        title=item.title,
-                        body=item.body,
-                        tags=item.tags,
-                        source=item.source,
-                        pinned=item.pinned,
-                        version=item.version,
-                        parameters=[param.model_dump()
-                                    for param in item.parameters],
-                        created_at=_ensure_aware(item.created_at) or _now(),
-                        updated_at=incoming_updated,
-                        deleted_at=item.deleted_at,
-                        conflict_of=item.conflict_of,
-                    )
-                    db.add(snippet)
-                    db.commit()
-                    db.refresh(snippet)
-                    saved.append(snippet)
+                if op.op == "delete":
                     continue
+                snippet = models.Snippet(
+                    id=item.id,
+                    user_id=user.id,
+                    tag_id=_safe_tag_id(db, user.id, item.tag_id),
+                    title=item.title,
+                    body=item.body,
+                    tags=item.tags,
+                    source=item.source,
+                    pinned=item.pinned,
+                    version=item.version,
+                    parameters=[param.model_dump()
+                                for param in item.parameters],
+                    created_at=_ensure_aware(
+                        item.created_at) or incoming_updated,
+                    updated_at=incoming_updated,
+                    deleted_at=_ensure_aware(item.deleted_at),
+                    conflict_of=item.conflict_of,
+                )
+                db.add(snippet)
+                db.commit()
+                db.refresh(snippet)
+                applied += 1
+                continue
 
-            snippet.updated_at = _ensure_aware(snippet.updated_at)
-            if snippet.updated_at and incoming_updated < snippet.updated_at:
+            if str(snippet.user_id) != str(user.id):
+                continue
+
+            current_ts = snippet.deleted_at or snippet.updated_at
+            if current_ts and incoming_updated < current_ts:
                 continue
 
             snippet.title = item.title or snippet.title
@@ -254,46 +291,54 @@ def sync_snippets(
             snippet.tags = item.tags or snippet.tags
             snippet.source = item.source or snippet.source
             snippet.pinned = item.pinned if item.pinned is not None else snippet.pinned
-            snippet.tag_id = item.tag_id or snippet.tag_id
-            snippet.deleted_at = item.deleted_at
+            snippet.tag_id = _safe_tag_id(
+                db, user.id, item.tag_id) or snippet.tag_id
             snippet.conflict_of = item.conflict_of
             snippet.parameters = [param.model_dump()
                                   for param in item.parameters] or snippet.parameters
+            if op.op == "delete":
+                snippet.deleted_at = _ensure_aware(
+                    item.deleted_at) or incoming_updated
+            else:
+                snippet.deleted_at = _ensure_aware(
+                    item.deleted_at) or snippet.deleted_at
             snippet.version = max(
                 item.version or snippet.version, snippet.version + 1)
             snippet.updated_at = incoming_updated
             db.add(snippet)
             db.commit()
             db.refresh(snippet)
-            saved.append(snippet)
+            applied += 1
 
         pull_query = db.query(models.Snippet).filter(
-            models.Snippet.user_id == user.id, models.Snippet.deleted_at.is_(
-                None)
+            models.Snippet.user_id == user.id
         )
-        if payload.updatedAfter:
+        if cursor:
             pull_query = pull_query.filter(
-                models.Snippet.updated_at > payload.updatedAfter)
-        if payload.updatedBefore:
-            pull_query = pull_query.filter(
-                models.Snippet.updated_at < payload.updatedBefore)
-        pulled_raw = (
+                (models.Snippet.updated_at > cursor)
+                | (models.Snippet.deleted_at > cursor)
+            )
+        pulled = (
             pull_query.order_by(
                 desc(models.Snippet.updated_at), desc(models.Snippet.id))
-            .limit(100)
+            .limit(200)
             .all()
         )
-        deduped: dict[str, models.Snippet] = {}
-        for it in pulled_raw:
-            existing = deduped.get(it.title)
-            if existing is None or (it.updated_at and existing.updated_at and it.updated_at > existing.updated_at):
-                deduped[it.title] = it
-        logger.info("snippet.sync user=%s pushed=%s pulled=%s",
-                    user.id, len(saved), len(deduped))
-        return SyncResponse(saved=saved, pulled=list(deduped.values()))
+        next_cursor: datetime | None = cursor
+        for it in pulled:
+            ts = it.deleted_at or it.updated_at
+            if ts is None:
+                continue
+            if next_cursor is None or ts > next_cursor:
+                next_cursor = ts
+        if next_cursor is None:
+            next_cursor = _now()
+        logger.info("snippet.sync user=%s applied=%s changes=%s cursor=%s",
+                    user.id, applied, len(pulled), next_cursor)
+        return SyncResponse(changes=pulled, nextCursor=next_cursor)
     except Exception as exc:  # noqa: BLE001
         db.rollback()
         logger.exception("snippet.sync failed user=%s count=%s",
-                         user.id, len(payload.snippets))
+                         user.id, len(payload.ops))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Sync snippets failed") from exc

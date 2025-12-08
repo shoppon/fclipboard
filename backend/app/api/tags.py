@@ -3,14 +3,19 @@ from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..deps import get_current_user
 from ..db import get_db
-from ..schemas_tag import TagCreate, TagRead, TagUpdate
+from ..schemas_tag import (
+    TagCreate,
+    TagRead,
+    TagSyncPayload,
+    TagSyncResponse,
+    TagUpdate,
+)
 from ..services.share_service import create_share_token
 
 router = APIRouter()
@@ -39,7 +44,10 @@ def list_tags(
     if page < 1:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="page must be >= 1")
-    query = db.query(models.Tag).filter(models.Tag.user_id == user.id)
+    query = (
+        db.query(models.Tag)
+        .filter(models.Tag.user_id == user.id, models.Tag.deleted_at.is_(None))
+    )
     if updatedAfter:
         query = query.filter(models.Tag.updated_at > updatedAfter)
     if updatedBefore:
@@ -53,6 +61,28 @@ def list_tags(
         .all()
     )
     return items
+
+
+@router.get("/full", response_model=List[TagRead])
+def download_all_tags(
+    limit: int = 200,
+    page: int = 1,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user),
+):
+    if page < 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="page must be >= 1")
+    page_size = max(1, min(limit, 500))
+    offset = (page - 1) * page_size
+    return (
+        db.query(models.Tag)
+        .filter(models.Tag.user_id == user.id)
+        .order_by(desc(models.Tag.updated_at), desc(models.Tag.id))
+        .offset(offset)
+        .limit(page_size)
+        .all()
+    )
 
 
 @router.post("", response_model=TagRead, status_code=status.HTTP_201_CREATED)
@@ -70,6 +100,7 @@ def create_tag(
             version=payload.version,
             created_at=_ensure_aware(payload.created_at) or _now(),
             updated_at=_ensure_aware(payload.updated_at) or _now(),
+            deleted_at=_ensure_aware(payload.deleted_at),
         )
         db.add(tag)
         db.commit()
@@ -125,7 +156,10 @@ def delete_tag(
     if tag is None or str(tag.user_id) != str(user.id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found")
-    db.delete(tag)
+    tag.deleted_at = _now()
+    tag.updated_at = tag.deleted_at
+    tag.version += 1
+    db.add(tag)
     db.commit()
     return None
 
@@ -141,6 +175,9 @@ def share_tag(
     if tag is None or str(tag.user_id) != str(user.id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found")
+    if tag.deleted_at is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Tag is deleted")
 
     recipient = (
         db.query(models.User)
@@ -165,16 +202,6 @@ def share_tag(
     return token
 
 
-class TagSyncPayload(BaseModel):
-    tags: List[TagCreate] = Field(default_factory=list)
-    updatedAfter: Optional[datetime] = None
-
-
-class TagSyncResponse(BaseModel):
-    saved: List[TagRead]
-    pulled: List[TagRead]
-
-
 @router.post("/sync", response_model=TagSyncResponse)
 def sync_tags(
     payload: TagSyncPayload,
@@ -182,63 +209,89 @@ def sync_tags(
     user: models.User = Depends(get_current_user),
 ):
     try:
-        saved: List[models.Tag] = []
-        for item in payload.tags:
-            tag = db.get(models.Tag, item.id) if item.id else None
+        cursor = _ensure_aware(payload.cursor)
+        applied = 0
+        for op in payload.ops:
+            item = op.tag
             incoming_updated = _ensure_aware(item.updated_at) or _now()
+            tag = db.get(models.Tag, item.id) if item.id else None
             if tag is None:
+                if op.op == "delete":
+                    continue
+                if not item.name:
+                    continue
                 tag = models.Tag(
                     id=item.id,
                     user_id=user.id,
                     name=item.name,
                     color=item.color,
                     version=item.version,
-                    created_at=_ensure_aware(item.created_at) or _now(),
+                    created_at=_ensure_aware(
+                        item.created_at) or incoming_updated,
                     updated_at=incoming_updated,
+                    deleted_at=_ensure_aware(item.deleted_at),
                 )
                 db.add(tag)
                 db.commit()
                 db.refresh(tag)
-                saved.append(tag)
+                applied += 1
                 continue
 
-            tag.updated_at = _ensure_aware(tag.updated_at)
-            if tag.updated_at and incoming_updated < tag.updated_at:
+            if str(tag.user_id) != str(user.id):
                 continue
 
-            tag.name = item.name or tag.name
-            tag.color = item.color or tag.color
+            current_ts = tag.deleted_at or tag.updated_at
+            if current_ts and incoming_updated < current_ts:
+                continue
+
+            if op.op == "delete":
+                tag.deleted_at = _ensure_aware(
+                    item.deleted_at) or incoming_updated
+            else:
+                if item.name:
+                    tag.name = item.name
+                tag.color = item.color or tag.color
+                tag.deleted_at = _ensure_aware(
+                    item.deleted_at) or tag.deleted_at
             tag.version = max(item.version or tag.version, tag.version + 1)
             tag.updated_at = incoming_updated
             db.add(tag)
             db.commit()
             db.refresh(tag)
-            saved.append(tag)
+            applied += 1
 
         pull_query = db.query(models.Tag).filter(models.Tag.user_id == user.id)
-        if payload.updatedAfter:
+        if cursor:
             pull_query = pull_query.filter(
-                models.Tag.updated_at > payload.updatedAfter)
-        if payload.updatedBefore:
-            pull_query = pull_query.filter(
-                models.Tag.updated_at < payload.updatedBefore)
-        pulled_raw = (
+                (models.Tag.updated_at > cursor)
+                | (models.Tag.deleted_at > cursor)
+            )
+        pulled = (
             pull_query.order_by(desc(models.Tag.updated_at),
                                 desc(models.Tag.id))
-            .limit(100)
+            .limit(200)
             .all()
         )
-        deduped: dict[str, models.Tag] = {}
-        for it in pulled_raw:
-            existing = deduped.get(it.name)
-            if existing is None or (it.updated_at and existing.updated_at and it.updated_at > existing.updated_at):
-                deduped[it.name] = it
-        logger.info("tag.sync user=%s pushed=%s pulled=%s",
-                    user.id, len(saved), len(deduped))
-        return TagSyncResponse(saved=saved, pulled=list(deduped.values()))
+        next_cursor: datetime | None = cursor
+        for it in pulled:
+            ts = it.deleted_at or it.updated_at
+            if ts is None:
+                continue
+            if next_cursor is None or ts > next_cursor:
+                next_cursor = ts
+        if next_cursor is None:
+            next_cursor = _now()
+        logger.info(
+            "tag.sync user=%s applied=%s changes=%s cursor=%s",
+            user.id,
+            applied,
+            len(pulled),
+            next_cursor,
+        )
+        return TagSyncResponse(changes=pulled, nextCursor=next_cursor)
     except Exception as exc:  # noqa: BLE001
         db.rollback()
-        logger.exception("tag.sync failed user=%s count=%s",
-                         user.id, len(payload.tags))
+        logger.exception("tag.sync failed user=%s ops=%s",
+                         user.id, len(payload.ops))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Sync tags failed") from exc
