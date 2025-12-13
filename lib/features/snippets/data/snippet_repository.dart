@@ -102,6 +102,14 @@ class SnippetRepository {
         payload: _snippetToJson(deleted));
   }
 
+  Future<int> deleteSnippetsByTagId(String tagId) async {
+    final items = await _local.list(tagId: tagId);
+    for (final snippet in items) {
+      await deleteSnippet(snippet);
+    }
+    return items.length;
+  }
+
   Future<Snippet> togglePin(Snippet snippet) async {
     final updated = snippet.copyWith(
         pinned: !snippet.pinned,

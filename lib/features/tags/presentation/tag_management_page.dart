@@ -6,6 +6,16 @@ import '../../../core/data/tag.dart';
 import '../../snippets/data/snippet_repository.dart';
 import '../data/tag_repository.dart';
 
+class _DeleteTagDecision {
+  const _DeleteTagDecision({
+    required this.confirmed,
+    required this.deleteSnippets,
+  });
+
+  final bool confirmed;
+  final bool deleteSnippets;
+}
+
 class TagManagementPage extends ConsumerStatefulWidget {
   const TagManagementPage({super.key});
 
@@ -80,24 +90,72 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
   }
 
   Future<void> _delete(Tag tag) async {
-    final ok = await showDialog<bool>(
+    final count = _counts[tag.id] ?? 0;
+    final decision = await showDialog<_DeleteTagDecision>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('删除标签'),
-        content: Text('确定删除“${tag.name}”吗？'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('取消')),
-          FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('删除')),
-        ],
-      ),
+      builder: (context) {
+        var deleteSnippets = false;
+        return StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: const Text('删除标签'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('确定删除“${tag.name}”吗？'),
+                if (count > 0) ...[
+                  const SizedBox(height: 8),
+                  CheckboxListTile(
+                    value: deleteSnippets,
+                    onChanged: (value) =>
+                        setState(() => deleteSnippets = value ?? false),
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text('同时删除该标签下的 $count 个片段'),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(
+                  context,
+                  const _DeleteTagDecision(
+                    confirmed: false,
+                    deleteSnippets: false,
+                  ),
+                ),
+                child: const Text('取消'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(
+                  context,
+                  _DeleteTagDecision(
+                    confirmed: true,
+                    deleteSnippets: deleteSnippets,
+                  ),
+                ),
+                child: const Text('删除'),
+              ),
+            ],
+          ),
+        );
+      },
     );
-    if (ok == true) {
+    if (decision == null || !decision.confirmed) return;
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      if (decision.deleteSnippets) {
+        await ref.read(snippetRepositoryProvider).deleteSnippetsByTagId(tag.id);
+      }
       await ref.read(tagRepositoryProvider).deleteTag(tag.id);
       await _load();
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('删除失败：$e')),
+      );
     }
   }
 
@@ -264,11 +322,10 @@ class _TagManagementPageState extends ConsumerState<TagManagementPage> {
           TextButton(
             onPressed: () async {
               await Clipboard.setData(ClipboardData(text: token));
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已复制令牌')),
-                );
-              }
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('已复制令牌')),
+              );
             },
             child: const Text('重新复制'),
           ),
