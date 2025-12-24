@@ -12,19 +12,14 @@ class LocalSnippetStore {
 
   Future<List<Snippet>> list({String? tagId}) async {
     final db = await _dbProvider.database;
-    final where = StringBuffer('(deleted_at IS NULL OR deleted_at = \'\' )');
-    final args = <Object?>[];
-    if (tagId != null) {
-      where.write(' AND tag_id = ?');
-      args.add(tagId);
-    }
     final rows = await db.query(
       'snippets',
-      where: where.toString(),
-      whereArgs: args.isEmpty ? null : args,
+      where: '(deleted_at IS NULL OR deleted_at = \'\')',
       orderBy: 'updated_at DESC',
     );
-    return rows.map(_mapRow).toList();
+    final mapped = rows.map(_mapRow).toList();
+    if (tagId == null) return mapped;
+    return mapped.where((snippet) => snippet.tagIds.contains(tagId)).toList();
   }
 
   Future<List<Snippet>> listAll() async {
@@ -45,7 +40,7 @@ class LocalSnippetStore {
         'id': snippet.id,
         'title': snippet.title,
         'body': snippet.body,
-        'tags': jsonEncode(snippet.tags),
+        'tag_ids': jsonEncode(snippet.tagIds),
         'source': snippet.source,
         'pinned': snippet.pinned ? 1 : 0,
         'parameters':
@@ -55,7 +50,6 @@ class LocalSnippetStore {
         'updated_at': snippet.updatedAt.toIso8601String(),
         'deleted_at': snippet.deletedAt?.toIso8601String(),
         'conflict_of': snippet.conflictOf,
-        'tag_id': snippet.tagId,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -66,7 +60,7 @@ class LocalSnippetStore {
       id: r['id'] as String,
       title: (r['title'] as String?) ?? '',
       body: (r['body'] as String?) ?? '',
-      tags: _decodeList(r['tags'] as String?),
+      tagIds: _decodeList(r['tag_ids'] as String?),
       source: r['source'] as String?,
       pinned: (r['pinned'] as int? ?? 0) == 1,
       parameters: _decodeParams(r['parameters'] as String?),
@@ -79,7 +73,6 @@ class LocalSnippetStore {
           ? DateTime.tryParse(r['deleted_at'] as String)
           : null,
       conflictOf: r['conflict_of'] as String?,
-      tagId: r['tag_id'] as String?,
     );
   }
 
@@ -105,19 +98,16 @@ class LocalSnippetStore {
 
   Future<Map<String?, int>> countByTag() async {
     final db = await _dbProvider.database;
-    final rows = await db.rawQuery(
-      '''
-        SELECT tag_id, COUNT(*) as cnt
-        FROM snippets
-        WHERE (deleted_at IS NULL OR deleted_at = '')
-        GROUP BY tag_id
-      ''',
+    final rows = await db.query(
+      'snippets',
+      where: '(deleted_at IS NULL OR deleted_at = \'\')',
     );
     final counts = <String?, int>{};
-    for (final r in rows) {
-      final tagId = r['tag_id'] as String?;
-      final cnt = (r['cnt'] as int?) ?? 0;
-      counts[tagId] = cnt;
+    for (final row in rows) {
+      final tagIds = _decodeList(row['tag_ids'] as String?);
+      for (final tagId in tagIds) {
+        counts[tagId] = (counts[tagId] ?? 0) + 1;
+      }
     }
     return counts;
   }

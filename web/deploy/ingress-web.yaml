@@ -11,10 +11,34 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
+        - sebrain.lingmind.cn
         - fclipboard.lingmind.cn
       secretName: wildcard-lingmind-cn-tls
+    - hosts:
+        - sebrain.cn
+      secretName: wildcard-sebrain-cn
   rules:
+    - host: sebrain.lingmind.cn
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80
     - host: fclipboard.lingmind.cn
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80
+    - host: sebrain.cn
       http:
         paths:
           - pathType: Prefix

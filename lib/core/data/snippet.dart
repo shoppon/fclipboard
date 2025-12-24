@@ -7,10 +7,9 @@ class Snippet {
     required this.createdAt,
     required this.version,
     this.parameters = const [],
-    this.tagId,
     this.deletedAt,
     this.conflictOf,
-    this.tags = const [],
+    this.tagIds = const [],
     this.source,
     this.pinned = false,
   });
@@ -21,8 +20,7 @@ class Snippet {
   final DateTime createdAt;
   final DateTime updatedAt;
   final int version;
-  final List<String> tags;
-  final String? tagId;
+  final List<String> tagIds;
   final String? source;
   final bool pinned;
   final DateTime? deletedAt;
@@ -37,8 +35,7 @@ class Snippet {
     DateTime? createdAt,
     int? version,
     List<EntryParameter>? parameters,
-    String? tagId,
-    List<String>? tags,
+    List<String>? tagIds,
     String? source,
     bool? pinned,
     DateTime? deletedAt,
@@ -52,8 +49,7 @@ class Snippet {
       updatedAt: updatedAt ?? this.updatedAt,
       version: version ?? this.version,
       parameters: parameters ?? this.parameters,
-      tagId: tagId ?? this.tagId,
-      tags: tags ?? this.tags,
+      tagIds: tagIds ?? this.tagIds,
       source: source ?? this.source,
       pinned: pinned ?? this.pinned,
       deletedAt: deletedAt ?? this.deletedAt,

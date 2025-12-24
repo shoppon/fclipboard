@@ -21,25 +21,16 @@ class SnippetRepository {
   final ApiClient _api;
   final _uuid = const Uuid();
 
-  Future<List<Snippet>> fetchSnippets(
-      {String query = "", String? tagId}) async {
+  Future<List<Snippet>> fetchSnippets({String? tagId}) async {
     final snippets = await _local.list(tagId: tagId);
-    final filtered = query.isEmpty
-        ? snippets
-        : snippets
-            .where((e) =>
-                e.title.toLowerCase().contains(query.toLowerCase()) ||
-                e.body.toLowerCase().contains(query.toLowerCase()))
-            .toList()
-      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-    return filtered;
+    snippets.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    return snippets;
   }
 
   Future<Snippet> createSnippet({
     required String title,
     required String body,
-    String? tagId,
-    List<String> tags = const [],
+    List<String> tagIds = const [],
     List<EntryParameter> parameters = const [],
   }) async {
     final now = DateTime.now();
@@ -50,8 +41,7 @@ class SnippetRepository {
       createdAt: now,
       updatedAt: now,
       version: 1,
-      tags: tags,
-      tagId: tagId,
+      tagIds: tagIds,
       parameters: parameters,
       pinned: false,
     );
@@ -68,13 +58,13 @@ class SnippetRepository {
     required Snippet snippet,
     required String title,
     required String body,
-    String? tagId,
+    List<String>? tagIds,
     List<EntryParameter> parameters = const [],
   }) async {
     final updated = snippet.copyWith(
       title: title,
       body: body,
-      tagId: tagId,
+      tagIds: tagIds ?? snippet.tagIds,
       parameters: parameters,
       updatedAt: DateTime.now(),
       version: snippet.version + 1,
@@ -161,8 +151,7 @@ class SnippetRepository {
   }
 
   Future<int> acceptShareToken(String token) async {
-    final res =
-        await _api.post('/share/accept', body: {'token': token});
+    final res = await _api.post('/share/accept', body: {'token': token});
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw Exception('Accept share failed with status ${res.statusCode}');
     }
@@ -175,7 +164,7 @@ class SnippetRepository {
       'id': snippet.id,
       'title': snippet.title,
       'body': snippet.body,
-      'tags': snippet.tags,
+      'tag_ids': snippet.tagIds,
       'source': snippet.source,
       'pinned': snippet.pinned,
       'parameters': snippet.parameters.map((p) => p.toJson()).toList(),
@@ -184,7 +173,6 @@ class SnippetRepository {
       'updated_at': snippet.updatedAt.toIso8601String(),
       'deleted_at': snippet.deletedAt?.toIso8601String(),
       'conflict_of': snippet.conflictOf,
-      'tag_id': snippet.tagId,
     };
   }
 

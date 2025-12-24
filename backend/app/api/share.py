@@ -74,7 +74,9 @@ def accept_share(
         db.commit()
         logger.info("share.accept snippet sender=%s recipient=%s snippet=%s",
                     sender_id, user.id, snippet.id)
-        return schemas.ShareAcceptResponse(imported=1, tag_id=saved.tag_id)
+        return schemas.ShareAcceptResponse(
+            imported=1, tag_id=target_tag.id if target_tag else None
+        )
 
     if token_type == "share_tag":
         tag_id = data.get("tag_id")
@@ -98,7 +100,7 @@ def accept_share(
             .filter(
                 models.Snippet.user_id == sender_user.id,
                 models.Snippet.deleted_at.is_(None),
-                models.Snippet.tag_id == tag.id,
+                models.Snippet.tags.any(models.Tag.id == tag.id),
             )
             .all()
         )

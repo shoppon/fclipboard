@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -29,15 +28,31 @@ class User(Base):
     tags: Mapped[list["Tag"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
+snippet_tags = Table(
+    "snippet_tags",
+    Base.metadata,
+    Column(
+        "snippet_id",
+        UUID(as_uuid=True),
+        ForeignKey("snippets.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "tag_id",
+        UUID(as_uuid=True),
+        ForeignKey("tags.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+)
+
+
 class Snippet(Base):
     __tablename__ = "snippets"
 
     id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
-    tag_id: Mapped[UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("tags.id"), nullable=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     body: Mapped[str] = mapped_column(Text, default="")
-    tags: Mapped[list[str] | None] = mapped_column(JSONB, default=list)
     source: Mapped[str | None] = mapped_column(String(255))
     pinned: Mapped[bool] = mapped_column(Boolean, default=False)
     parameters: Mapped[list | None] = mapped_column(JSONB, default=list)
@@ -48,7 +63,14 @@ class Snippet(Base):
     conflict_of: Mapped[UUID | None] = mapped_column(UUID(as_uuid=True))
 
     user: Mapped[User] = relationship(back_populates="snippets")
-    tag: Mapped[Optional["Tag"]] = relationship(back_populates="snippets")
+    tags: Mapped[list["Tag"]] = relationship(
+        secondary=snippet_tags,
+        back_populates="snippets",
+    )
+
+    @property
+    def tag_ids(self) -> list[UUID]:
+        return [tag.id for tag in self.tags]
 
 
 class RefreshToken(Base):
@@ -75,4 +97,7 @@ class Tag(Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     user: Mapped[User] = relationship(back_populates="tags")
-    snippets: Mapped[list[Snippet]] = relationship(back_populates="tag", cascade="all, delete-orphan")
+    snippets: Mapped[list["Snippet"]] = relationship(
+        secondary=snippet_tags,
+        back_populates="tags",
+    )

@@ -85,8 +85,8 @@ class SyncService {
                   'tag': p.payload,
                 })
             .toList(),
-      }..removeWhere((_, value) =>
-          value == null || (value is List && value.isEmpty));
+      }..removeWhere(
+          (_, value) => value == null || (value is List && value.isEmpty));
 
       final res = await api.post('/tags/sync', body: payload);
       if (res.statusCode < 200 || res.statusCode >= 300) {
@@ -109,8 +109,8 @@ class SyncService {
       }
       final nextCursorStr = data['nextCursor'] as String?;
       if (nextCursorStr != null && nextCursorStr.isNotEmpty) {
-        await syncStore
-            .setLastSynced('tags_cursor', DateTime.parse(nextCursorStr));
+        await syncStore.setLastSynced(
+            'tags_cursor', DateTime.parse(nextCursorStr));
       }
       debugPrint(
           'sync tags done changes=${changes.length} pending=${pending.length}');
@@ -132,8 +132,8 @@ class SyncService {
                   'snippet': p.payload,
                 })
             .toList(),
-      }..removeWhere((_, value) =>
-          value == null || (value is List && value.isEmpty));
+      }..removeWhere(
+          (_, value) => value == null || (value is List && value.isEmpty));
 
       final res = await api.post('/snippets/sync', body: payload);
       if (res.statusCode < 200 || res.statusCode >= 300) {
@@ -166,8 +166,10 @@ class SyncService {
   Future<void> _downloadTags() async {
     try {
       final pending = await syncStore.pending('tag');
-      final pendingDeletes =
-          pending.where((op) => op.op == 'delete').map((op) => op.entityId).toSet();
+      final pendingDeletes = pending
+          .where((op) => op.op == 'delete')
+          .map((op) => op.entityId)
+          .toSet();
       final ids = <String>{};
       DateTime? maxTs;
       const limit = 200;
@@ -180,9 +182,8 @@ class SyncService {
         }
         final list = jsonDecode(utf8.decode(res.bodyBytes)) as List<dynamic>;
         if (list.isEmpty) break;
-        final mapped = list
-            .map((item) => _mapTag(item as Map<String, dynamic>))
-            .toList();
+        final mapped =
+            list.map((item) => _mapTag(item as Map<String, dynamic>)).toList();
         for (final t in mapped) {
           ids.add(t.id);
           if (pendingDeletes.contains(t.id)) {
@@ -211,8 +212,10 @@ class SyncService {
   Future<void> _downloadSnippets() async {
     try {
       final pending = await syncStore.pending('snippet');
-      final pendingDeletes =
-          pending.where((op) => op.op == 'delete').map((op) => op.entityId).toSet();
+      final pendingDeletes = pending
+          .where((op) => op.op == 'delete')
+          .map((op) => op.entityId)
+          .toSet();
       final ids = <String>{};
       DateTime? maxTs;
       const limit = 200;
@@ -259,8 +262,8 @@ class SyncService {
       name: json['name'] as String? ?? '',
       color: json['color'] as String?,
       version: (json['version'] as num?)?.toInt() ?? 1,
-      updatedAt:
-          DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at']?.toString() ?? '') ??
+          DateTime.now(),
       deletedAt: json['deleted_at'] != null
           ? DateTime.tryParse(json['deleted_at'].toString())
           : null,
@@ -272,7 +275,7 @@ class SyncService {
       id: (json['id'] ?? const Uuid().v4()).toString(),
       title: json['title'] as String? ?? '',
       body: json['body'] as String? ?? '',
-      tags: (json['tags'] as List<dynamic>? ?? []).cast<String>(),
+      tagIds: (json['tag_ids'] as List<dynamic>? ?? []).cast<String>(),
       source: json['source'] as String?,
       pinned: json['pinned'] as bool? ?? false,
       parameters: (json['parameters'] as List<dynamic>? ?? [])
@@ -287,7 +290,6 @@ class SyncService {
           ? DateTime.tryParse(json['deleted_at'].toString())
           : null,
       conflictOf: json['conflict_of']?.toString(),
-      tagId: json['tag_id']?.toString(),
     );
   }
 }

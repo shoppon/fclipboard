@@ -1,6 +1,6 @@
 image:
   repository: harbor.lingmind.cn/teabrew/fclipboard-backend
-  tag: "20251208171016"
+  tag: "20251224121113"
   pullPolicy: IfNotPresent
 
 replicaCount: 1

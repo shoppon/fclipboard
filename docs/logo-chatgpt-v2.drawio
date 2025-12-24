@@ -1,0 +1,30 @@
+<mxfile host="65bd71144e">
+    <diagram id="fRy18F3fODmkj0_Rz2G2" name="第 1 页">
+        <mxGraphModel dx="1026" dy="530" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram name="SeBrain Logo Minimal" id="P1lB3QVB4Fq7PE8WkGwy">
+        <mxGraphModel dx="1026" dy="530" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="bg" value="" style="rounded=1;fillColor=#F8FAFC;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="180" y="80" width="240" height="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="main" value="" style="ellipse;fillColor=#020617;strokeColor=#020617;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="120" width="160" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="focus" value="" style="ellipse;fillColor=#38BDF8;strokeColor=#38BDF8;" parent="1" vertex="1">
+                    <mxGeometry x="305" y="200" width="20" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="text" value="SeBrain" style="text;html=1;fontSize=26;fontStyle=1;fontColor=#020617;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="340" width="160" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

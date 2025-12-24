@@ -48,19 +48,25 @@ class _AddSnippetPageState extends ConsumerState<AddSnippetPage> {
   final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
   final _paramControllers = <_ParamControllers>[];
-  String? _selectedTagId;
+  final _selectedTags = <_TagInput>[];
+  final _pendingTagIds = <String>[];
+  bool _tagIdsHydrated = false;
   bool _saving = false;
   bool get _isEditing => widget.snippet != null;
 
   @override
   void initState() {
     super.initState();
-    _selectedTagId = widget.initialTagId;
+    if (widget.initialTagId != null) {
+      _pendingTagIds.add(widget.initialTagId!);
+    }
     final snippet = widget.snippet;
     if (snippet != null) {
       _titleController.text = snippet.title;
       _bodyController.text = snippet.body;
-      _selectedTagId = snippet.tagId ?? widget.initialTagId;
+      _pendingTagIds
+        ..clear()
+        ..addAll(snippet.tagIds.toSet());
       _paramControllers.addAll(
         snippet.parameters
             .map(
@@ -84,6 +90,94 @@ class _AddSnippetPageState extends ConsumerState<AddSnippetPage> {
       controller.dispose();
     }
     super.dispose();
+  }
+
+  static String _normalizeTagName(String value) => value.trim();
+
+  static bool _sameTagName(String a, String b) =>
+      _normalizeTagName(a).toLowerCase() == _normalizeTagName(b).toLowerCase();
+
+  Tag? _findTagById(List<Tag> tags, String id) {
+    for (final tag in tags) {
+      if (tag.id == id) return tag;
+    }
+    return null;
+  }
+
+  Tag? _findTagByName(List<Tag> tags, String name) {
+    for (final tag in tags) {
+      if (_sameTagName(tag.name, name)) return tag;
+    }
+    return null;
+  }
+
+  void _hydrateTagIds(List<Tag> tags) {
+    if (_tagIdsHydrated) return;
+    _tagIdsHydrated = true;
+    if (_pendingTagIds.isEmpty) return;
+    final toAdd = <_TagInput>[];
+    for (final id in _pendingTagIds) {
+      final matched = _findTagById(tags, id);
+      if (matched == null) continue;
+      final exists = _selectedTags.any((tag) => tag.id == matched.id);
+      if (exists) continue;
+      toAdd.add(_TagInput(id: matched.id, name: matched.name));
+    }
+    if (toAdd.isEmpty) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() => _selectedTags.addAll(toAdd));
+    });
+  }
+
+  void _addTagInputs(Iterable<_TagInput> inputs) {
+    final existingNames =
+        _selectedTags.map((tag) => tag.name.toLowerCase()).toSet();
+    final existingIds =
+        _selectedTags.map((tag) => tag.id).whereType<String>().toSet();
+    final toAdd = <_TagInput>[];
+    for (final input in inputs) {
+      final name = _normalizeTagName(input.name);
+      if (name.isEmpty) continue;
+      if (input.id != null && existingIds.contains(input.id)) continue;
+      if (existingNames.contains(name.toLowerCase())) continue;
+      toAdd.add(_TagInput(id: input.id, name: name));
+    }
+    if (toAdd.isEmpty) return;
+    setState(() => _selectedTags.addAll(toAdd));
+  }
+
+  void _removeTag(_TagInput tag) {
+    setState(() {
+      _selectedTags.removeWhere((item) {
+        if (tag.id != null) return item.id == tag.id;
+        return _sameTagName(item.name, tag.name);
+      });
+    });
+  }
+
+  void _submitTagInput(
+    List<Tag> tags,
+    TextEditingController controller,
+    FocusNode focusNode,
+  ) {
+    final raw = controller.text;
+    if (raw.trim().isEmpty) {
+      controller.clear();
+      return;
+    }
+    final parts = raw.split(RegExp(r'[,\n，]+'));
+    final inputs = parts.map(
+      (part) {
+        final normalized = _normalizeTagName(part);
+        if (normalized.isEmpty) return null;
+        final matched = _findTagByName(tags, normalized);
+        return _TagInput(id: matched?.id, name: matched?.name ?? normalized);
+      },
+    ).whereType<_TagInput>();
+    _addTagInputs(inputs);
+    controller.clear();
+    focusNode.requestFocus();
   }
 
   @override
@@ -193,27 +287,114 @@ class _AddSnippetPageState extends ConsumerState<AddSnippetPage> {
                   const SizedBox(height: 14),
                   _SectionCard(
                     title: '标签',
-                    description: '用于分组过滤，可选。',
+                    description: '用于分组过滤，支持多个标签。',
                     child: tagsAsync.when(
                       data: (tags) {
-                        final selectedTagId =
-                            _selectedTagId ?? widget.initialTagId;
-                        final dropdownValue =
-                            tags.any((t) => t.id == selectedTagId)
-                                ? selectedTagId
-                                : null;
-                        return DropdownButtonFormField<String>(
-                          value: dropdownValue,
-                          decoration: _formDecoration('选择标签（可选）'),
-                          items: tags
-                              .map(
-                                (t) => DropdownMenuItem(
-                                  value: t.id,
-                                  child: Text(t.name),
+                        _hydrateTagIds(tags);
+                        TextEditingController? fieldController;
+                        FocusNode? fieldFocusNode;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (_selectedTags.isEmpty)
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: UiTokens.surface,
+                                  borderRadius: UiTokens.cardRadius,
+                                  border: Border.all(color: UiTokens.border),
                                 ),
-                              )
-                              .toList(),
-                          onChanged: (t) => setState(() => _selectedTagId = t),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.sell_outlined,
+                                        color: UiTokens.textSecondary),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        '暂无标签。使用下方输入框添加多个标签。',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                                color: UiTokens.textSecondary),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if (_selectedTags.isNotEmpty)
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _selectedTags
+                                    .map(
+                                      (tag) => InputChip(
+                                        label: Text(tag.name),
+                                        onDeleted: () => _removeTag(tag),
+                                        deleteIcon: const Icon(
+                                          Icons.close,
+                                          size: 18,
+                                        ),
+                                        backgroundColor: UiTokens.subtle,
+                                        labelStyle: const TextStyle(
+                                          color: UiTokens.textSecondary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        side: const BorderSide(
+                                          color: UiTokens.border,
+                                        ),
+                                        shape: const RoundedRectangleBorder(
+                                          borderRadius: UiTokens.chipRadius,
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            const SizedBox(height: 10),
+                            Autocomplete<Tag>(
+                              displayStringForOption: (tag) => tag.name,
+                              optionsBuilder: (value) {
+                                final query = value.text.trim().toLowerCase();
+                                final filtered = tags.where((tag) {
+                                  final selected = _selectedTags.any((t) =>
+                                      t.id == tag.id ||
+                                      _sameTagName(t.name, tag.name));
+                                  if (selected) return false;
+                                  if (query.isEmpty) return true;
+                                  return tag.name.toLowerCase().contains(query);
+                                });
+                                return filtered.take(8);
+                              },
+                              onSelected: (tag) {
+                                _addTagInputs(
+                                    [_TagInput(id: tag.id, name: tag.name)]);
+                                fieldController?.clear();
+                                fieldFocusNode?.requestFocus();
+                              },
+                              fieldViewBuilder: (
+                                context,
+                                textEditingController,
+                                focusNode,
+                                onFieldSubmitted,
+                              ) {
+                                fieldController = textEditingController;
+                                fieldFocusNode = focusNode;
+                                return TextField(
+                                  controller: textEditingController,
+                                  focusNode: focusNode,
+                                  decoration: _formDecoration(
+                                    '添加标签',
+                                    hint: '输入后回车添加，可多选',
+                                    helper: '支持自动补全已有标签',
+                                  ),
+                                  onSubmitted: (_) => _submitTagInput(
+                                    tags,
+                                    textEditingController,
+                                    focusNode,
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
                         );
                       },
                       loading: () => const LinearProgressIndicator(),
@@ -267,22 +448,49 @@ class _AddSnippetPageState extends ConsumerState<AddSnippetPage> {
         )
         .where((p) => p.name.isNotEmpty)
         .toList();
+    List<Tag> availableTags = const [];
+    try {
+      availableTags = await ref.read(_tagsProvider.future);
+    } catch (_) {
+      // ignore tag lookup failures; still save snippet content
+    }
+    final tagRepo = ref.read(tagRepositoryProvider);
+    final resolvedTagIds = <String>[];
+    for (final input in _selectedTags) {
+      if (input.id != null) {
+        resolvedTagIds.add(input.id!);
+        continue;
+      }
+      final normalized = _normalizeTagName(input.name);
+      if (normalized.isEmpty) continue;
+      final existing = _findTagByName(availableTags, normalized);
+      if (existing != null) {
+        resolvedTagIds.add(existing.id);
+        continue;
+      }
+      final created = await tagRepo.createTag(name: normalized);
+      availableTags = [...availableTags, created];
+      resolvedTagIds.add(created.id);
+    }
+    final uniqueTagIds = <String>[];
+    final seen = <String>{};
+    for (final id in resolvedTagIds) {
+      if (seen.add(id)) uniqueTagIds.add(id);
+    }
     try {
       if (_isEditing && widget.snippet != null) {
         await ref.read(snippetRepositoryProvider).updateSnippet(
               snippet: widget.snippet!,
               title: title,
               body: _bodyController.text.trim(),
-              tagId: _selectedTagId ??
-                  widget.initialTagId ??
-                  widget.snippet!.tagId,
+              tagIds: uniqueTagIds,
               parameters: params,
             );
       } else {
         await ref.read(snippetRepositoryProvider).createSnippet(
               title: title,
               body: _bodyController.text.trim(),
-              tagId: _selectedTagId ?? widget.initialTagId,
+              tagIds: uniqueTagIds,
               parameters: params,
             );
       }
@@ -515,4 +723,11 @@ class _ParamControllers {
   final TextEditingController description;
   final TextEditingController value;
   bool requiredField;
+}
+
+class _TagInput {
+  const _TagInput({required this.name, this.id});
+
+  final String name;
+  final String? id;
 }

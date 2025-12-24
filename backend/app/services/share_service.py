@@ -85,6 +85,42 @@ def resolve_target_tag(
     return target_tag
 
 
+def resolve_shared_tags(
+    source_tags: list[models.Tag],
+    recipient: models.User,
+    db: Session,
+) -> list[models.Tag]:
+    resolved: list[models.Tag] = []
+    seen: set[str] = set()
+    for tag in source_tags:
+        name = tag.name.strip()
+        if not name:
+            continue
+        key = name.lower()
+        if key in seen:
+            continue
+        existing = (
+            db.query(models.Tag)
+            .filter(models.Tag.user_id == recipient.id, models.Tag.name == name)
+            .order_by(desc(models.Tag.updated_at))
+            .first()
+        )
+        if existing is None:
+            existing = models.Tag(
+                user_id=recipient.id,
+                name=name,
+                color=tag.color,
+                version=1,
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc),
+            )
+            db.add(existing)
+            db.flush()
+        resolved.append(existing)
+        seen.add(key)
+    return resolved
+
+
 def upsert_shared_snippet(
     source: models.Snippet,
     recipient: models.User,
@@ -99,11 +135,13 @@ def upsert_shared_snippet(
         .first()
     )
     shared_from = f"shared from {sender.email}"
+    shared_tags = resolve_shared_tags(source.tags, recipient, db)
+    if target_tag is not None and target_tag not in shared_tags:
+        shared_tags.append(target_tag)
     if existing:
         existing.body = source.body
-        existing.tags = source.tags
+        existing.tags = shared_tags
         existing.parameters = source.parameters
-        existing.tag_id = target_tag.id if target_tag else existing.tag_id
         existing.source = shared_from
         existing.updated_at = datetime.now(timezone.utc)
         existing.deleted_at = None
@@ -113,10 +151,8 @@ def upsert_shared_snippet(
 
     snippet = models.Snippet(
         user_id=recipient.id,
-        tag_id=target_tag.id if target_tag else None,
         title=source.title,
         body=source.body,
-        tags=source.tags,
         source=shared_from,
         pinned=False,
         parameters=source.parameters,
@@ -126,5 +162,6 @@ def upsert_shared_snippet(
         deleted_at=None,
         conflict_of=source.id,
     )
+    snippet.tags = shared_tags
     db.add(snippet)
     return snippet

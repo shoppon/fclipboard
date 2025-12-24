@@ -45,11 +45,10 @@ class Parameter(BaseModel):
 class SnippetBase(BaseModel):
     title: str
     body: str = ""
-    tags: List[str] = Field(default_factory=list)
+    tag_ids: List[UUID] = Field(default_factory=list)
     source: Optional[str] = None
     pinned: bool = False
     version: int = 1
-    tag_id: Optional[UUID] = None
     parameters: List[Parameter] = Field(default_factory=list)
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -64,11 +63,10 @@ class SnippetCreate(SnippetBase):
 class SnippetUpdate(BaseModel):
     title: Optional[str] = None
     body: Optional[str] = None
-    tags: Optional[List[str]] = None
+    tag_ids: Optional[List[UUID]] = None
     source: Optional[str] = None
     pinned: Optional[bool] = None
     version: Optional[int] = None
-    tag_id: Optional[UUID] = None
     parameters: Optional[List[Parameter]] = None
     deleted_at: Optional[datetime] = None
     conflict_of: Optional[UUID] = None

@@ -259,8 +259,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 : () => _showAddTagDialog(context, controller),
             onManageTags: () => _openTagManagement(controller),
             onProfile: () => context.pushNamed('profile'),
-            onFullSync:
-                state.loading ? null : () => controller.downloadAll(),
+            onFullSync: state.loading ? null : () => controller.downloadAll(),
           ),
           const SizedBox(width: 6),
         ],
@@ -335,6 +334,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 return _SnippetCard(
                                   key: _itemKeys[snippet.id],
                                   snippet: snippet,
+                                  tags: state.tags,
                                   selected: selected,
                                   onCopy: () => _selectSnippetAndCopy(
                                       controller, snippet),
@@ -482,11 +482,12 @@ class _HomePageState extends ConsumerState<HomePage> {
       return null;
     }
 
-    final initialTag = _findTag(snippet.tagId);
+    final initialTagId = snippet.tagIds.isEmpty ? null : snippet.tagIds.first;
+    final initialTag = _findTag(initialTagId);
     final emailController = TextEditingController();
     final tagNameController =
         TextEditingController(text: initialTag != null ? initialTag.name : '');
-    String? selectedTagId = snippet.tagId;
+    String? selectedTagId = initialTagId;
     final formKey = GlobalKey<FormState>();
 
     final confirmed = await showDialog<bool>(
@@ -725,6 +726,7 @@ class _SnippetCard extends StatefulWidget {
   const _SnippetCard({
     super.key,
     required this.snippet,
+    required this.tags,
     required this.selected,
     required this.onCopy,
     required this.onEdit,
@@ -735,6 +737,7 @@ class _SnippetCard extends StatefulWidget {
   });
 
   final Snippet snippet;
+  final List<Tag> tags;
   final bool selected;
   final VoidCallback onCopy;
   final VoidCallback onEdit;
@@ -756,6 +759,13 @@ class _SnippetCardState extends State<_SnippetCard> {
     final dateText = DateFormat('MM-dd HH:mm').format(widget.snippet.updatedAt);
     final pinLabel = widget.snippet.pinned ? '取消置顶' : '置顶';
     final maxLines = _expanded ? 12 : (widget.compact ? 4 : 3);
+    final tagNameById = {
+      for (final tag in widget.tags) tag.id: tag.name,
+    };
+    final snippetTags = widget.snippet.tagIds
+        .map((id) => tagNameById[id])
+        .whereType<String>()
+        .toList();
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -978,8 +988,8 @@ class _SnippetCardState extends State<_SnippetCard> {
                               runSpacing: 6,
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                if (widget.snippet.tags.isNotEmpty)
-                                  ...widget.snippet.tags.map(
+                                if (snippetTags.isNotEmpty)
+                                  ...snippetTags.map(
                                     (tag) => _InfoBadge(
                                       label: tag,
                                       icon: Icons.sell_outlined,

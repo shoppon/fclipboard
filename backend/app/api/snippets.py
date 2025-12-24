@@ -29,13 +29,15 @@ def _ensure_aware(value: datetime | None) -> datetime | None:
     return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
 
 
-def _safe_tag_id(db: Session, user_id: UUID, tag_id: UUID | None) -> UUID | None:
-    if tag_id is None:
-        return None
-    tag = db.get(models.Tag, tag_id)
-    if tag is None or str(tag.user_id) != str(user_id):
-        return None
-    return tag_id
+def _safe_tag_ids(db: Session, user_id: UUID, tag_ids: list[UUID]) -> list[UUID]:
+    if not tag_ids:
+        return []
+    rows = (
+        db.query(models.Tag.id)
+        .filter(models.Tag.user_id == user_id, models.Tag.id.in_(tag_ids))
+        .all()
+    )
+    return [row[0] for row in rows]
 
 
 @router.get("", response_model=List[schemas.SnippetRead])
@@ -64,7 +66,7 @@ def list_snippets(
         except ValueError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid tag id")
-        query = query.filter(models.Snippet.tag_id == tag_uuid)
+        query = query.filter(models.Snippet.tags.any(models.Tag.id == tag_uuid))
     page_size = max(1, min(limit, 100))
     offset = (page - 1) * page_size
     items = (
@@ -106,13 +108,13 @@ def create_snippet(
     user: models.User = Depends(get_current_user),
 ):
     try:
+        tag_ids = _safe_tag_ids(db, user.id, payload.tag_ids)
+        tags = db.query(models.Tag).filter(models.Tag.id.in_(tag_ids)).all()
         snippet = models.Snippet(
             id=payload.id,
             user_id=user.id,
-            tag_id=payload.tag_id,
             title=payload.title,
             body=payload.body,
-            tags=payload.tags,
             source=payload.source,
             pinned=payload.pinned,
             version=payload.version,
@@ -122,6 +124,7 @@ def create_snippet(
             deleted_at=payload.deleted_at,
             conflict_of=payload.conflict_of,
         )
+        snippet.tags = tags
         db.add(snippet)
         db.commit()
         db.refresh(snippet)
@@ -150,8 +153,14 @@ def update_snippet(
         for field, value in payload.model_dump(exclude_unset=True).items():
             if field == "parameters" and value is not None:
                 snippet.parameters = [param.model_dump() for param in value]
-            else:
-                setattr(snippet, field, value)
+                continue
+            if field == "tag_ids" and value is not None:
+                tag_ids = _safe_tag_ids(db, user.id, value)
+                snippet.tags = (
+                    db.query(models.Tag).filter(models.Tag.id.in_(tag_ids)).all()
+                )
+                continue
+            setattr(snippet, field, value)
         snippet.updated_at = _now()
         snippet.version = max(
             payload.version or snippet.version, snippet.version + 1)
@@ -255,13 +264,13 @@ def sync_snippets(
             if snippet is None:
                 if op.op == "delete":
                     continue
+                tag_ids = _safe_tag_ids(db, user.id, item.tag_ids)
+                tags = db.query(models.Tag).filter(models.Tag.id.in_(tag_ids)).all()
                 snippet = models.Snippet(
                     id=item.id,
                     user_id=user.id,
-                    tag_id=_safe_tag_id(db, user.id, item.tag_id),
                     title=item.title,
                     body=item.body,
-                    tags=item.tags,
                     source=item.source,
                     pinned=item.pinned,
                     version=item.version,
@@ -273,6 +282,7 @@ def sync_snippets(
                     deleted_at=_ensure_aware(item.deleted_at),
                     conflict_of=item.conflict_of,
                 )
+                snippet.tags = tags
                 db.add(snippet)
                 db.commit()
                 db.refresh(snippet)
@@ -288,14 +298,18 @@ def sync_snippets(
 
             snippet.title = item.title or snippet.title
             snippet.body = item.body or snippet.body
-            snippet.tags = item.tags or snippet.tags
             snippet.source = item.source or snippet.source
             snippet.pinned = item.pinned if item.pinned is not None else snippet.pinned
-            snippet.tag_id = _safe_tag_id(
-                db, user.id, item.tag_id) or snippet.tag_id
             snippet.conflict_of = item.conflict_of
-            snippet.parameters = [param.model_dump()
-                                  for param in item.parameters] or snippet.parameters
+            if "parameters" in item.model_fields_set:
+                snippet.parameters = [
+                    param.model_dump() for param in item.parameters
+                ]
+            if "tag_ids" in item.model_fields_set:
+                tag_ids = _safe_tag_ids(db, user.id, item.tag_ids or [])
+                snippet.tags = (
+                    db.query(models.Tag).filter(models.Tag.id.in_(tag_ids)).all()
+                )
             if op.op == "delete":
                 snippet.deleted_at = _ensure_aware(
                     item.deleted_at) or incoming_updated

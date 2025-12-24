@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/data/snippet.dart';
+import '../../../core/data/tag.dart';
 import '../../../core/sync/sync_service.dart';
 import '../../snippets/data/snippet_repository.dart';
 import '../../tags/data/tag_repository.dart';
@@ -57,9 +58,9 @@ class HomeController extends StateNotifier<HomeState> {
       selectedSnippetId: null,
     );
     try {
-      final results = await _snippets.fetchSnippets(
-          query: query, tagId: state.selectedTagId);
-      state = state.copyWith(snippets: results);
+      final results = await _snippets.fetchSnippets(tagId: state.selectedTagId);
+      final filtered = _filterSnippets(results, query, state.tags);
+      state = state.copyWith(snippets: filtered);
     } catch (_) {
     } finally {
       state = state.copyWith(loading: false);
@@ -69,17 +70,15 @@ class HomeController extends StateNotifier<HomeState> {
   Future<void> _refreshState() async {
     final tags = await _tags.fetchTags();
     final dedupedTags = await _tags.dedupeByName(tags);
-    final results = await _snippets.fetchSnippets(
-      query: state.query,
-      tagId: state.selectedTagId,
-    );
+    final results = await _snippets.fetchSnippets(tagId: state.selectedTagId);
     await _snippets.dedupeByTitle(results);
+    final filtered = _filterSnippets(results, state.query, dedupedTags);
     final selectedSnippetExists =
-        results.any((e) => e.id == state.selectedSnippetId);
+        filtered.any((e) => e.id == state.selectedSnippetId);
     final selectedTagExists =
         dedupedTags.any((t) => t.id == state.selectedTagId);
     state = state.copyWith(
-      snippets: results,
+      snippets: filtered,
       tags: dedupedTags,
       selectedSnippetId: selectedSnippetExists ? state.selectedSnippetId : null,
       selectedTagId: selectedTagExists ? state.selectedTagId : null,
@@ -93,9 +92,9 @@ class HomeController extends StateNotifier<HomeState> {
       selectedSnippetId: null,
     );
     try {
-      final results =
-          await _snippets.fetchSnippets(query: state.query, tagId: tagId);
-      state = state.copyWith(snippets: results);
+      final results = await _snippets.fetchSnippets(tagId: tagId);
+      final filtered = _filterSnippets(results, state.query, state.tags);
+      state = state.copyWith(snippets: filtered);
     } catch (_) {
     } finally {
       state = state.copyWith(loading: false);
@@ -157,7 +156,7 @@ class HomeController extends StateNotifier<HomeState> {
   Future<void> addSnippet({
     required String title,
     required String body,
-    String? tagId,
+    List<String> tagIds = const [],
     List<EntryParameter> parameters = const [],
   }) async {
     if (state.creatingSnippet) return;
@@ -166,13 +165,34 @@ class HomeController extends StateNotifier<HomeState> {
       await _snippets.createSnippet(
         title: title,
         body: body,
-        tagId: tagId,
+        tagIds: tagIds,
         parameters: parameters,
       );
       await load();
     } finally {
       state = state.copyWith(creatingSnippet: false);
     }
+  }
+
+  List<Snippet> _filterSnippets(
+    List<Snippet> items,
+    String query,
+    List<Tag> tags,
+  ) {
+    if (query.trim().isEmpty) return items;
+    final needle = query.toLowerCase();
+    final tagNameById = {
+      for (final tag in tags) tag.id: tag.name.toLowerCase()
+    };
+    return items.where((snippet) {
+      if (snippet.title.toLowerCase().contains(needle)) return true;
+      if (snippet.body.toLowerCase().contains(needle)) return true;
+      for (final tagId in snippet.tagIds) {
+        final name = tagNameById[tagId];
+        if (name != null && name.contains(needle)) return true;
+      }
+      return false;
+    }).toList();
   }
 
   Future<String> shareSnippet({

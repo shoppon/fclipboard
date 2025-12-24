@@ -28,6 +28,7 @@ class LocalDb {
       onUpgrade: (db, oldVersion, newVersion) async {
         await db.execute(
             'ALTER TABLE snippets ADD COLUMN IF NOT EXISTS parameters TEXT');
+        await _ensureColumn(db, 'snippets', 'tag_ids', 'TEXT');
       },
     );
   }
@@ -49,7 +50,7 @@ class LocalDb {
         id TEXT PRIMARY KEY,
         title TEXT,
         body TEXT,
-        tags TEXT,
+        tag_ids TEXT,
         source TEXT,
         pinned INTEGER,
         parameters TEXT,
@@ -57,8 +58,7 @@ class LocalDb {
         created_at TEXT,
         updated_at TEXT,
         deleted_at TEXT,
-        conflict_of TEXT,
-        tag_id TEXT
+        conflict_of TEXT
       );
     ''');
     await db.execute('''
@@ -78,9 +78,11 @@ class LocalDb {
       );
     ''');
     await _ensureColumn(db, 'tags', 'deleted_at', 'TEXT');
+    await _ensureColumn(db, 'snippets', 'tag_ids', 'TEXT');
   }
 
-  Future<void> _ensureColumn(Database db, String table, String column, String type) async {
+  Future<void> _ensureColumn(
+      Database db, String table, String column, String type) async {
     final cols = await db.rawQuery('PRAGMA table_info($table);');
     final exists = cols.any((c) => (c['name'] as String?) == column);
     if (exists) return;
